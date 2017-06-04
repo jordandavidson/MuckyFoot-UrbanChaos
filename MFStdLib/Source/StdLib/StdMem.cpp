@@ -144,6 +144,15 @@ void	*MemAlloc(ULONG size)
 	return ptr;
 }
 
+void	*MemReAlloc(void *ptr, ULONG size)
+{
+	size = (size + 3) & 0xfffffffc;
+	ptr = (void*)HeapReAlloc(MFHeap, HEAP_ZERO_MEMORY, ptr, size);
+	ASSERT(ptr != NULL);
+
+	return ptr;
+}
+
 //---------------------------------------------------------------
 
 void	MemFree(void *mem_ptr)

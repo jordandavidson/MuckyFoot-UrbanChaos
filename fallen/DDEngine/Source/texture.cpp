@@ -1077,12 +1077,7 @@ void TEXTURE_initialise_clumping(CBYTE *fname_level)
 	const int clumping = 0;
 #else //#ifdef TARGET_DC
 
-#undef	FINAL
-#ifdef FINAL
 	int	clumping = 1;
-#else
-	int	clumping = ENV_get_value_number("enable_clumps", 0, "TextureClumps");
-#endif
 
 #endif //#else //#ifdef TARGET_DC
 

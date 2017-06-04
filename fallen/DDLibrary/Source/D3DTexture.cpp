@@ -1599,7 +1599,7 @@ found_and_continue:;
 			ti.width  >>= 1;
 			ti.height >>= 1;
 
-			tga = (TGA_Pixel *) realloc(tga, ti.width * ti.height * sizeof(TGA_Pixel));
+			tga = (TGA_Pixel *)MemReAlloc((void*)tga, ti.width * ti.height * sizeof(TGA_Pixel));
 #endif
 		}
 	}

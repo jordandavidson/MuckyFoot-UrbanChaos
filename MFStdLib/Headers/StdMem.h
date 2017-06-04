@@ -9,6 +9,7 @@
 BOOL	SetupMemory(void);
 void	ResetMemory(void);
 void	*MemAlloc(ULONG size);
+void	*MemReAlloc(void *ptr, ULONG size);
 void	MemFree(void *mem_ptr);
 
 
