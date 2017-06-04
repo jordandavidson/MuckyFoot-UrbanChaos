@@ -66,7 +66,7 @@ extern	BOOL	allow_debug_keys;
 
 
 #ifndef TARGET_DC
-UBYTE build_dc = TRUE;		// Set to TRUE to save out all the dreamcast DAD files.
+UBYTE build_dc = FALSE;		// Set to TRUE to save out all the dreamcast DAD files.
 UBYTE build_dc_mission;
 #endif
 
@@ -810,10 +810,10 @@ void ChangeDoorResetStatus ( bool bAllowReset )
 
 
 
-#ifndef TARGET_DC
-// define this to save backgrounds out again in DC file format.
-#define SAVE_MY_BACKGROUNDS_PLEASE_BOB defined
-#endif
+//#ifndef TARGET_DC
+//// define this to save backgrounds out again in DC file format.
+//#define SAVE_MY_BACKGROUNDS_PLEASE_BOB defined
+//#endif
 
 
 #if USE_COMPRESSED_BACKGROUNDS
