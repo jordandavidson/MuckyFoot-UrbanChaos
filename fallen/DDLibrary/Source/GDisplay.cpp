@@ -853,13 +853,7 @@ extern int	VideoRes;
 		the_display.UseWorkOn();
 #endif
 
-	// Voodoo must be fullscreen
-	if (Video3DMode == 1)
-		the_display.FullScreenOn();
-
-	// 32-bit colour must also be fullscreen
-	if (VideoTrueColour)
-		the_display.FullScreenOn();
+	the_display.FullScreenOff();
 
 	result = SetDisplay(width,height,depth);
 
