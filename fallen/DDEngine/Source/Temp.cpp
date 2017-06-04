@@ -4,19 +4,20 @@
 
 
 
-#include	"Engine.h"
+#include	"..\Headers\Engine.h"
+#include	"..\Headers\memory.h"
 #include	"crinkle.h"
 
-#include	"c:\fallen\editor\headers\primativ.hpp"
-//#include	"c:\fallen\editor\headers\building.hpp"
-#include	"c:\fallen\editor\headers\Edit.h"
-//#include	"c:\fallen\editor\headers\Engine.h"
-#include	"c:\fallen\editor\headers\Map.h"
-#include	"c:\fallen\editor\headers\prim_draw.h"
-#include	"c:\fallen\editor\headers\Thing.h"
-#include	"c:\fallen\headers\interact.h"
-#include	"c:\fallen\headers\FMatrix.h"
-//#include	"c:\fallen\editor\headers\collide.hpp"
+#include	"..\editor\headers\primativ.hpp"
+//#include	"..\editor\headers\building.hpp"
+#include	"..\editor\headers\Edit.h"
+//#include	"..\editor\headers\Engine.h"
+#include	"..\editor\headers\Map.h"
+#include	"..\editor\headers\prim_draw.h"
+#include	"..\editor\headers\Thing.h"
+#include	"..\headers\interact.h"
+#include	"..\headers\FMatrix.h"
+//#include	"..\editor\headers\collide.hpp"
 
 #define	POLY_FLAG_TEXTURED		(1<<1)
 #define	POLY_FLAG_MASKED		(1<<2)
@@ -34,7 +35,7 @@ struct	DXMaterial
 
 extern SLONG                material_count;
 extern DXMaterial			dx_materials[200];
-extern SVECTOR_F			dx_prim_points[MAX_PRIM_POINTS];
+extern SVECTOR_F			dx_prim_points[RMAX_PRIM_POINTS];
 
 #define	SHOE_SIZE			8
 //---------------------------------------------------------------
@@ -195,8 +196,8 @@ void	reset_anim_stuff(void)
 {
 	//if(test_chunk)
 	{
-		test_chunk.MultiObject=0;
-		test_chunk.ElementCount=0;
+		test_chunk->MultiObject=0;
+		test_chunk->ElementCount=0;
 	}
 	if(the_elements)
 		MemFree(the_elements);

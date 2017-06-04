@@ -4,8 +4,8 @@
 #include	"DDLib.h"
 //#include	"finaleng.h"
 #include	"BinkClient.h"
-#include	"c:\fallen\headers\music.h"
-#include	"c:\fallen\headers\game.h"
+#include	"..\headers\music.h"
+#include	"..\headers\game.h"
 
 extern void MFX_QUICK_stop(void);
 

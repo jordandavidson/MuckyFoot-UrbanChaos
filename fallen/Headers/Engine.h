@@ -3,7 +3,7 @@
 
 #ifndef	ENGINE_H
 #define	ENGINE_H
-
+#include "../../MFStdLib/Headers/MFStdLib.h"
 //---------------------------------------------------------------
 
 #ifdef	VERSION_D3D
@@ -137,7 +137,7 @@ void  ENGINE_flip(void);
 SLONG ENGINE_lock(void);		// Locks the screen.. returns TRUE on success.
 void  ENGINE_unlock(void);
 
-#include "c:\fallen\ddengine\headers\font.h"
+#include "..\ddengine\headers\font.h"
 
 
 

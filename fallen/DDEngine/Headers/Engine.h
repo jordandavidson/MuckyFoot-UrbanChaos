@@ -342,7 +342,7 @@ struct EnginePointF
 #define	MAX_VERTICES		(32000)
 #define	ELE_SHIFT			(8)
 #define	ELE_SHIFT_F			(1.0f/(float)(ELE_SIZE))
-#define	ELE_SIZE			(1<<ELE_SHIFT)
+//#define	ELE_SIZE			(1<<ELE_SHIFT)
 #define	ELE_SIZE_F			((float)(1<<ELE_SHIFT))
 #define	TEXTURE_MUL			(0.00390625f)
 #define	SHADE_MUL			((float)(1.0f/128.0f))

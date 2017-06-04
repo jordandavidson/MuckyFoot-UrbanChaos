@@ -37,9 +37,9 @@
 #include	"sound.h"
 #include	"grenade.h"
 #ifndef		PSX
-#include	"c:\fallen\ddengine\headers\panel.h"
+#include	"..\ddengine\headers\panel.h"
 #else
-#include	"c:\fallen\psxeng\headers\panel.h"
+#include	"..\psxeng\headers\panel.h"
 #endif
 
 extern	void	add_damage_text(SWORD x,SWORD y,SWORD z,CBYTE *text);

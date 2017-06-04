@@ -1,28 +1,22 @@
 
 #include	"game.h"
 #include	"shadow.h"
-#include "c:\fallen\headers\animtmap.h"
+#include "..\headers\animtmap.h"
 #include	"pap.h"
 #include	"supermap.h"
 #include	"io.h"
 #include	"memory.h"
 
-#ifndef PSX
-#ifdef	EDITOR
-#include	"c:\fallen\editor\headers\Editor.hpp"
-#else
-#define PSX
+#include	"..\editor\headers\Editor.hpp"
+#include	"..\editor\headers\outline.h"
 
-//bits that #defining PSX removes: bring them back:
-  struct	TXTY	textures_xy[200][5];
-  struct	DXTXTY	dx_textures_xy[200][5];
-  UBYTE	textures_flags[200][5];
+struct	DepthStrip	edit_map[EDIT_MAP_WIDTH][EDIT_MAP_DEPTH];  //2meg
+UWORD	tex_map[EDIT_MAP_WIDTH][EDIT_MAP_DEPTH];
 
-#endif
-#endif
+SBYTE	edit_map_roof_height[EDIT_MAP_WIDTH][EDIT_MAP_DEPTH];
+struct	EditInfo	edit_info;
+UWORD	page_remap[64 * 8];
 
-
-extern	UWORD	page_remap[];
 
 extern	SLONG	build_psx;
 
@@ -3762,6 +3756,75 @@ void	clear_reflective_flag(SLONG min_x,SLONG min_z,SLONG max_x,SLONG max_z)
 
 }
 
+//
+// Returns the OUTLINE_Outline of the given storey.  Returns NULL if
+// the storey is not circular.  Non-circular storeys are not defined.
+//
+
+OUTLINE_Outline *get_storey_outline(SLONG storey)
+{
+	OUTLINE_Outline *oo;
+
+	SLONG wall;
+	SLONG x1;
+	SLONG z1;
+	SLONG x2;
+	SLONG z2;
+
+	if (!is_storey_circular(storey))
+	{
+		//
+		// Not circular stories don't have outlines.
+		//
+
+		return NULL;
+	}
+
+	oo = OUTLINE_create(128);
+
+	x1 = storey_list[storey].DX >> 8;
+	z1 = storey_list[storey].DZ >> 8;
+
+	wall = storey_list[storey].WallHead;
+
+	while (wall)
+	{
+		x2 = wall_list[wall].DX >> 8;
+		z2 = wall_list[wall].DZ >> 8;
+
+		OUTLINE_add_line(oo, x1, z1, x2, z2);
+
+		x1 = x2;
+		z1 = z2;
+
+		wall = wall_list[wall].Next;
+	}
+
+	return oo;
+}
+
+SLONG	do_storeys_overlap(SLONG s1, SLONG s2)
+{
+	OUTLINE_Outline *oos;
+	OUTLINE_Outline *ool;
+	oos = get_storey_outline(s1);
+	if (oos == NULL)
+		return(0);
+	ool = get_storey_outline(s2);
+	if (ool == NULL)
+		return(0);
+
+
+	if (OUTLINE_overlap(oos, ool))
+	{
+		return(1);
+	}
+	else
+	{
+		return(0);
+	}
+}
+
 SLONG	build_roof_grid(SLONG storey,SLONG y,SLONG flat_flag)
 {
 	SLONG	min_x=9999999,max_x=0,min_z=9999999,max_z=0;
@@ -3843,8 +3906,6 @@ SLONG	build_roof_grid(SLONG storey,SLONG y,SLONG flat_flag)
 		s=building_list[building].StoreyHead;
 		while(s)
 		{
-SLONG	do_storeys_overlap(SLONG s1,SLONG s2);
-
 			if(do_storeys_overlap(s,storey) && (storey_list[s].DY==storey_list[storey].DY+storey_height) && (storey_list[s].StoreyType==STOREY_TYPE_SKYLIGHT||storey_list[s].StoreyType==STOREY_TYPE_NORMAL) )
 			{
 				LogText(" storey %d height %d is 1 above %d so edge it\n",s,storey_list[s].DY,storey);

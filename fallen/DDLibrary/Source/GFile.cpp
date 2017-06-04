@@ -15,7 +15,7 @@ CBYTE cTempFilename[MAX_LENGTH_OF_FULL_NAME+1];
 CBYTE *MakeFullPathName ( CBYTE *cFilename )
 {
 	strcpy ( cTempFilename, cBasePath );
-	ASSERT ( strlen ( filename ) < ( MAX_LENGTH_OF_FULL_NAME - MAX_LENGTH_OF_BASE_PATH ) );
+	ASSERT ( strlen (cFilename) < ( MAX_LENGTH_OF_FULL_NAME - MAX_LENGTH_OF_BASE_PATH ) );
 	strcat ( cTempFilename, cFilename );
 	return ( cTempFilename );
 }

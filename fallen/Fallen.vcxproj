@@ -44,12 +44,14 @@
     <OutDir>.\Release\</OutDir>
     <IntDir>.\Release\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>.\Debug\</OutDir>
     <IntDir>.\Debug\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);c:\MFStdLib\Headers</IncludePath>
+    <IncludePath>..\MFStdLib\Headers;$(IncludePath)</IncludePath>
+    <LibraryPath>$(DX61SDK_DIR)\Lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -61,7 +63,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <WarningLevel>Level3</WarningLevel>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <AdditionalIncludeDirectories>Headers;c:\fallen\ledit\headers;c:\fallen\sedit\headers;c:\fallen\DDLibrary\Headers;c:\fallen\gedit\headers;c:\fallen\ddengine\headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Headers;..\fallen\ledit\headers;..\fallen\sedit\headers;..\fallen\DDLibrary\Headers;..\fallen\gedit\headers;..\fallen\ddengine\headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;_RELEASE;WIN32;_WINDOWS;FINAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>.\Release\</AssemblerListingLocation>
       <BrowseInformation>true</BrowseInformation>
@@ -105,14 +107,14 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <WarningLevel>Level2</WarningLevel>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <AdditionalIncludeDirectories>c:\fallen\gedit\headers;Headers;c:\fallen\ledit\headers;c:\fallen\sedit\headers;c:\fallen\DDLibrary\Headers;c:\fallen\ddengine\headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_WINDOWS;WIN32;_DEBUG;TEST_DC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDOWS;WIN32;_DEBUG;VERSION_D3D;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>.\Debug\</AssemblerListingLocation>
       <PrecompiledHeaderOutputFile>.\Debug\Fallen.pch</PrecompiledHeaderOutputFile>
       <ObjectFileName>.\Debug\</ObjectFileName>
       <ProgramDataBaseFileName>.\Debug\</ProgramDataBaseFileName>
       <AdditionalOptions> /D /NODEFAULTLIB:libcmtd.lib" "</AdditionalOptions>
       <StructMemberAlignment>1Byte</StructMemberAlignment>
+      <AdditionalIncludeDirectories>$(DX61SDK_DIR)\Include;Headers;..\fallen\ledit\headers;..\fallen\sedit\headers;..\fallen\DDLibrary\Headers;..\fallen\gedit\headers;..\fallen\ddengine\headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Midl>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -136,10 +138,158 @@
       <SubSystem>Windows</SubSystem>
       <OutputFile>.\Debug\Fallen.exe</OutputFile>
       <AdditionalLibraryDirectories>c:\fallen\bink;c:\miles;c:\fallen\miles;c:\mflib1\libs;C:\qsound\QM411SDK\qmdx;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>dplayx.lib;odbc32.lib;odbccp32.lib;comctl32.lib;amstrmid.lib;quartz.lib;strmbase.lib;binkw32.lib;mss32.lib;ddraw.lib;dinput.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dplayx.lib;odbc32.lib;odbccp32.lib;comctl32.lib;amstrmid.lib;quartz.lib;strmbase.lib;ddraw.lib;dinput.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\MFStdLib\Source\StdLib\StdFile.cpp" />
+    <ClCompile Include="..\MFStdLib\Source\StdLib\StdMaths.cpp" />
+    <ClCompile Include="..\MFStdLib\Source\StdLib\StdMem.cpp" />
+    <ClCompile Include="DDEngine\Source\aa.cpp" />
+    <ClCompile Include="DDEngine\Source\aeng.cpp" />
+    <ClCompile Include="DDEngine\Source\BreakTimer.cpp" />
+    <ClCompile Include="DDEngine\Source\Bucket.cpp" />
+    <ClCompile Include="DDEngine\Source\build.cpp" />
+    <ClCompile Include="DDEngine\Source\comp.cpp" />
+    <ClCompile Include="DDEngine\Source\cone.cpp" />
+    <ClCompile Include="DDEngine\Source\console.cpp" />
+    <ClCompile Include="DDEngine\Source\Crinkle.cpp" />
+    <ClCompile Include="DDEngine\Source\DCback.cpp" />
+    <ClCompile Include="DDEngine\Source\DCcredits.cpp" />
+    <ClCompile Include="DDEngine\Source\DCfont.cpp" />
+    <ClCompile Include="DDEngine\Source\DCos.cpp" />
+    <ClCompile Include="DDEngine\Source\drawxtra.cpp" />
+    <ClCompile Include="DDEngine\Source\engineMap.cpp" />
+    <ClCompile Include="DDEngine\Source\facet.cpp" />
+    <ClCompile Include="DDEngine\Source\farfacet.cpp" />
+    <ClCompile Include="DDEngine\Source\fastprim.cpp" />
+    <ClCompile Include="DDEngine\Source\figure.cpp" />
+    <ClCompile Include="DDEngine\Source\flamengine.cpp" />
+    <ClCompile Include="DDEngine\Source\Font.cpp" />
+    <ClCompile Include="DDEngine\Source\font2d.cpp" />
+    <ClCompile Include="DDEngine\Source\font3d.cpp" />
+    <ClCompile Include="DDEngine\Source\Gamut.cpp" />
+    <ClCompile Include="DDEngine\Source\ic.cpp" />
+    <ClCompile Include="DDEngine\Source\Matrix.cpp" />
+    <ClCompile Include="DDEngine\Source\menufont.cpp" />
+    <ClCompile Include="DDEngine\Source\mesh.cpp" />
+    <ClCompile Include="DDEngine\Source\Message.cpp" />
+    <ClCompile Include="DDEngine\Source\NGamut.cpp" />
+    <ClCompile Include="DDEngine\Source\oval.cpp" />
+    <ClCompile Include="DDEngine\Source\pack.cpp" />
+    <ClCompile Include="DDEngine\Source\panel.cpp" />
+    <ClCompile Include="DDEngine\Source\planmap.cpp" />
+    <ClCompile Include="DDEngine\Source\poly.cpp" />
+    <ClCompile Include="DDEngine\Source\polypage.cpp" />
+    <ClCompile Include="DDEngine\Source\polypoint.cpp" />
+    <ClCompile Include="DDEngine\Source\polyrenderstate.cpp" />
+    <ClCompile Include="DDEngine\Source\qeng.cpp" />
+    <ClCompile Include="DDEngine\Source\Quaternion.cpp" />
+    <ClCompile Include="DDEngine\Source\ray.cpp" />
+    <ClCompile Include="DDEngine\Source\renderstate.cpp" />
+    <ClCompile Include="DDEngine\Source\shape.cpp" />
+    <ClCompile Include="DDEngine\Source\sky.cpp" />
+    <ClCompile Include="DDEngine\Source\smap.cpp" />
+    <ClCompile Include="DDEngine\Source\sprite.cpp" />
+    <ClCompile Include="DDEngine\Source\supercrinkle.cpp" />
+    <ClCompile Include="DDEngine\Source\superfacet.cpp" />
+    <ClCompile Include="DDEngine\Source\sw.cpp" />
+    <ClCompile Include="DDEngine\Source\Text.cpp" />
+    <ClCompile Include="DDEngine\Source\texture.cpp" />
+    <ClCompile Include="DDEngine\Source\tom.cpp" />
+    <ClCompile Include="DDEngine\Source\truetype.cpp" />
+    <ClCompile Include="DDEngine\Source\vertexbuffer.cpp" />
+    <ClCompile Include="DDEngine\Source\wibble.cpp" />
+    <ClCompile Include="DDLibrary\Source\AsyncFile2.cpp" />
+    <ClCompile Include="DDLibrary\Source\BinkClient.cpp" />
+    <ClCompile Include="DDLibrary\Source\D3DTexture.cpp" />
+    <ClCompile Include="DDLibrary\Source\DCLowLevel.cpp" />
+    <ClCompile Include="DDLibrary\Source\DDManager.cpp" />
+    <ClCompile Include="DDLibrary\Source\DIManager.cpp" />
+    <ClCompile Include="DDLibrary\Source\Drive.cpp" />
+    <ClCompile Include="DDLibrary\Source\DSManager.cpp" />
+    <ClCompile Include="DDLibrary\Source\FFManager.cpp" />
+    <ClCompile Include="DDLibrary\Source\FileClump.cpp" />
+    <ClCompile Include="DDLibrary\Source\GDebug.cpp" />
+    <ClCompile Include="DDLibrary\Source\GDisplay.cpp" />
+    <ClCompile Include="DDLibrary\Source\GHost.cpp" />
+    <ClCompile Include="DDLibrary\Source\GKeyboard.cpp" />
+    <ClCompile Include="DDLibrary\Source\GMouse.cpp" />
+    <ClCompile Include="DDLibrary\Source\GWorkScreen.cpp" />
+    <ClCompile Include="DDLibrary\Source\MFx.cpp" />
+    <ClCompile Include="DDLibrary\Source\MFX_DC.cpp" />
+    <ClCompile Include="DDLibrary\Source\net.cpp" />
+    <ClCompile Include="DDLibrary\Source\SampleManager.cpp" />
+    <ClCompile Include="DDLibrary\Source\Tga.cpp" />
+    <ClCompile Include="DDLibrary\Source\WindProcs.cpp" />
+    <ClCompile Include="Editor\Source\outline.cpp" />
+    <ClCompile Include="GEdit\Source\activatesetup.cpp" />
+    <ClCompile Include="GEdit\Source\animSetup.cpp" />
+    <ClCompile Include="GEdit\Source\barrelSetup.cpp" />
+    <ClCompile Include="GEdit\Source\bombSetup.cpp" />
+    <ClCompile Include="GEdit\Source\BonusSetup.cpp" />
+    <ClCompile Include="GEdit\Source\burnsetup.cpp" />
+    <ClCompile Include="GEdit\Source\CameraSetup.cpp" />
+    <ClCompile Include="GEdit\Source\CamTargetSetup.cpp" />
+    <ClCompile Include="GEdit\Source\converse.cpp" />
+    <ClCompile Include="GEdit\Source\countersetup.cpp" />
+    <ClCompile Include="GEdit\Source\CreatureSetup.cpp" />
+    <ClCompile Include="GEdit\Source\cutscene.cpp" />
+    <ClCompile Include="GEdit\Source\dlightSetup.cpp" />
+    <ClCompile Include="GEdit\Source\EdStrings.cpp" />
+    <ClCompile Include="GEdit\Source\enemyflagsetup.cpp" />
+    <ClCompile Include="GEdit\Source\EnemySetup.cpp" />
+    <ClCompile Include="GEdit\Source\EngWind.cpp" />
+    <ClCompile Include="GEdit\Source\ExtendSetup.cpp" />
+    <ClCompile Include="GEdit\Source\GEdit.cpp" />
+    <ClCompile Include="GEdit\Source\inputbox.cpp" />
+    <ClCompile Include="GEdit\Source\ItemSetup.cpp" />
+    <ClCompile Include="GEdit\Source\locksetup.cpp" />
+    <ClCompile Include="GEdit\Source\MapExitSetup.cpp" />
+    <ClCompile Include="GEdit\Source\MapView.cpp" />
+    <ClCompile Include="GEdit\Source\MessageSetup.cpp" />
+    <ClCompile Include="GEdit\Source\Mission.cpp" />
+    <ClCompile Include="GEdit\Source\MoveSetup.cpp" />
+    <ClCompile Include="GEdit\Source\NavSetup.cpp" />
+    <ClCompile Include="GEdit\Source\PeeSetup.cpp" />
+    <ClCompile Include="GEdit\Source\platformSetup.cpp" />
+    <ClCompile Include="GEdit\Source\PlayerSetup.cpp" />
+    <ClCompile Include="GEdit\Source\propedit.cpp" />
+    <ClCompile Include="GEdit\Source\ResetSetup.cpp" />
+    <ClCompile Include="GEdit\Source\setskills.cpp" />
+    <ClCompile Include="GEdit\Source\SfxSetup.cpp" />
+    <ClCompile Include="GEdit\Source\signsetup.cpp" />
+    <ClCompile Include="GEdit\Source\spotfxSetup.cpp" />
+    <ClCompile Include="GEdit\Source\stallsetup.cpp" />
+    <ClCompile Include="GEdit\Source\SubClass.cpp" />
+    <ClCompile Include="GEdit\Source\TabCtl.cpp" />
+    <ClCompile Include="GEdit\Source\ticklist.cpp" />
+    <ClCompile Include="GEdit\Source\TransferSetup.cpp" />
+    <ClCompile Include="GEdit\Source\TrapSetup.cpp" />
+    <ClCompile Include="GEdit\Source\treasuresetup.cpp" />
+    <ClCompile Include="GEdit\Source\TriggerSetup.cpp" />
+    <ClCompile Include="GEdit\Source\VehicleSetup.cpp" />
+    <ClCompile Include="GEdit\Source\VfxSetup.cpp" />
+    <ClCompile Include="GEdit\Source\warefxsetup.cpp" />
+    <ClCompile Include="GEdit\Source\waypointSetup.cpp" />
+    <ClCompile Include="GEdit\Source\WayWind.cpp" />
+    <ClCompile Include="GEdit\Source\wptSetup.cpp" />
+    <ClCompile Include="GEdit\Source\WSpace.cpp" />
+    <ClCompile Include="Ledit\Source\ed.cpp" />
+    <ClCompile Include="Ledit\Source\gi.cpp" />
+    <ClCompile Include="Ledit\Source\ledit.cpp" />
+    <ClCompile Include="outro\back.cpp" />
+    <ClCompile Include="outro\cam.cpp" />
+    <ClCompile Include="outro\credits.cpp" />
+    <ClCompile Include="outro\imp.cpp" />
+    <ClCompile Include="outro\mf.cpp" />
+    <ClCompile Include="outro\os.cpp" />
+    <ClCompile Include="outro\outroFont.cpp" />
+    <ClCompile Include="outro\outroMain.cpp" />
+    <ClCompile Include="outro\outroMatrix.cpp" />
+    <ClCompile Include="outro\OutroTga.cpp" />
+    <ClCompile Include="outro\wire.cpp" />
     <ClCompile Include="Source\Anim.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /D /NODEFAULTLIB:libcmtd.lib" "  /D /NODEFAULTLIB:libcmtd.lib" "</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"> /D /NODEFAULTLIB:libcmtd.lib" "  /D /NODEFAULTLIB:libcmtd.lib" "</AdditionalOptions>
@@ -332,10 +482,7 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /D /NODEFAULTLIB:libcmtd.lib" "  /D /NODEFAULTLIB:libcmtd.lib" "</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"> /D /NODEFAULTLIB:libcmtd.lib" "  /D /NODEFAULTLIB:libcmtd.lib" "</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="Source\Map.cpp">
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /D /NODEFAULTLIB:libcmtd.lib" "  /D /NODEFAULTLIB:libcmtd.lib" "</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"> /D /NODEFAULTLIB:libcmtd.lib" "  /D /NODEFAULTLIB:libcmtd.lib" "</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="Source\Map.cpp" />
     <ClCompile Include="Source\maths.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"> /D /NODEFAULTLIB:libcmtd.lib" "  /D /NODEFAULTLIB:libcmtd.lib" "</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"> /D /NODEFAULTLIB:libcmtd.lib" "  /D /NODEFAULTLIB:libcmtd.lib" "</AdditionalOptions>
@@ -554,9 +701,176 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\MFStdLib\Headers\MFStdLib.h" />
+    <ClInclude Include="..\MFStdLib\Headers\StdFile.h" />
+    <ClInclude Include="..\MFStdLib\Headers\StdKeybd.h" />
+    <ClInclude Include="..\MFStdLib\Headers\StdMaths.h" />
+    <ClInclude Include="..\MFStdLib\Headers\StdMem.h" />
+    <ClInclude Include="..\MFStdLib\Headers\StdMouse.h" />
+    <ClInclude Include="DDEngine\Headers\aa.h" />
+    <ClInclude Include="DDEngine\Headers\aeng.h" />
+    <ClInclude Include="DDEngine\Headers\BreakTimer.h" />
+    <ClInclude Include="DDEngine\Headers\Bucket.h" />
+    <ClInclude Include="DDEngine\Headers\build.h" />
+    <ClInclude Include="DDEngine\Headers\comp.h" />
+    <ClInclude Include="DDEngine\Headers\cone.h" />
+    <ClInclude Include="DDEngine\Headers\console.h" />
+    <ClInclude Include="DDEngine\Headers\Crinkle.h" />
+    <ClInclude Include="DDEngine\Headers\DCback.h" />
+    <ClInclude Include="DDEngine\Headers\DCcredits.h" />
+    <ClInclude Include="DDEngine\Headers\DCfont.h" />
+    <ClInclude Include="DDEngine\Headers\DCos.h" />
+    <ClInclude Include="DDEngine\Headers\DrawXtra.h" />
+    <ClInclude Include="DDEngine\Headers\Engine.h" />
+    <ClInclude Include="DDEngine\Headers\facet.h" />
+    <ClInclude Include="DDEngine\Headers\fall.h" />
+    <ClInclude Include="DDEngine\Headers\farfacet.h" />
+    <ClInclude Include="DDEngine\Headers\fastprim.h" />
+    <ClInclude Include="DDEngine\Headers\figure.h" />
+    <ClInclude Include="DDEngine\Headers\flamengine.h" />
+    <ClInclude Include="DDEngine\Headers\Font.h" />
+    <ClInclude Include="DDEngine\Headers\font2d.h" />
+    <ClInclude Include="DDEngine\Headers\font3d.h" />
+    <ClInclude Include="DDEngine\Headers\Gamut.h" />
+    <ClInclude Include="DDEngine\Headers\ic.h" />
+    <ClInclude Include="DDEngine\Headers\map.h" />
+    <ClInclude Include="DDEngine\Headers\Matrix.h" />
+    <ClInclude Include="DDEngine\Headers\menufont.h" />
+    <ClInclude Include="DDEngine\Headers\mesh.h" />
+    <ClInclude Include="DDEngine\Headers\Message.h" />
+    <ClInclude Include="DDEngine\Headers\NGamut.h" />
+    <ClInclude Include="DDEngine\Headers\oval.h" />
+    <ClInclude Include="DDEngine\Headers\pack.h" />
+    <ClInclude Include="DDEngine\Headers\panel.h" />
+    <ClInclude Include="DDEngine\Headers\planmap.h" />
+    <ClInclude Include="DDEngine\Headers\poly.h" />
+    <ClInclude Include="DDEngine\Headers\polypage.h" />
+    <ClInclude Include="DDEngine\Headers\polypoint.h" />
+    <ClInclude Include="DDEngine\Headers\qeng.h" />
+    <ClInclude Include="DDEngine\Headers\Quaternion.h" />
+    <ClInclude Include="DDEngine\Headers\ray.h" />
+    <ClInclude Include="DDEngine\Headers\renderstate.h" />
+    <ClInclude Include="DDEngine\Headers\shape.h" />
+    <ClInclude Include="DDEngine\Headers\sky.h" />
+    <ClInclude Include="DDEngine\Headers\smap.h" />
+    <ClInclude Include="DDEngine\Headers\sprite.h" />
+    <ClInclude Include="DDEngine\Headers\supercrinkle.h" />
+    <ClInclude Include="DDEngine\Headers\superfacet.h" />
+    <ClInclude Include="DDEngine\Headers\sw.h" />
+    <ClInclude Include="DDEngine\Headers\Text.h" />
+    <ClInclude Include="DDEngine\Headers\texture.h" />
     <ClInclude Include="DDEngine\Headers\truetype.h" />
+    <ClInclude Include="DDEngine\Headers\vertexbuffer.h" />
+    <ClInclude Include="DDEngine\Headers\wibble.h" />
+    <ClInclude Include="DDLibrary\Headers\A3DManager.h" />
+    <ClInclude Include="DDLibrary\Headers\AsyncFile.h" />
+    <ClInclude Include="DDLibrary\Headers\AsyncFile2.h" />
+    <ClInclude Include="DDLibrary\Headers\BinkClient.h" />
+    <ClInclude Include="DDLibrary\Headers\D3DTexture.h" />
+    <ClInclude Include="DDLibrary\Headers\DCLowLevel.h" />
+    <ClInclude Include="DDLibrary\Headers\DDlib.h" />
+    <ClInclude Include="DDLibrary\Headers\DDManager.h" />
+    <ClInclude Include="DDLibrary\Headers\Debug.h" />
+    <ClInclude Include="DDLibrary\Headers\DIManager.h" />
+    <ClInclude Include="DDLibrary\Headers\Drive.h" />
+    <ClInclude Include="DDLibrary\Headers\DSManager.h" />
+    <ClInclude Include="DDLibrary\Headers\FFManager.h" />
+    <ClInclude Include="DDLibrary\Headers\FileClump.h" />
+    <ClInclude Include="DDLibrary\Headers\GDisplay.h" />
+    <ClInclude Include="DDLibrary\Headers\GWorkScreen.h" />
+    <ClInclude Include="DDLibrary\Headers\MFx.h" />
+    <ClInclude Include="DDLibrary\Headers\MFX_Miles.h" />
+    <ClInclude Include="DDLibrary\Headers\net.h" />
+    <ClInclude Include="DDLibrary\Headers\QSManager.h" />
+    <ClInclude Include="DDLibrary\Headers\resource.h" />
+    <ClInclude Include="DDLibrary\Headers\SampleManager.h" />
+    <ClInclude Include="DDLibrary\Headers\snd_type.h" />
+    <ClInclude Include="DDLibrary\Headers\Tga.h" />
+    <ClInclude Include="DDLibrary\Headers\WindProcs.h" />
+    <ClInclude Include="Editor\Headers\Alert.hpp" />
     <ClInclude Include="Editor\Headers\Anim.h" />
+    <ClInclude Include="Editor\Headers\building.hpp" />
+    <ClInclude Include="Editor\Headers\BuildTab.hpp" />
+    <ClInclude Include="Editor\Headers\collide.hpp" />
+    <ClInclude Include="Editor\Headers\ColTab.hpp" />
+    <ClInclude Include="Editor\Headers\ComTab.h" />
+    <ClInclude Include="Editor\Headers\CondTab.h" />
+    <ClInclude Include="Editor\Headers\Controls.hpp" />
+    <ClInclude Include="Editor\Headers\convert.h" />
+    <ClInclude Include="Editor\Headers\CtrlSet.hpp" />
+    <ClInclude Include="Editor\Headers\DarkCity.h" />
+    <ClInclude Include="Editor\Headers\EdCom.h" />
+    <ClInclude Include="Editor\Headers\Edit.h" />
+    <ClInclude Include="Editor\Headers\EditMod.hpp" />
+    <ClInclude Include="Editor\Headers\Editor.h" />
+    <ClInclude Include="Editor\Headers\Editor.hpp" />
+    <ClInclude Include="Editor\Headers\EditorLib.h" />
+    <ClInclude Include="Editor\Headers\EdUtils.h" />
+    <ClInclude Include="Editor\Headers\EdWay.h" />
+    <ClInclude Include="Editor\Headers\engine.h" />
+    <ClInclude Include="Editor\Headers\extra.h" />
+    <ClInclude Include="Editor\Headers\FileReq.hpp" />
+    <ClInclude Include="Editor\Headers\game.h" />
+    <ClInclude Include="Editor\Headers\GameEd.h" />
+    <ClInclude Include="Editor\Headers\HmTab.hpp" />
+    <ClInclude Include="Editor\Headers\Icon.hpp" />
+    <ClInclude Include="Editor\Headers\Intrface.hpp" />
+    <ClInclude Include="Editor\Headers\KFrameEd.hpp" />
+    <ClInclude Include="Editor\Headers\KFramer.hpp" />
+    <ClInclude Include="Editor\Headers\LevelEd.hpp" />
+    <ClInclude Include="Editor\Headers\LightTab.hpp" />
+    <ClInclude Include="Editor\Headers\macros.h" />
+    <ClInclude Include="Editor\Headers\map.h" />
+    <ClInclude Include="Editor\Headers\MapEdTab.hpp" />
+    <ClInclude Include="Editor\Headers\MapTab.hpp" />
+    <ClInclude Include="Editor\Headers\ModeTab.hpp" />
+    <ClInclude Include="Editor\Headers\ObjectEd.hpp" />
+    <ClInclude Include="Editor\Headers\outline.h" />
+    <ClInclude Include="Editor\Headers\PaintTab.hpp" />
+    <ClInclude Include="Editor\Headers\perstex.h" />
+    <ClInclude Include="Editor\Headers\Poly.h" />
     <ClInclude Include="Editor\Headers\Prim.h" />
+    <ClInclude Include="Editor\Headers\Primativ.hpp" />
+    <ClInclude Include="Editor\Headers\primtex.h" />
+    <ClInclude Include="Editor\Headers\prim_draw.h" />
+    <ClInclude Include="Editor\Headers\prim_edit.h" />
+    <ClInclude Include="Editor\Headers\PrPiTab.hpp" />
+    <ClInclude Include="Editor\Headers\SaveTab.h" />
+    <ClInclude Include="Editor\Headers\scan.h" />
+    <ClInclude Include="Editor\Headers\scrflc.h" />
+    <ClInclude Include="Editor\Headers\sewertab.hpp" />
+    <ClInclude Include="Editor\Headers\spare.h" />
+    <ClInclude Include="Editor\Headers\Stealth.h" />
+    <ClInclude Include="Editor\Headers\Structs.h" />
+    <ClInclude Include="Editor\Headers\TexTab.hpp" />
+    <ClInclude Include="Editor\Headers\Thing.h" />
+    <ClInclude Include="Editor\Headers\ThingTab.h" />
+    <ClInclude Include="Editor\Headers\undo.hpp" />
+    <ClInclude Include="Editor\Headers\Window.hpp" />
+    <ClInclude Include="GEdit\Headers\activatesetup.h" />
+    <ClInclude Include="GEdit\Headers\CameraSetup.h" />
+    <ClInclude Include="GEdit\Headers\CamTargetSetup.h" />
+    <ClInclude Include="GEdit\Headers\cutscene.h" />
+    <ClInclude Include="GEdit\Headers\EdStrings.h" />
+    <ClInclude Include="GEdit\Headers\EnemySetup.h" />
+    <ClInclude Include="GEdit\Headers\EngWind.h" />
+    <ClInclude Include="GEdit\Headers\GEdit.h" />
+    <ClInclude Include="GEdit\Headers\inputbox.h" />
+    <ClInclude Include="GEdit\Headers\ItemSetup.h" />
+    <ClInclude Include="GEdit\Headers\MapExitSetup.h" />
+    <ClInclude Include="GEdit\Headers\MapView.h" />
+    <ClInclude Include="GEdit\Headers\Mission.h" />
+    <ClInclude Include="GEdit\Headers\platformSetup.h" />
+    <ClInclude Include="GEdit\Headers\PlayerSetup.h" />
+    <ClInclude Include="GEdit\Headers\propedit.h" />
+    <ClInclude Include="GEdit\Headers\SubClass.h" />
+    <ClInclude Include="GEdit\Headers\TabCtl.h" />
+    <ClInclude Include="GEdit\Headers\ticklist.h" />
+    <ClInclude Include="GEdit\Headers\trapsetup.h" />
+    <ClInclude Include="GEdit\Headers\TriggerSetup.h" />
+    <ClInclude Include="GEdit\Headers\waypointSetup.h" />
+    <ClInclude Include="GEdit\Headers\WayWind.h" />
+    <ClInclude Include="GEdit\Headers\WSpace.h" />
     <ClInclude Include="Headers\america.h" />
     <ClInclude Include="Headers\animal.h" />
     <ClInclude Include="Headers\animate.h" />
@@ -661,6 +975,25 @@
     <ClInclude Include="Headers\widget.h" />
     <ClInclude Include="Headers\wmove.h" />
     <ClInclude Include="Headers\xlat_str.h" />
+    <ClInclude Include="Ledit\Headers\ed.h" />
+    <ClInclude Include="Ledit\Headers\gi.h" />
+    <ClInclude Include="Ledit\Headers\ledit.h" />
+    <ClInclude Include="outro\Always.h" />
+    <ClInclude Include="outro\back.h" />
+    <ClInclude Include="outro\cam.h" />
+    <ClInclude Include="outro\checker.h" />
+    <ClInclude Include="outro\credits.h" />
+    <ClInclude Include="outro\font.h" />
+    <ClInclude Include="outro\imp.h" />
+    <ClInclude Include="outro\Key.h" />
+    <ClInclude Include="outro\lmap.h" />
+    <ClInclude Include="outro\Matrix.h" />
+    <ClInclude Include="outro\mf.h" />
+    <ClInclude Include="outro\midasdll.h" />
+    <ClInclude Include="outro\os.h" />
+    <ClInclude Include="outro\slap.h" />
+    <ClInclude Include="outro\Tga.h" />
+    <ClInclude Include="outro\wire.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="DDLibrary\arrowcop.cur" />

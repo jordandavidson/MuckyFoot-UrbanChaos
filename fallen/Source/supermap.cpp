@@ -1,17 +1,17 @@
 #include	"game.h"
-#include	"c:\fallen\headers\supermap.h"
-#include	"c:\fallen\headers\pap.h"
-#include	"c:\fallen\headers\inside2.h"
-#include	"c:\fallen\headers\ob.h"
+#include	"..\headers\supermap.h"
+#include	"..\headers\pap.h"
+#include	"..\headers\inside2.h"
+#include	"..\headers\ob.h"
 #ifndef	PSX
-#include	"c:\fallen\editor\headers\Editor.hpp"
+#include	"..\editor\headers\Editor.hpp"
 #endif
 #include	"memory.h"
 #include	"mav.h"
 #include	"noserver.h"
 #ifndef	PSX
-#include	"c:\fallen\ddengine\headers\texture.h"
-#include	"c:\fallen\headers\env.h"
+#include	"..\ddengine\headers\texture.h"
+#include	"..\headers\env.h"
 #endif
 
 #ifdef EDITOR
@@ -109,9 +109,6 @@ extern	SLONG	TEXTURE_set;
 #define	DOOR_DOWN	64
 #define	DOOR_LEFT	128
 
-#ifdef EDITOR
-#ifndef	PSX
-
 //
 // returns inside_index && room id for position in world
 //
@@ -152,6 +149,8 @@ UWORD	calc_inside_for_xyz(SLONG x,SLONG y,SLONG z,UWORD *room)
 	return(0);
 }
 
+#ifdef EDITOR
+#ifndef	PSX
 
 void	add_wall(UBYTE *map,SLONG x1,SLONG z1,SLONG x2,SLONG z2,SLONG door_flag)
 {

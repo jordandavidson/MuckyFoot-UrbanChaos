@@ -5,6 +5,7 @@
 #define	DISPLAY_H
 
 #include	"DDManager.h"
+#include	"D3DTexture.h"
 
 
 #ifdef TARGET_DC

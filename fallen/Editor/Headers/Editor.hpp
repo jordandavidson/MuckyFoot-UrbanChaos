@@ -30,8 +30,8 @@
 #include	"LevelEd.hpp"
 #include	"math.h"
 #include	"macros.h"
-#include	"c:\fallen\headers\inline.h"
-#include	"c:\fallen\headers\building.h"
+#include	"..\headers\inline.h"
+#include	"..\headers\building.h"
 #include	"ModeTab.hpp"
 #include	"PaintTab.hpp"
 #include	"poly.h"
@@ -44,7 +44,7 @@
 #include	"ThingTab.h"
 #include	"Window.hpp"
 #include	"undo.hpp"
-#include	"c:\fallen\headers\game.h"
+#include	"..\headers\game.h"
 //#include	"collide.hpp"
 
 

@@ -4,6 +4,7 @@
 
 #ifndef	VEHICLE_H
 #define	VEHICLE_H
+#include "../Headers/State.h"
 
 #define	FLAG_VEH_DRIVING	 (1<<0)
 #define	FLAG_VEH_WHEEL1_GRIP (1<<1)

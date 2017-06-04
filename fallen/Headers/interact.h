@@ -2,6 +2,7 @@
 #define INTERACT_H
 
 #include "building.h"
+#include "Thing.h"
 
 //
 // Defines

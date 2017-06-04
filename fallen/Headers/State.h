@@ -4,8 +4,7 @@
 #ifndef	STATE_H
 #define	STATE_H
 
-
-
+struct Thing;
 //---------------------------------------------------------------
 
 typedef struct	

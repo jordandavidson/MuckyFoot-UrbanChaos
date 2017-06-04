@@ -5,7 +5,7 @@
 #include	"statedef.h"
 #include	"cnet.h"
 #ifndef	PSX
-#include	"c:\fallen\ddlibrary\headers\net.h"
+#include	"..\ddlibrary\headers\net.h"
 #endif
 #include	"pap.h"
 #include	"pcom.h"
@@ -972,7 +972,7 @@ void	process_things_tick(SLONG frame_rate_independant)
 	SLONG	cur_tick;
 
 	SLONG	tick_diff;
-	static	first_pass=1;
+	static BOOL first_pass=TRUE;
 
  	cur_tick=GetTickCount();
 	tick_diff=cur_tick-prev_tick;
@@ -981,7 +981,7 @@ void	process_things_tick(SLONG frame_rate_independant)
 	if(first_pass)
 	{
 		tick_diff=NORMAL_TICK_TOCK;
-		first_pass=0;
+		first_pass=FALSE;
 	}
 
 #ifndef PSX

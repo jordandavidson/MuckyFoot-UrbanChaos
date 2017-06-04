@@ -12,11 +12,11 @@
 #include "dirt.h"
 #include "thing.h"
 #include "pow.h"
-#include "c:\fallen\headers\music.h"
+#include "..\headers\music.h"
 #ifndef	PSX
 #include "font2d.h"
-#include "C:\fallen\DDEngine\Headers\console.h"
-#include "C:\fallen\DDEngine\Headers\map.h"
+#include "..\DDEngine\Headers\console.h"
+#include "..\DDEngine\Headers\map.h"
 #endif
 #include "chopper.h"
 #include "animal.h"
@@ -50,7 +50,7 @@
 #include "xlat_str.h"
 #include "mist.h"
 #include "gamemenu.h"
-#include	"c:\fallen\headers\env.h"
+#include "..\headers\env.h"
 
 
 #ifdef TARGET_DC

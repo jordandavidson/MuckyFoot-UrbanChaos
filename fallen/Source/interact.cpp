@@ -7,12 +7,12 @@
 #include "ware.h"
 #include "mav.h"
 
-//#include	"c:\fallen\editor\headers\collide.hpp"
-#include	"c:\fallen\editor\headers\map.h"
+//#include	"..\editor\headers\collide.hpp"
+#include	"..\editor\headers\map.h"
 #include	"animate.h"
 #include	"FMatrix.h"
 #ifndef	PSX
-#include	"c:\fallen\editor\headers\prim_draw.h"
+#include	"..\editor\headers\prim_draw.h"
 #else
 extern	void rotate_obj(SWORD xangle,SWORD yangle,SWORD zangle, Matrix33 *r3);
 

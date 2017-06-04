@@ -1,14 +1,17 @@
 // Attract.cpp
 // Guy Simmons, 20th November 1997.
 
+#include	"DDlib.h"
 #include	"Engine.h"
+#include	"GDisplay.h"
 #include	"font.h"
 
+extern Display the_display;
 //---------------------------------------------------------------
 
 void	engine_attract(void)
 {
-	static	count=0;
+	static int count=0;
 	count++;
 	if (the_display.screen_lock())
 	{

@@ -4,6 +4,7 @@
 
 #ifndef IN_BUILDING_H
 #define IN_BUILDING_H
+#include "Game.h"
 
 
 //

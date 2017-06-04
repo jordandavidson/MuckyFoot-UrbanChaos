@@ -10,7 +10,7 @@
 #include "qedit.h"
 #include "qmap.h"
 #include "fmatrix.h"
-#include "c:\fallen\ddengine\headers\qeng.h"
+#include "..\ddengine\headers\qeng.h"
 
 
 

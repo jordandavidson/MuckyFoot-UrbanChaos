@@ -1921,7 +1921,7 @@ void DCLL_init()
 
 	#ifdef DCLL_OUTPUT_STEREO_WAVS
 
-	DCLL_handle = fopen("t:\\stereowavs.txt", "wb");
+	DCLL_handle = fopen("d:\\stereowavs.txt", "wb");
 
 	#endif
 }
@@ -2141,7 +2141,7 @@ void DCLL_stop_sound(DCLL_Sound *ds)
 		return;
 	}
 
-	ds->dsb->Stop();
+	//ds->dsb->Stop();
 }
 
 

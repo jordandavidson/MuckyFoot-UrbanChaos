@@ -677,7 +677,8 @@ try_the_next_texture_coz_this_is_not_needed:
 
 		// OK, try to pack it into an existing page in the right directory with a gap.
 		bFound = FALSE;
-		for ( iPageNum = 0; iPageNum < iNumPackedPages; iPageNum++ )
+		int iPageNum;
+		for (iPageNum = 0; iPageNum < iNumPackedPages; iPageNum++ )
 		{
 			// Only auto-pack into 3x3s
 			if ( pagePacking[iPageNum].bPageType == reqd_page_type )

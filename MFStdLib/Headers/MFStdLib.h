@@ -9,7 +9,6 @@
 
 // Standard 'C' includes.
 #if !defined(TARGET_DC)
-#include	<iostream.h>
 #include	<time.h>
 #endif
 #include	<stdio.h>
@@ -284,7 +283,7 @@ void	SetListenerPosition(SLONG x,SLONG y,SLONG z,SLONG scale);
 //
 // Stuff put in by Mark...
 //
-
+#undef INFINITY
 #define INFINITY		0x7fffffff
 #define PI				(3.14159265F)
 #define WITHIN(x,a,b)	((x) >= (a) && (x) <= (b))

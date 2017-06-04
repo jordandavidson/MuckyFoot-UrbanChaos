@@ -11,8 +11,8 @@
 #include "drawxtra.h"
 #include "sound.h"
 #include "MFx.h"
-#include    "C:\fallen\DDLibrary\headers\D3DTexture.h"
-#include    "C:\fallen\DDLibrary\headers\GDisplay.h"
+#include "..\DDLibrary\headers\D3DTexture.h"
+#include "..\DDLibrary\headers\GDisplay.h"
 #include "interfac.h"
 
 #define RECT_LEFT	1

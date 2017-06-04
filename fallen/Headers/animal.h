@@ -88,8 +88,8 @@ Animal   *ANIMAL_get_animal  (Thing *animal_thing);
 // Some useful centering stuff i had nowhere else convenient to shove
 //
 
-GameCoord GetChunkCentre(GameKeyFrameChunk *chunk);
-SetChunkCentre(GameKeyFrameChunk *chunk, GameCoord centre);
+//GameCoord GetChunkCentre(GameKeyFrameChunk *chunk);
+//SetChunkCentre(GameKeyFrameChunk *chunk, GameCoord centre);
 
 
 #endif

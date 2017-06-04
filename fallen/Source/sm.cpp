@@ -8,7 +8,7 @@
 #include "sm.h"
 #include "inline.h"
 #ifndef PSX
-#include "c:\fallen\ddengine\headers\aeng.h"
+#include "..\ddengine\headers\aeng.h"
 #else
 #include "c:\fallen\psxeng\headers\psxeng.h"
 #endif

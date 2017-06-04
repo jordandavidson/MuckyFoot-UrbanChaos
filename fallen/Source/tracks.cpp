@@ -8,7 +8,7 @@
 #include "tracks.h"
 #include "structs.h"
 #ifndef PSX
-#include "C:\fallen\DDEngine\Headers\poly.h"
+#include "..\DDEngine\Headers\poly.h"
 #else
 #include "c:\fallen\psxeng\headers\poly.h"
 #endif

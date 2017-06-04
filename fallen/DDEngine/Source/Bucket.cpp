@@ -1,6 +1,7 @@
 // Bucket.cpp
 // Guy Simmons, 24th October 1997.
 
+#include	"Bucket.h"
 #include	"Engine.h"
 
 

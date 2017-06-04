@@ -9,6 +9,9 @@
 #include "build.h"
 #include "memory.h"
 
+LIGHT_Colour LIGHT_building_point[RMAX_PRIM_POINTS];
+LIGHT_Colour LIGHT_amb_colour;
+
 void BUILD_draw(Thing *p_thing)
 {
 	SLONG i;

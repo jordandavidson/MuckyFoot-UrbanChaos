@@ -13,7 +13,7 @@
 
 #include	"EdStrings.h"
 #include	"GEdit.h"
-#include	"C:\fallen\headers\sound_id.h"
+#include	"..\headers\sound_id.h"
 #include	"mmsystem.h"
 
 

@@ -1,6 +1,6 @@
 #include	"Game.h"
-//#include	"c:\fallen\editor\headers\collide.hpp"
-#include	"c:\fallen\editor\headers\map.h"
+//#include	"..\editor\headers\collide.hpp"
+#include	"..\editor\headers\map.h"
 #include	"animate.h"
 #include	"dirt.h"
 #include	"fog.h"
@@ -16,12 +16,12 @@
 #include	"mav.h"
 #include	"build2.h"
 #ifndef		PSX
-#include	"C:\fallen\DDEngine\Headers\console.h"
+#include	"..\DDEngine\Headers\console.h"
 #endif
 #include	"person.h"
 #include	"sound.h"
 #include	"interact.h"
-#include	"C:\fallen\headers\inside2.h"
+#include	"..\headers\inside2.h"
 #include	"barrel.h"
 #include	"walkable.h"
 #include	"fc.h"
@@ -95,11 +95,11 @@ UWORD	next_col_vect_link=1;
 //		 xo
 //		  xx   x
 
-#ifdef	EDITOR
+//#ifdef	EDITOR
 struct	WalkLink	walk_links[MAX_WALK_POOL];	//120K
 
 UWORD	next_walk_link=1;
-#endif
+//#endif
 
 //extern	SLONG	do_move_collide(SLONG x,SLONG y,SLONG z,SLONG dx,SLONG dy,SLONG dz,SLONG cell_dx,SLONG cell_dz,SLONG	scale_move);
 //extern	SLONG	do_move_collide_circle(SLONG x,SLONG y,SLONG z,SLONG len,SLONG cell_dx,SLONG cell_dz);

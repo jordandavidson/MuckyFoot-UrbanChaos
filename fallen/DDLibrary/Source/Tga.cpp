@@ -518,7 +518,7 @@ static void WriteSquished(UWORD* buffer, size_t nwords, ULONG id)
 		*sptr++ = buffer[2];
 		*sptr++ = total;
 
-		for (ii = 0; ii < total; ii++)
+		for (size_t ii = 0; ii < total; ii++)
 		{
 			*sptr++ = mapping[ii];
 		}
@@ -530,7 +530,7 @@ static void WriteSquished(UWORD* buffer, size_t nwords, ULONG id)
 		UWORD	cword = 0;	// current word
 		UWORD	cbits = 0;	// # bits in current word
 
-		for (ii = 3; ii < nwords; ii++)
+		for (size_t ii = 3; ii < nwords; ii++)
 		{
 			UWORD	encoded = used[buffer[ii]] - 1;
 
@@ -612,7 +612,7 @@ static UBYTE* ReadSquished(ULONG id)
 	int		cbits = 16;
 	UWORD	cword = *bptr++;
 
-	for (ii = 0; ii < nwords; ii++)
+	for (size_t ii = 0; ii < nwords; ii++)
 	{
 		UWORD	encoded;
 

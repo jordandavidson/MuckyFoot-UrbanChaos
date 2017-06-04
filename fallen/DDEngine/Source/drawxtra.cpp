@@ -22,7 +22,7 @@
 #include "memory.h"
 #include "collide.h"
 #include	"tracks.h"
-#include	"c:\fallen\headers\fc.h"
+#include	"..\headers\fc.h"
 #include	"barrel.h"
 #include	"eway.h"
 #include "mfx.h"

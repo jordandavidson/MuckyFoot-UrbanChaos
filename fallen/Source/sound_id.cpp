@@ -554,7 +554,7 @@ CBYTE *sound_list[] = {
     "misc\\GTRAMP-PAIN04.wav",
     "misc\\GTRAMP-PAIN05.wav",
     " *DL* GeneralMusic\\AlbTks\\ADFoundationMONO.wav",
-	"GeneralMusic\\FrontLoopEditMONO.wav",
+	"GeneralMusic\\FrontLoop.wav",
     "!",
     };
 

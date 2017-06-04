@@ -3,7 +3,9 @@
 
 #ifndef	THING_H
 #define	THING_H
-#include	"game.h"
+#include	"../Headers/Game.h"
+#include	"../Headers/drawtype.h"
+#include	"../Headers/vehicle.h"
 
 
 //---------------------------------------------------------------

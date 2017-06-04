@@ -12,7 +12,7 @@
 #include "shadow.h"
 #include "supermap.h"
 #include "ware.h"
-#include "c:\fallen\ledit\headers\ed.h"
+#include "..\ledit\headers\ed.h"
 
 #ifdef	PSX
 

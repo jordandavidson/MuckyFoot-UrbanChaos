@@ -3,8 +3,8 @@
 #include <math.h>
 #include "aeng.h"
 #include "game.h"
-#include "c:\fallen\headers\pap.h"
-#include "c:\fallen\headers\road.h"
+#include "..\headers\pap.h"
+#include "..\headers\road.h"
 #include "planmap.h"
 
 

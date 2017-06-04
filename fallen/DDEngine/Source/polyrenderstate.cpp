@@ -12,7 +12,7 @@
 #include "message.h"
 #include "night.h"
 #ifndef TARGET_DC
-#include "clip.h"
+#include "../../MuckyBasic/clip.h"
 #endif
 #include "vertexbuffer.h"
 #include "polypoint.h"
@@ -219,7 +219,7 @@ void POLY_init_render_states()
 	PolyPage*	pa;
 
 
-	for (ii = 0; ii < POLY_NUM_PAGES; ii++)
+	for (int ii = 0; ii < POLY_NUM_PAGES; ii++)
 	{
 		pa = &POLY_Page[ii];
 
@@ -1754,7 +1754,7 @@ extern int iPolyNumPagesRender;
 
 #ifndef TARGET_DC
 #ifdef _DEBUG
-	for (ii = 0; ii < POLY_NUM_PAGES; ii++)
+	for (int ii = 0; ii < POLY_NUM_PAGES; ii++)
 	{
 		if (char* err = POLY_Page[ii].RS.Validate())
 		{

@@ -3,6 +3,7 @@
 
 #ifndef	BUCKET_H
 #define	BUCKET_H
+#include "Engine.h"
 
 //---------------------------------------------------------------
 
