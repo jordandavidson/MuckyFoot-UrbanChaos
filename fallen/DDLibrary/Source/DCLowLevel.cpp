@@ -663,7 +663,7 @@ FillSoundBuffer(IDirectSoundBuffer *pdsb, BYTE *pbWaveData, DWORD dwWaveSize)
 
 
 // Have you learned nothing of what I have taught you, young Adami?
-#if 0
+#if 1
     memcpy(pMem1, pbWaveData, dwSize1);
 
     if (dwSize2 != 0)
@@ -741,11 +741,6 @@ LoadSoundBuffer(char *szName, SLONG is_3d)
 			//
 			// This is a stereo sample.
 			//
-
-			fprintf(DCLL_handle, szName);
-			fprintf(DCLL_handle, "\r\n");
-
-			fflush(DCLL_handle);
 		}
 
 		#endif
