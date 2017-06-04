@@ -3704,7 +3704,7 @@ void	FRONTEND_MissionHierarchy(CBYTE *script) {
 	FileCloseScript();
 
 
-#if 0
+#if 1
 	if ( !IsEnglish )
 	{
 		// Never show breakout in French.
@@ -6866,7 +6866,7 @@ extern SLONG EWAY_cam_active;
 	TICK_RATIO = (1 << TICK_SHIFT);
 
 	// Set up the current language
-	switch ( ENV_get_value_number ( "lang_num", 0, "" ) )
+	switch ( 0 )
 	{
 	case 0:
 		pcSpeechLanguageDir = "talk2\\";
