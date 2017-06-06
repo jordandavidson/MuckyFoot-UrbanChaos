@@ -302,25 +302,11 @@ void MUSIC_play_the_mode(UBYTE mode)
 
 				{
 					CBYTE fname[256];
-					SLONG offset;
-
-					if (sound_list[index][0] == ' ')
-					{
-						//
-						// This sound probably has " *DL* " at the beginning of it...
-						//
-
-						offset = 6;
-					}
-					else
-					{
-						offset = 0;
-					}
 
 					#ifdef TARGET_DC	
 					sprintf(fname, "Data\\Sfx\\1622DC\\%s", sound_list[index] + offset);
 					#else
-					sprintf(fname, "Data\\Sfx\\1622\\%s", sound_list[index] + offset);
+					sprintf(fname, "Data\\Sfx\\1622\\%s", sound_list[index]);
 					#endif
 
 					last_MFX_QUICK_play_id = MFX_QUICK_play(fname, TRUE, 0,0,0);
