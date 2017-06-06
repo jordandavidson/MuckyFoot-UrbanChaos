@@ -4518,63 +4518,6 @@ __declspec(naked) long _ftol_fasteddie(float arg)
 		ret
 	}
 }
-
-// Intel's crappy "I don't work" version
-// -- fixed so it does! ;-)
-//
-// I mean, Jesus, it's all very well giving us
-// code that does some quite clever manipulations
-// of IEEE floats as ints, BUT the code as provided
-// had 2 typos and 1 major bug - for fucks sake!
-
-__declspec(naked) long _ftol(float arg)
-{
-	static double	temp = 0;
-
-	__asm
-	{
-		// store as a quadword int and reload
-		fld		st(0)					// X X
-		fistp	QWORD PTR temp			// X
-		fild	QWORD PTR temp			// X [X]
-		mov		edx,DWORD PTR temp+4
-		mov		eax,DWORD PTR temp
-		test	eax,eax
-		je		maybe_zero
-
-		// number isn't zero, so get X - [X]
-not_zero:
-		fsubp	st(1),st				// X - [X]
-		test	edx,edx
-		jns		positive
-
-		// number < 0 - inc eax if X - [X] is >0
-		fstp	DWORD PTR temp
-		mov		ecx,DWORD PTR temp		// get IEEE rep
-		xor		ecx,80000000h			// now <0 if diff >0
-		add		ecx,7FFFFFFFh			// carry if it was 00000001 to 7FFFFFFF
-		adc		eax,0					// add carry in
-		ret
-
-positive:
-		// number > 0 - dec eax if X - [X] is <0
-		fstp	DWORD PTR temp
-		mov		ecx,DWORD PTR temp		// get IEEE rep
-		add		ecx,7FFFFFFFh			// carry if it was 80000001 to FFFFFFFF
-		sbb		eax,0					// sub carry
-		ret
-
-maybe_zero:
-		test	edx,7FFFFFFFh
-		jnz		not_zero
-
-		// number is zero - clear the stack
-		fstp	st(0)
-		fstp	st(0)
-		ret
-	}
-}
-
 }
 
 // from the Intel compiler:
