@@ -3646,7 +3646,7 @@ extern	FONT2D_DrawString_3d(CBYTE*str, ULONG world_x, ULONG world_y,ULONG world_
 
 
 #ifdef DEBUG
-static bPleaseDoSuperFacets = TRUE;
+static BOOL bPleaseDoSuperFacets = TRUE;
 #endif
 
 

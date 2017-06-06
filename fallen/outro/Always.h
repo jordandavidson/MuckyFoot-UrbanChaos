@@ -34,6 +34,7 @@ typedef					char			CBYTE;
 //
 
 #define PI         (3.14159265F)
+#undef INFINITY
 #define INFINITY   (0x7fffffff)
 
 

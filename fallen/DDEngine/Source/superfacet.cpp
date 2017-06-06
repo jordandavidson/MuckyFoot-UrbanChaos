@@ -743,7 +743,7 @@ void SUPERFACET_fill_facet_points(
 				lv->z        = quad[j]->z;
 
 				#ifdef SHOW_ME_SUPERFACET_DEBUGGING_PLEASE_BOB
-				if ( m_bShowDebuggingInfo || ( abs(quad[0]->y - quad[2]->y) > 257 ) )
+				if ( m_bShowDebuggingInfo || ( fabs(quad[0]->y - quad[2]->y) > 257 ) )
 				{
 					// Make a pretty colour from the call pointer,
 					// so we can see the efficiency.
