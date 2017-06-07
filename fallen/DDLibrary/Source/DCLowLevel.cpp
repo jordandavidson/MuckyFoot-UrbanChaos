@@ -25,6 +25,7 @@ Abstract:
 #include "MFStdLib.h"
 #include <dsound.h>
 #include <math.h>
+#include <SDL_audio.h>
 #ifdef TARGET_DC
 #include <floatmathlib.h>
 
@@ -59,8 +60,6 @@ extern volatile HWND hDDLibWindow;
 
 bool m_bSoundHasActuallyStartedPlaying = FALSE;
 
-#define DCLL_OUTPUT_STEREO_WAVS
-
 #ifdef DCLL_OUTPUT_STEREO_WAVS
 FILE *DCLL_handle;
 #endif
@@ -74,141 +73,61 @@ FILE *DCLL_handle;
 #endif
 
 
-
-inline DWORD ReadNonalignedDword ( void *addr )
-{
-	DWORD res;
-	unsigned char *myaddr = (unsigned char *)addr;
-
-	res  = ( ( *myaddr++ ) & 0xff );
-	res |= ( ( *myaddr++ ) & 0xff ) << 8;
-	res |= ( ( *myaddr++ ) & 0xff ) << 16;
-	res |= ( ( *myaddr++ ) & 0xff ) << 24;
-
-	return ( res );
-}
-
-inline WORD ReadNonalignedWord ( void *addr )
-{
-	WORD res;
-	char *myaddr = (char *)addr;
-
-	res  = ( ( *myaddr++ ) & 0xff );
-	res |= ( ( *myaddr++ ) & 0xff ) << 8;
-
-	return ( res );
-}
-
-
-
-void *DwordMemcpy ( void *pvDst, const void *pvSrc, size_t dwSize )
-{
-
-	//TRACE ( "DwordMemcpy arrived with 0x%x, 0x%x, 0x%x\n", pvDst, pvSrc, dwSize );
-
-	if ( ( (DWORD)pvSrc & 0x3 ) == 0 )
-	{
-		// Source is DWORD-aligned.
-		const DWORD *pdwSrc = (DWORD *)pvSrc;
-		DWORD *pdwDst = (DWORD *)pvDst;
-		ASSERT ( ( (DWORD)pdwSrc & 0x3 ) == 0 );
-		ASSERT ( ( (DWORD)pdwDst & 0x3 ) == 0 );
-		ASSERT ( ( dwSize & 0x3 ) == 0 );
-		dwSize >>= 2;
-		while ( dwSize > 0 )
-		{
-			*pdwDst++ = *pdwSrc++;
-			dwSize--;
-		}
-	}
-	else
-	{
-
-#ifdef DEBUG
-		// Check endianness
-		DWORD dwTest = 0x12345678;
-		ASSERT ( *(((char*)&dwTest)+0) == 0x78 );
-		ASSERT ( *(((char*)&dwTest)+1) == 0x56 );
-		ASSERT ( *(((char*)&dwTest)+2) == 0x34 );
-		ASSERT ( *(((char*)&dwTest)+3) == 0x12 );
-#endif
-
-		// Source is not dword aligned!
-		const unsigned char *pdwSrc = (unsigned char *)pvSrc;
-		DWORD *pdwDst = (DWORD *)pvDst;
-		//ASSERT ( ( (DWORD)pdwSrc & 0x3 ) == 0 );
-		ASSERT ( ( (DWORD)pdwDst & 0x3 ) == 0 );
-		ASSERT ( ( dwSize & 0x3 ) == 0 );
-		dwSize >>= 2;
-		while ( dwSize > 0 )
-		{
-			DWORD dwTemp = (DWORD)*pdwSrc++;
-			dwTemp |= ( (DWORD)(*pdwSrc++) ) << 8;
-			dwTemp |= ( (DWORD)(*pdwSrc++) ) << 16;
-			dwTemp |= ( (DWORD)(*pdwSrc++) ) << 24;
-			*pdwDst++ = dwTemp;
-			dwSize--;
-		}
-	}
-	return pvDst;
-}
-
-
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 Function:
 
-    InitDirectSound
+	InitDirectSound
 
 Description:
 
-    Initialize the DirectSound object
+	Initialize the DirectSound object
 
 Arguments:
 
-    None
+	None
 
 Return Value:
 
-    TRUE on success, FALSE on failure.
+	TRUE on success, FALSE on failure.
 
 -------------------------------------------------------------------*/
 BOOL
 InitDirectSound()
 {
-    // Create the DirectSound object
-    g_errLast = DirectSoundCreate(NULL, &g_pds, NULL);
+	// Create the DirectSound object
+	g_errLast = DirectSoundCreate(NULL, &g_pds, NULL);
 
-    if (CheckError(TEXT("DirectSoundCreate")))
-        return FALSE;
+	if (CheckError(TEXT("DirectSoundCreate")))
+		return FALSE;
 
-    // Set the DirectSound cooperative level
-    if (g_pds->SetCooperativeLevel(hDDLibWindow, DSSCL_NORMAL) != DS_OK)
+	// Set the DirectSound cooperative level
+	if (g_pds->SetCooperativeLevel(hDDLibWindow, DSSCL_NORMAL) != DS_OK)
 	{
 		ASSERT(0);
 	}
 
-    return TRUE;
+	return TRUE;
 }
 
 
 BOOL
 InitDirectSound3D()
 {
-    DSBUFFERDESC    dsbd;
+	DSBUFFERDESC    dsbd;
 
-    // Create the primary sound buffer (needed for the listener interface)
-    memset(&dsbd, 0, sizeof(dsbd));
-    dsbd.dwSize  = sizeof(dsbd);
-    dsbd.dwFlags = DSBCAPS_PRIMARYBUFFER | DSBCAPS_CTRL3D;
-    g_errLast = g_pds->CreateSoundBuffer(&dsbd, &g_pdsbPrimary, NULL);
-    if (CheckError(TEXT("Create SoundBuffer")))
-        return FALSE;
+	// Create the primary sound buffer (needed for the listener interface)
+	memset(&dsbd, 0, sizeof(dsbd));
+	dsbd.dwSize = sizeof(dsbd);
+	dsbd.dwFlags = DSBCAPS_PRIMARYBUFFER | DSBCAPS_CTRL3D;
+	g_errLast = g_pds->CreateSoundBuffer(&dsbd, &g_pdsbPrimary, NULL);
+	if (CheckError(TEXT("Create SoundBuffer")))
+		return FALSE;
 
-    // Get a pointer to the IDirectSound3DListener interface
-    g_errLast = g_pdsbPrimary->QueryInterface(IID_IDirectSound3DListener, (void **)&g_pds3dl);
-    if (CheckError(TEXT("QueryInterface for IDirectSound3DListener interface")))
-        return FALSE;
+	// Get a pointer to the IDirectSound3DListener interface
+	g_errLast = g_pdsbPrimary->QueryInterface(IID_IDirectSound3DListener, (void **)&g_pds3dl);
+	if (CheckError(TEXT("QueryInterface for IDirectSound3DListener interface")))
+		return FALSE;
 
 	//
 	// How many metres in an UC block? 256 => 2 metres?
@@ -216,396 +135,40 @@ InitDirectSound3D()
 
 	g_pds3dl->SetDistanceFactor(0.25F / 256.0F, DS3D_IMMEDIATE);
 
-    // We no longer need the primary buffer, just the Listener interface
+	// We no longer need the primary buffer, just the Listener interface
 	// g_pdsbPrimary->Release();
 
-    // Set the doppler factor to the maximum, so we can more easily notice it
-    // g_errLast = g_pds3dl->SetDopplerFactor(DS3D_MAXDOPPLERFACTOR, DS3D_IMMEDIATE);
+	// Set the doppler factor to the maximum, so we can more easily notice it
+	// g_errLast = g_pds3dl->SetDopplerFactor(DS3D_MAXDOPPLERFACTOR, DS3D_IMMEDIATE);
 
 	//
 	// Set the primary buffer playing all the time to avoid nasty clicks...
 	//
 
-	g_pdsbPrimary->Play(0,0,0);
+	g_pdsbPrimary->Play(0, 0, 0);
 
-    return TRUE;
+	return TRUE;
 }
 
-
-
-/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Function:
-
-    ParseWaveFile
-
-Description:
-
-    Get the Wave File header, size, and data pointer...
-    
-Arguments:
-
-    void         *pvWaveFile     -  Pointer to the wav file to parse
-
-    WAVEFORMATEX **ppWaveHeader  -  Fill this with pointer to wave header
-
-    BYTE         **ppbWaveData   -  Fill this with pointer to wave data
-
-    DWORD        **pcbWaveSize   -  Fill this with wave data size.
-
-Return Value:
-
-    TRUE on success, FALSE on failure.
-
--------------------------------------------------------------------*/
-BOOL
-ParseWaveFile(void *pvWaveFile, WAVEFORMATEX **ppWaveHeader, BYTE **ppbWaveData, DWORD *pcbWaveSize)
+bool LoadWave(const char* fileName, unsigned char** buffer, unsigned int* size, WAVEFORMATEX* format)
 {
-    DWORD *pdw;
-    DWORD *pdwEnd;
-    DWORD dwRiff;
-    DWORD dwType;
-    DWORD dwLength;
-
-    if (ppWaveHeader)
-        *ppWaveHeader = NULL;
-
-    if (ppbWaveData)
-        *ppbWaveData = NULL;
-
-    if (pcbWaveSize)
-        *pcbWaveSize = 0;
-
-    pdw = (DWORD *)pvWaveFile;
-    dwRiff   = *pdw++;
-    dwLength = *pdw++;
-    dwType   = *pdw++;
-
-    // Check if it's a WAV format file
-    if (dwType != mmioFOURCC('W', 'A', 'V', 'E'))
+	SDL_AudioSpec spec;
+	if (!SDL_LoadWAV(fileName, &spec, buffer, size) || spec.format != AUDIO_S16)
 	{
-		ASSERT ( FALSE );
-        return FALSE;
+		TRACE("Could not load sound file: %s", fileName);
+		return false;
 	}
 
-    // Check if it's a RIFF format file
-    if (dwRiff != mmioFOURCC('R', 'I', 'F', 'F'))
-	{
-		ASSERT ( FALSE );
-        return FALSE;
-	}
+	memset(format, 0, sizeof(WAVEFORMATEX));
+	format->wFormatTag = WAVE_FORMAT_PCM;
+	format->nChannels = spec.channels;
+	format->nSamplesPerSec = spec.freq;
+	format->wBitsPerSample = 16;
+	format->nBlockAlign = format->wBitsPerSample / 8 * format->nChannels;
+	format->nAvgBytesPerSec = format->nSamplesPerSec * format->nBlockAlign;
 
-    pdwEnd = (DWORD *)((BYTE *)pdw + dwLength-4);
-
-    while (pdw < pdwEnd)
-    {
-#if 0
-        dwType = *pdw++;
-        dwLength = *pdw++;
-#else
-		dwType = ReadNonalignedDword ( pdw );
-		pdw++;
-		dwLength = ReadNonalignedDword ( pdw );
-		pdw++;
-#endif
-
-        switch (dwType)
-        {
-        case mmioFOURCC('f', 'm', 't', ' '):
-            if (ppWaveHeader && !*ppWaveHeader)
-            {
-                if (dwLength < sizeof(WAVEFORMAT))
-                    return FALSE;
-
-                *ppWaveHeader = (WAVEFORMATEX *)pdw;
-
-                if ((!ppbWaveData || *ppbWaveData) && (!pcbWaveSize || *pcbWaveSize))
-                    return TRUE;
-            }
-            break;
-
-        case mmioFOURCC('d', 'a', 't', 'a'):
-            if ((ppbWaveData && !*ppbWaveData) || (pcbWaveSize && !*pcbWaveSize))
-            {
-                if (ppbWaveData)
-                    *ppbWaveData = (LPBYTE)pdw;
-
-                if (pcbWaveSize)
-                    *pcbWaveSize = dwLength;
-
-                if (!ppWaveHeader || *ppWaveHeader)
-                    return TRUE;
-            }
-            break;
-		default:
-			ASSERT ( FALSE );
-			return FALSE;
-			break;
-        }
-
-        pdw = (DWORD *)((BYTE *)pdw + ((dwLength+1)&~1));
-    }
-
-    return FALSE;
+	return true;
 }
-
-/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Function:
-
-    GetWaveResource
-
-Description:
-
-    Load a WAV file from the executable's Resource file or the specified file.
-    
-Arguments:
-
-    LPCTSTR      tszName         -  Name of the WAV file to load
-
-    WAVEFORMATEX **ppWaveHeader  -  Fill this with pointer to wave header
-
-    BYTE         **ppbWaveData   -  Fill this with pointer to wave data
-
-    DWORD        **pcbWaveSize   -  Fill this with wave data size.
-
-Return Value:
-
-    TRUE on success, FALSE on failure.
-
-	NOTE! Return values of **ppWaveHeader, **ppbWaveData, **pcbWaveSize
-	are owned by this rout. Do not do anything permanent to them, coz
-	the memory blocks will be frazzed next time this is called.
-
--------------------------------------------------------------------*/
-
-
-// For some bizarre reason, they keep failing every now and then.
-#define USE_ALIGNED_LOADS 0
-
-static DWORD dwSizeOfGWRBlock = 0;
-static void *pvGWRBlock = NULL;
-
-BOOL
-GetWaveResource(char *szName, WAVEFORMATEX **ppWaveHeader,
-                BYTE **ppbWaveData, DWORD *pcbWaveSize)
-{
-	//HRSRC			hResInfo;
-	//HGLOBAL			hResData;
-    //void			*pvRes;
-    MFFileHandle	hFile;
-    //static BYTE		*rgbyFileTemp = NULL;
-    unsigned long	cbRead;
-    DWORD			dwSize;
-
-	/*
-
-    // Find the specifed WAV resource
-    hResInfo = FindResource(g_hinst, tszName, TEXT("WAV"));
-    if (hResInfo == NULL)
-        goto TryFile;
-
-    // Load the Resource
-    hResData = LoadResource(g_hinst, hResInfo);
-    if (hResData == NULL)
-        goto TryFile;
-
-    // Lock the Resource
-    pvRes = LockResource(hResData);
-    if (pvRes == NULL)
-        goto TryFile;
-
-    // Read and parse the Resource
-    if (ParseWaveFile(pvRes, ppWaveHeader, ppbWaveData, pcbWaveSize) != NULL)
-        return TRUE;
-
-	*/
-
-//TryFile:
-
-#ifdef TARGET_DC
-	// GDWorkshop converts any non-alphanumerics to "_"
-	char chTemp[128];
-	char *pchSrc = szName;
-	char *pchDst = chTemp;
-	while ( TRUE )
-	{
-		if ( ( ( *pchSrc >= 'a' ) && ( *pchSrc <= 'z' ) ) ||
-			 ( ( *pchSrc >= 'A' ) && ( *pchSrc <= 'Z' ) ) ||
-			 ( ( *pchSrc >= '0' ) && ( *pchSrc <= '9' ) ) ||
-			 ( *pchSrc == '.' ) ||
-			 ( *pchSrc == '\\' )
-			 )
-		{
-			*pchDst++ = *pchSrc++;
-		}
-		else if ( *pchSrc == '\0' )
-		{
-			*pchDst++ = '\0';
-			break;
-		}
-		else
-		{
-			*pchDst++ = '_';
-			pchSrc++;
-		}
-	}
-
-	szName = chTemp;
-#endif
-
-
-#if 0
-#ifdef DEBUG
-	if ( 0 == stricmp ( szName, "data\\sfx\\1622dc\\heli.wav" ) )
-	{
-		// Replace it for the mo.
-		szName = "data\\sfx\\1622dc\\helifucked64.wav";
-	}
-	else if ( 0 == stricmp ( szName, "data\\sfx\\1622dc\\sfx080799_\\search2.wav" ) )
-	{
-		// Replace it for the mo.
-		szName = "data\\sfx\\1622dc\\sfx080799_\\search2fucked32.wav";
-	}
-#endif
-#endif
-
-
-
-
-    hFile = FileOpen ( szName );
-    if ( hFile == FILE_OPEN_ERROR )
-	{
-		TRACE ( "Failed to load sound %s\n", szName );
-        return FALSE;
-	}
-
-    dwSize = FileSize(hFile);
-
-#if !USE_ALIGNED_LOADS
-	// Free memory used in previous call.
-	if ( pvGWRBlock != NULL )
-	{
-		MemFree ( pvGWRBlock );
-		pvGWRBlock = NULL;
-	}
-    pvGWRBlock = (BYTE*) MemAlloc ( dwSize );
-    if ( !pvGWRBlock )
-	{
-		ASSERT ( FALSE );
-        return FALSE;
-	}
-#else
-	if ( dwSizeOfGWRBlock < dwSize )
-	{
-		if ( pvGWRBlock != NULL )
-		{
-			//MemFree ( pvGWRBlock );
-			VirtualFree ( pvGWRBlock, NULL, MEM_RELEASE );
-		}
-		// Grow slightly more than needed to prevent hammering.
-		dwSizeOfGWRBlock = ( dwSize * 5 / 4 + 10240 );
-		// Ensure it's 4k-aligned.
-		dwSizeOfGWRBlock = ( ( dwSizeOfGWRBlock + 4095 ) & ~4095 );
-		//pvGWRBlock = MemAlloc ( dwSizeOfGWRBlock );
-		pvGWRBlock = VirtualAlloc ( NULL, dwSizeOfGWRBlock, MEM_COMMIT, PAGE_READWRITE );
-		ASSERT ( pvGWRBlock != NULL );
-	}
-	//rgbyFileTemp = (BYTE *)pvGWRBlock;
-
-#endif
-
-#if !USE_ALIGNED_LOADS
-	// Load in one go.
-    cbRead = FileRead ( hFile, pvGWRBlock, dwSize );
-#else
-	// Use DMA load, then finish the rest.
-
-	int iAlignedFileSize = dwSize & ( ~4095 );
-	// DMA read
-	if ( iAlignedFileSize > 0 )
-	{
-		cbRead = FileRead ( hFile, pvGWRBlock, iAlignedFileSize );
-	}
-	else
-	{
-		cbRead = 0;
-	}
-	// Finish off with PIO or whatever.
-	if ( dwSize - iAlignedFileSize > 0 )
-	{
-		cbRead += FileRead ( hFile, (void *)( (char *)pvGWRBlock + iAlignedFileSize ), dwSize - iAlignedFileSize );
-	}
-#endif
-    FileClose ( hFile );
-
-#if 0
-
-    hFile = CreateFile(tszName, GENERIC_READ, 0, NULL, OPEN_EXISTING, 0, NULL);
-    if (hFile == INVALID_HANDLE_VALUE)
-	{
-        return FALSE;
-	}
-
-    dwSize = GetFileSize(hFile, NULL);
-
-    pvGWRBlock = (BYTE*) MemAlloc(dwSize);
-    if (!pvGWRBlock)
-        return FALSE;
-
-    ReadFile (hFile, pvGWRBlock, dwSize, &cbRead, NULL);
-    CloseHandle(hFile);
-
-#endif
-
-    if (cbRead != dwSize)
-	{
-		ASSERT ( FALSE );
-#if !USE_ALIGNED_LOADS
-		//MemFree ( pvGWRBlock );
-#endif
-        return FALSE;
-	}
-
-    if (ParseWaveFile(pvGWRBlock, ppWaveHeader, ppbWaveData, pcbWaveSize) == NULL)
-	{
-#if !USE_ALIGNED_LOADS
-		//MemFree ( pvGWRBlock );
-#endif
-        return FALSE;
-	}
-
-
-	// This is NOT freed until next call, since it holds all the data that the pointer all point into.
-#if !USE_ALIGNED_LOADS
-	//MemFree ( pvGWRBlock );
-#endif
-
-    return TRUE;
-}
-
-
-
-// Call this when a bunch of sounds have finished loading.
-// Can be called whenever you like really.
-void DCLL_ProbablyDoneMostOfMySoundLoadingForAWhile ( void )
-{
-#if !USE_ALIGNED_LOADS
-	if ( pvGWRBlock != NULL )
-	{
-		MemFree ( pvGWRBlock );
-		pvGWRBlock = NULL;
-	}
-#else
-	if ( pvGWRBlock != NULL )
-	{
-		//MemFree ( pvGWRBlock );
-		VirtualFree ( pvGWRBlock, NULL, MEM_RELEASE );
-		pvGWRBlock = NULL;
-	}
-#endif
-}
-
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -663,22 +226,10 @@ FillSoundBuffer(IDirectSoundBuffer *pdsb, BYTE *pbWaveData, DWORD dwWaveSize)
 
 
 // Have you learned nothing of what I have taught you, young Adami?
-#if 1
     memcpy(pMem1, pbWaveData, dwSize1);
 
     if (dwSize2 != 0)
         memcpy(pMem2, pbWaveData+dwSize1, dwSize2);
-#else
-	//TRACE ( "DwordMemcpy  called with 0x%x, 0x%x, 0x%x\n", pMem1, pbWaveData, dwSize1 );
-    DwordMemcpy(pMem1, pbWaveData, dwSize1);
-
-    if (dwSize2 != 0)
-	{
-		//TRACE ( "DwordMemcpy  called with 0x%x, 0x%x, 0x%x\n", pMem2, pbWaveData+dwSize1, dwSize2 );
-        DwordMemcpy(pMem2, pbWaveData+dwSize1, dwSize2);
-	}
-
-#endif
 
     pdsb->Unlock(pMem1, dwSize1, pMem2, dwSize2);
 
@@ -715,35 +266,23 @@ IDirectSoundBuffer *
 LoadSoundBuffer(char *szName, SLONG is_3d)
 {
     IDirectSoundBuffer *pdsb = NULL;
-    DSBUFFERDESC dsbd = {0};
-    BYTE *pbWaveData;
 
 	DCLL_bytes_of_sound_memory_used = 0;
 
-
-
-#if 0
-	// Just testing.
-	return NULL;
-#else
-
-
-
-    if (GetWaveResource(szName, &dsbd.lpwfxFormat, &pbWaveData, &dsbd.dwBufferBytes))
+	SDL_AudioSpec spec;
+	unsigned char* audioBuf;
+	unsigned int audioLen;
+	WAVEFORMATEX format;
+    if (LoadWave(szName, &audioBuf, &audioLen, &format))
     {
+		DSBUFFERDESC dsbd = { 0 };
+
         dsbd.dwSize = sizeof(dsbd);
         dsbd.dwFlags = DSBCAPS_STATIC | DSBCAPS_CTRLVOLUME | DSBCAPS_GETCURRENTPOSITION2;
 
-		#ifdef DCLL_OUTPUT_STEREO_WAVS
+		dsbd.dwBufferBytes = audioLen;
+		dsbd.lpwfxFormat = &format;
 
-		if (dsbd.lpwfxFormat->nChannels == 2)
-		{
-			//
-			// This is a stereo sample.
-			//
-		}
-
-		#endif
 
 		if (is_3d)
 		{
@@ -758,29 +297,9 @@ LoadSoundBuffer(char *szName, SLONG is_3d)
 
 		pdsb = NULL;
 
-#ifdef DEBUG
-		// See if we're out of memory or not.
-		DSCAPS dscaps;
-		ZeroMemory ( &dscaps, sizeof(dscaps) );
-		dscaps.dwSize = sizeof(dscaps);
-		g_pds->GetCaps ( &dscaps );
-		if ( dscaps.dwMaxContigFreeHwMemBytes < 0x8000 )
-		{
-			SHARON ( "Running very low on sound memory - 0x%x bytes left.\n", dscaps.dwMaxContigFreeHwMemBytes );
-			// And don't bother to load it.
-			goto yuk_didnt_like_that_sound;
-		}
-
-		if ( dsbd.dwBufferBytes > 0x8000 )
-		{
-			SHARON ( "Tried to load <%s> more than 32k in length - bad person!\n", szName );
-			goto yuk_didnt_like_that_sound;
-		}
-#endif
-
         if (SUCCEEDED(g_pds->CreateSoundBuffer(&dsbd, &pdsb, NULL)))
         {
-            if (!FillSoundBuffer(pdsb, pbWaveData, dsbd.dwBufferBytes))
+            if (!FillSoundBuffer(pdsb, audioBuf, dsbd.dwBufferBytes))
             {
                 pdsb->Release();
                 pdsb = NULL;
@@ -879,48 +398,22 @@ LoadSoundBuffer(char *szName, SLONG is_3d)
 		{
             pdsb = NULL;
 		}
-yuk_didnt_like_that_sound:;
+		SDL_FreeWAV(audioBuf);
     }
-
-#endif
 
     return pdsb;
 }
 
 
-IDirectSoundBuffer *CreateStreamingSoundBuffer(int nSamplesPerSec, WORD wBitsPerSample, DWORD dwBufferSize)
+IDirectSoundBuffer *CreateStreamingSoundBuffer(WAVEFORMATEX* format, DWORD dwBufferSize)
 {
     IDirectSoundBuffer *pdsb        = NULL;
     DSBUFFERDESC       dsbd         = {0};
-    WAVEFORMATEX       waveformatex = {0};
-
-#ifdef STREAMING_BUFFER_IS_ADPCM
-    // Set up the Wave format description for Yamaha ADPCM
-    waveformatex.wFormatTag      = 0x0020;
-    waveformatex.nChannels       = 1;
-    waveformatex.nSamplesPerSec  = 22050;
-    waveformatex.wBitsPerSample  = 4;
-    waveformatex.nBlockAlign     = (waveformatex.nChannels * waveformatex.wBitsPerSample) / 8;
-    waveformatex.nAvgBytesPerSec = waveformatex.nSamplesPerSec * waveformatex.nBlockAlign;
-    waveformatex.cbSize          = 0;
+    
     dsbd.dwSize                  = sizeof(dsbd);
     dsbd.dwBufferBytes           = dwBufferSize;
-    dsbd.dwFlags                 = DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLPOSITIONNOTIFY;// | DSBCAPS_LOCSOFTWARE;
-    dsbd.lpwfxFormat             = &waveformatex;
-#else
-    // Set up the Wave format description
-    waveformatex.wFormatTag      = WAVE_FORMAT_PCM;
-    waveformatex.nChannels       = 1;
-    waveformatex.nSamplesPerSec  = nSamplesPerSec;
-    waveformatex.wBitsPerSample  = wBitsPerSample;
-    waveformatex.nBlockAlign     = (waveformatex.nChannels * waveformatex.wBitsPerSample) / 8;
-    waveformatex.nAvgBytesPerSec = waveformatex.nSamplesPerSec * waveformatex.nBlockAlign;
-    waveformatex.cbSize          = 0;
-    dsbd.dwSize                  = sizeof(dsbd);
-    dsbd.dwBufferBytes           = dwBufferSize;
-    dsbd.dwFlags                 = DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLPOSITIONNOTIFY;// | DSBCAPS_LOCSOFTWARE;
-    dsbd.lpwfxFormat             = &waveformatex;
-#endif
+    dsbd.dwFlags                 = DSBCAPS_CTRLFREQUENCY | DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLPOSITIONNOTIFY;// | DSBCAPS_LOCSOFTWARE;
+    dsbd.lpwfxFormat             = format;
 
     g_errLast = g_pds->CreateSoundBuffer(&dsbd, &pdsb, NULL);
     if (CheckError(TEXT("Create DirectSound Buffer")))
@@ -929,23 +422,21 @@ IDirectSoundBuffer *CreateStreamingSoundBuffer(int nSamplesPerSec, WORD wBitsPer
     return pdsb;
 }
 
+void SetupNofications(IDirectSoundBuffer* buffer, HANDLE event, unsigned int bufferSize)
+{
+	IDirectSoundNotify *pdsn;
+	DSBPOSITIONNOTIFY   rgdsbpn[2];
 
+	buffer->QueryInterface(IID_IDirectSoundNotify, (void **)&pdsn);
 
+	rgdsbpn[0].hEventNotify = event;
+	rgdsbpn[1].hEventNotify = event;
+	rgdsbpn[0].dwOffset = bufferSize / 2;
+	rgdsbpn[1].dwOffset = bufferSize - 2;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	pdsn->SetNotificationPositions(2, rgdsbpn);
+	pdsn->Release();
+}
 
 
 // ========================================================
@@ -1001,10 +492,13 @@ CBYTE DCLL_stream_new_fname[MAX_PATH];
 SLONG DCLL_stream_data_offset;
 SLONG DCLL_stream_silence_count;
 
-IDirectSoundBuffer *DCLL_stream_dsb;
-MFFileHandle        DCLL_stream_file_handle;	// The file handle of what we are streaming...
+IDirectSoundBuffer *DCLL_stream_dsb = nullptr;
+Uint8*				DCLL_stream_sound_buffer = nullptr;
+unsigned int		DCLL_stream_sound_buffer_length;
+unsigned int		DCLL_stream_sound_buffer_position;
 HANDLE              DCLL_stream_event;
 HANDLE              DCLL_stream_thread;			// Streaming sound thread
+SLONG				DCLL_stream_volume_value = DSBVOLUME_MAX;
 float				DCLL_stream_volume_range = 1.0F;
 
 
@@ -1093,23 +587,9 @@ DWORD DCLL_stream_process(int nUnused)
 		//
 		// What's hapenned to our event?
 		//
-
-#if 0
-		// Debugging - rip out this.
-		DCLL_stream_command = DCLL_STREAM_COMMAND_NOTHING;
-		if (DCLL_stream_file_handle != NULL)
-		{
-			// Close it.
-			FileClose ( DCLL_stream_file_handle );
-			DCLL_stream_file_handle = NULL;
-		}
-#else
-
-
 		switch(DCLL_stream_command)
 		{
 			case DCLL_STREAM_COMMAND_NOTHING:
-
 				{
 					DWORD write_pos;
 					SLONG start;
@@ -1119,30 +599,14 @@ DWORD DCLL_stream_process(int nUnused)
 					//
 
 					DWORD dummy;
-#ifdef TARGET_DC
-					// We need to find the write position.
-#if OLD_STYLE_THING_THAT_DIDNT_WORK_VERY_WELL
-					DCLL_stream_dsb->GetCurrentPosition(&dummy, &write_pos);
-#else
-					DCLL_stream_dsb->GetCurrentPosition(&write_pos, &dummy);
-#endif
-#else
-					// Different on the PC.
-					DCLL_stream_dsb->GetCurrentPosition(&write_pos, &dummy);
-#endif
 
-
+					DCLL_stream_dsb->GetCurrentPosition(&write_pos, &dummy);
 
 					// Very occasionally, the read position is just before the end of the buffer, which causes this to fall over.
 					// So add a little something to tweak it.
-#if OLD_STYLE_THING_THAT_DIDNT_WORK_VERY_WELL
-					if ( write_pos >= ( DCLL_STREAM_BUFFER_SIZE / 2 ) )
-#else
-
 #define SOUND_POS_TWEAK_FACTOR 64
 					if ( ( write_pos >= ( ( DCLL_STREAM_BUFFER_SIZE / 2 ) - SOUND_POS_TWEAK_FACTOR ) ) &&
 						 ( write_pos <  ( ( DCLL_STREAM_BUFFER_SIZE ) - SOUND_POS_TWEAK_FACTOR ) ) )
-#endif
 					{
 						//
 						// Overwrite the first half.
@@ -1161,7 +625,7 @@ DWORD DCLL_stream_process(int nUnused)
 						TRACIE (( "Write pos 0x%x - overwriting second half\n", write_pos ));
 					}
 
-					if (DCLL_stream_file_handle == NULL)
+					if (DCLL_stream_sound_buffer == NULL)
 					{
 						//
 						// No more sound data, so fill the sound buffer
@@ -1189,17 +653,7 @@ DWORD DCLL_stream_process(int nUnused)
 					DWORD block1_length;
 					DWORD block2_length;
 
-#ifdef TARGET_DC
-#if OLD_STYLE_THING_THAT_DIDNT_WORK_VERY_WELL
-					DCLL_stream_dsb->Lock(start, DCLL_STREAM_BUFFER_SIZE / 2, (void **) &block1_mem, &block1_length, (void **) &block2_mem, &block2_length, DSBLOCK_FROMWRITECURSOR );
-#else
 					DCLL_stream_dsb->Lock(start, DCLL_STREAM_BUFFER_SIZE / 2, (void **) &block1_mem, &block1_length, (void **) &block2_mem, &block2_length, 0 );
-#endif
-#else
-					DCLL_stream_dsb->Lock(start, DCLL_STREAM_BUFFER_SIZE / 2, (void **) &block1_mem, &block1_length, (void **) &block2_mem, &block2_length, 0 );
-#endif
-
-
 
 					if ( block1_mem == NULL )
 					{
@@ -1210,7 +664,7 @@ DWORD DCLL_stream_process(int nUnused)
 					else
 					{
 
-						if (DCLL_stream_file_handle == NULL)
+						if (DCLL_stream_sound_buffer == NULL)
 						{
 							//
 							// Silence...
@@ -1221,13 +675,6 @@ DWORD DCLL_stream_process(int nUnused)
 							DWORD *dst1 = (DWORD *)block1_mem;
 							DWORD count = block1_length;
 
-							#ifdef TARGET_DC
-
-							ASSERT ( ( (DWORD)dst1 & 3 ) == 0 );
-							ASSERT ( ( count & 3 ) == 0 );
-
-							#endif
-
 							count >>= 2;
 							while ( (count--) > 0 )
 							{
@@ -1236,102 +683,35 @@ DWORD DCLL_stream_process(int nUnused)
 						}
 						else
 						{
-							DWORD bytes_read;
+							DWORD bytes_available = min(DCLL_stream_sound_buffer_length - DCLL_stream_sound_buffer_position, block1_length);
 
-							//
-							// Read sound data from the file.
-							//
+							memcpy(block1_mem, DCLL_stream_sound_buffer + DCLL_stream_sound_buffer_position, bytes_available);
+							DCLL_stream_sound_buffer_position += bytes_available;
 
-	#ifdef TARGET_DC
-							// The version that streams in 256 byte chunks.
-							ASSERT ( ( block1_length & (DCLL_GRANULARITY-1) ) == 0 );
-							DWORD dwBytesToWrite = block1_length;
-							UBYTE *pbBlockMem = block1_mem;
-							while ( dwBytesToWrite > 0 )
-							{
-								if ( DCLL_stream_file_handle != NULL )
-								{
-									bytes_read = FileRead ( DCLL_stream_file_handle, pcDCLL_stream_buffer, DCLL_GRANULARITY );
-									if ( bytes_read < DCLL_GRANULARITY )
-									{
-										if ( DCLL_stream_loop )
-										{
-											// Start from the beginning again.
-											FileSeek(DCLL_stream_file_handle, SEEK_MODE_BEGINNING, DCLL_stream_data_offset);
-											DWORD new_bytes_read = FileRead ( DCLL_stream_file_handle, pcDCLL_stream_buffer + bytes_read, DCLL_GRANULARITY - bytes_read );
-											ASSERT ( new_bytes_read == ( DCLL_GRANULARITY - bytes_read ) );
-										}
-										else
-										{
-											// Need to pad with silence.
-											memset ( pcDCLL_stream_buffer + bytes_read, 0, DCLL_GRANULARITY - bytes_read );
-											FileClose ( DCLL_stream_file_handle );
-											DCLL_stream_file_handle = NULL;
-										}
-									}
-								}
-								else
-								{
-									bytes_read = 0;
-									memset ( pcDCLL_stream_buffer, 0, DCLL_GRANULARITY );
-								}
-
-								// And copy the buffer in. MUST BE IN DWORDS.
-								DWORD *pdwSrc = (DWORD*)pcDCLL_stream_buffer;
-								DWORD *pdwDst = (DWORD*)pbBlockMem;
-								for ( int i = 0; i < ( DCLL_GRANULARITY / 4 ); i++ )
-								{
-									*pdwDst++ = *pdwSrc++;
-								}
-								dwBytesToWrite -= DCLL_GRANULARITY;
-								pbBlockMem += DCLL_GRANULARITY;
-							}
-	#else
-
-
-
-	#if 0
-							ReadFile(
-								DCLL_stream_file_handle,
-								block1_mem,
-								block1_length,
-							   &bytes_read,
-								NULL);
-	#else
-							bytes_read = FileRead ( DCLL_stream_file_handle, block1_mem, block1_length );
-	#endif
-
-							if (bytes_read < block1_length)
+							if (bytes_available < block1_length)
 							{
 								if (DCLL_stream_loop)
 								{
 									//
-									// Go back to the beginning of the data section of the file and
+									// Go back to the beginning of the buffer and
 									// start looping again.
 									//
+									DCLL_stream_sound_buffer_position = 0;
 
-									FileSeek(DCLL_stream_file_handle, SEEK_MODE_BEGINNING, DCLL_stream_data_offset);
-									// SetFilePointer(DCLL_stream_file_handle, DCLL_stream_data_offset, NULL, FILE_BEGIN);
+									memcpy(block1_mem + bytes_available, DCLL_stream_sound_buffer, block1_length - bytes_available);
 
-									FileRead(DCLL_stream_file_handle, block1_mem + bytes_read, block1_length - bytes_read);
+									DCLL_stream_sound_buffer_position += block1_length - bytes_available;
 								}
 								else
 								{
 									//
-									// Fill the remainder of the buffer with silence and close the file.
+									// Fill the remainder of the buffer with silence and free the buffer.
 									//
 
 									// Can't use memset - must be DWORD writes.
 									//memset(block1_mem + bytes_read, 0, block1_length - bytes_read);
-									DWORD *dst1 = (DWORD *)( block1_mem + bytes_read );
-									DWORD count = block1_length - bytes_read;
-
-									#ifdef TARGET_DC
-
-									ASSERT ( ( (DWORD)dst1 & 3 ) == 0 );
-									ASSERT ( ( count & 3 ) == 0 );
-
-									#endif
+									DWORD *dst1 = (DWORD *)( block1_mem + bytes_available);
+									DWORD count = block1_length - bytes_available;
 
 									count >>= 2;
 									while ( (count--) > 0 )
@@ -1339,39 +719,13 @@ DWORD DCLL_stream_process(int nUnused)
 										*dst1++ = 0;
 									}
 
-	#if 0
-									CloseHandle(DCLL_stream_file_handle);
-	#else
-									FileClose ( DCLL_stream_file_handle );
-	#endif
+									SDL_FreeWAV (DCLL_stream_sound_buffer);
 
-									DCLL_stream_file_handle = NULL;
+									DCLL_stream_sound_buffer = nullptr;
 								}
 							}
-#endif
 						}
 		
-						/*
-
-						memset(block1_mem, 0, block1_length);
-
-						if (start)
-						{
-							SLONG i;
-
-							for (i = 0; i < block1_length; i++)
-							{
-								block1_mem[i] = rand();
-							}
-						}
-
-						*/
-
-	#ifdef TARGET_DC
-						// This has started falling over on the PC. But I don't care.
-						ASSERT(block2_mem == NULL);
-	#endif
-
 						DCLL_stream_dsb->Unlock(block1_mem, block1_length, block2_mem, block2_length);
 					}
 				}
@@ -1383,98 +737,54 @@ DWORD DCLL_stream_process(int nUnused)
 				{
 					DWORD status = 0;
 
-					DCLL_stream_dsb->GetStatus(&status);
-
-					if (status & (DSBSTATUS_LOOPING|DSBSTATUS_PLAYING))
+					if(DCLL_stream_dsb)
 					{
-						//
-						// If the buffer is playing, then we  close
-						// the current file handle and stop the sound playing.
-						//
-						
-						if (DCLL_stream_file_handle)
+						DCLL_stream_dsb->GetStatus(&status);
+
+						if (status & (DSBSTATUS_LOOPING | DSBSTATUS_PLAYING))
 						{
-							FileClose(DCLL_stream_file_handle);
+							//
+							// If the buffer is playing, then we free
+							// the current buffer and stop the sound playing.
+							//
 
-							DCLL_stream_file_handle   = NULL;
-							DCLL_stream_silence_count = 0;
+							if (DCLL_stream_sound_buffer)
+							{
+								SDL_FreeWAV(DCLL_stream_sound_buffer);
+
+								DCLL_stream_sound_buffer = NULL;
+								DCLL_stream_silence_count = 0;
+							}
+
+							DCLL_stream_dsb->Stop();
 						}
-
-						DCLL_stream_dsb->Stop();
 					}
 
 					{
-						BYTE          temp[256];
 						ULONG         bytes_read;
 						DWORD         size;
-						WAVEFORMATEX *pwfx;
+						WAVEFORMATEX pwfx;
 						BYTE         *data_start;
 
-						//
-						// Open the sound file.
-						//
-
-#ifdef CRAPPY_STREAMING_ADPCM_HACK
-						// Always load this 
-						if ( strstr ( DCLL_stream_new_fname, "FrontLoop" ) )
+						SDL_AudioSpec spec;
+						if( !LoadWave(DCLL_stream_new_fname, &DCLL_stream_sound_buffer, &DCLL_stream_sound_buffer_length, &pwfx))
 						{
-							strcpy ( DCLL_stream_new_fname, "Data\\sfx\\1622DC\\GeneralMusic\\FrontLoopMONOAD.wav" );
-						}
-						else
-						{
-							strcpy ( DCLL_stream_new_fname, "Data\\sfx\\1622DC\\whoryou.wav" );
-						}
-#endif
-
-
-#if 0
-						DCLL_stream_file_handle = CreateFile(DCLL_stream_new_fname, GENERIC_READ, 0, NULL, OPEN_EXISTING, 0, NULL);
-						if (DCLL_stream_file_handle == NULL)
-#else
-						DCLL_stream_file_handle = FileOpen ( DCLL_stream_new_fname );
-						if (DCLL_stream_file_handle == FILE_OPEN_ERROR )
-#endif
-						{
-							DCLL_stream_file_handle = NULL;
-							bytes_read = 0;
-						}
-						else
-						{
-							//
-							// Read the first 256 bytes to get file header
-							//
-
-#if 0
-							ReadFile(DCLL_stream_file_handle, temp, 256, &bytes_read, NULL);
-#else
-							bytes_read = FileRead ( DCLL_stream_file_handle, temp, 256 );
-#endif
-						}
-
-						if (bytes_read != 256)
-						{
-							DCLL_stream_file_handle = NULL;
+							DCLL_stream_sound_buffer = nullptr;
 
 							DCLL_stream_dsb->Stop();
 						}
 						else
 						{
-							//
-							// Parse the header information to get to the sound data.
-							//
+							if (DCLL_stream_dsb)
+							{
+								DCLL_stream_dsb->Stop();
+								DCLL_stream_dsb = nullptr;
+							}
+							DCLL_stream_dsb = CreateStreamingSoundBuffer(&pwfx, DCLL_STREAM_BUFFER_SIZE);
+							DCLL_stream_dsb->SetVolume(DCLL_stream_volume_value);
+							SetupNofications(DCLL_stream_dsb, DCLL_stream_event, DCLL_STREAM_BUFFER_SIZE);
 
-							ParseWaveFile((void *) temp, &pwfx, &data_start, &size);
-
-							//
-							// Set file pointer to point to start of data
-							//
-
-							DCLL_stream_data_offset = (SLONG) (data_start - temp);
-#if 0
-							SetFilePointer(DCLL_stream_file_handle, DCLL_stream_data_offset, NULL, FILE_BEGIN);
-#else
-							FileSeek ( DCLL_stream_file_handle, SEEK_MODE_BEGINNING, (int) (data_start - temp) );
-#endif
+							DCLL_stream_sound_buffer_position = 0;
 
 							//
 							// Fill up the sound buffer with the data.
@@ -1489,86 +799,29 @@ DWORD DCLL_stream_process(int nUnused)
 
 							if (block1_mem)
 							{
-								DWORD bytes_read;
+								DWORD bytes_available = min(DCLL_stream_sound_buffer_length - DCLL_stream_sound_buffer_position, block1_length);
 
-								//
-								// Read sound data from the file.
-								//
-
-#ifndef TARGET_DC
-
-#if 0
-								ReadFile(
-									DCLL_stream_file_handle,
-									block1_mem,
-									block1_length,
-								   &bytes_read,
-									NULL);
-#else
-								bytes_read = FileRead ( DCLL_stream_file_handle, block1_mem, block1_length );
-#endif
-
-								if (bytes_read < block1_length)
+								memcpy(block1_mem, DCLL_stream_sound_buffer + DCLL_stream_sound_buffer_position, bytes_available);
+								DCLL_stream_sound_buffer_position += bytes_available;
+								if (bytes_available < block1_length)
 								{
 									//
-									// Fill the remainder of the buffer with silence and close the file.
+									// Fill the remainder of the buffer with silence and free the buffer.
 									//
 								
 									// Can't use memset - must use DWORD writes.
 									//memset(block1_mem + bytes_read, 0, block1_length - bytes_read);
-									DWORD *dst1 = (DWORD *)( block1_mem + bytes_read );
-									DWORD count = block1_length - bytes_read;
-									ASSERT ( ( (DWORD)dst1 & 3 ) == 0 );
-									ASSERT ( ( count & 3 ) == 0 );
+									DWORD *dst1 = (DWORD *)( block1_mem + bytes_available);
+									DWORD count = block1_length - bytes_available;
 									count >>= 2;
 									while ( (count--) > 0 )
 									{
 										*dst1++ = 0;
 									}
+									SDL_FreeWAV ( DCLL_stream_sound_buffer );
 
-#if 0
-									CloseHandle(DCLL_stream_file_handle);
-#else
-									FileClose ( DCLL_stream_file_handle );
-#endif
-									DCLL_stream_file_handle = NULL;
+									DCLL_stream_sound_buffer = nullptr;
 								}
-
-#else
-// The version that streams in 256 byte chunks.
-								ASSERT ( ( block1_length & (DCLL_GRANULARITY-1) ) == 0 );
-								DWORD dwBytesToWrite = block1_length;
-								UBYTE *pbBlockMem = block1_mem;
-								while ( dwBytesToWrite > 0 )
-								{
-									if ( DCLL_stream_file_handle != NULL )
-									{
-										bytes_read = FileRead ( DCLL_stream_file_handle, pcDCLL_stream_buffer, DCLL_GRANULARITY );
-										if ( bytes_read < DCLL_GRANULARITY )
-										{
-											// Need to pad with silence.
-											memset ( pcDCLL_stream_buffer + bytes_read, 0, DCLL_GRANULARITY - bytes_read );
-											FileClose ( DCLL_stream_file_handle );
-											DCLL_stream_file_handle = NULL;
-										}
-									}
-									else
-									{
-										bytes_read = 0;
-										memset ( pcDCLL_stream_buffer, 0, DCLL_GRANULARITY );
-									}
-
-									// And copy the buffer in. MUST BE IN DWORDS.
-									DWORD *pdwSrc = (DWORD*)pcDCLL_stream_buffer;
-									DWORD *pdwDst = (DWORD*)pbBlockMem;
-									for ( int i = 0; i < ( DCLL_GRANULARITY / 4 ); i++ )
-									{
-										*pdwDst++ = *pdwSrc++;
-									}
-									dwBytesToWrite -= DCLL_GRANULARITY;
-									pbBlockMem += DCLL_GRANULARITY;
-								}
-#endif
 
 							}
 
@@ -1594,11 +847,6 @@ DWORD DCLL_stream_process(int nUnused)
 				ASSERT(0);
 				break;
 		}
-
-
-
-#endif
-
 	}
 
 	return 0;
@@ -1617,51 +865,11 @@ void DCLL_stream_init(void)
 	DCLL_stream_event = CreateEvent(NULL, FALSE, FALSE, NULL);
 
 	//
-	// Create the streaming buffer...
-	//
-
-	DCLL_stream_dsb = CreateStreamingSoundBuffer(22050, 16, DCLL_STREAM_BUFFER_SIZE);
-
-	//
 	// Spawn off the new thread.
 	//
 
 	DCLL_stream_thread  = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE) DCLL_stream_process, NULL, 0, &thread_id);
 	ASSERT(DCLL_stream_thread);
-#ifdef TARGET_DC
-	SetThreadPriority ( DCLL_stream_thread, THREAD_PRIORITY_HIGHEST );
-#endif
-
-	//
-	// Setup notifications...
-	//
-
-    IDirectSoundNotify *pdsn;
-	DSBPOSITIONNOTIFY   rgdsbpn[2];
-
-	/*
-
-	IDirectSoundBuffer_QueryInterface(
-		DCLL_stream_dsb,
-		IID_IDirectSoundNotify,
-		(void **)&pdsn);
-
-	*/
-
-	DCLL_stream_dsb->QueryInterface(IID_IDirectSoundNotify, (void **)&pdsn);
-
-    rgdsbpn[0].hEventNotify = DCLL_stream_event;
-    rgdsbpn[1].hEventNotify = DCLL_stream_event;
-    rgdsbpn[0].dwOffset     = DCLL_STREAM_BUFFER_SIZE / 2;
-    rgdsbpn[1].dwOffset     = DCLL_STREAM_BUFFER_SIZE - 2;
-
-    pdsn->SetNotificationPositions(2, rgdsbpn);
-
-	//
-    // No longer need the DirectSoundNotify interface, so release it
-	//
-	
-    pdsn->Release();
 }
 
 SLONG DCLL_stream_play(CBYTE *fname, SLONG loop)
@@ -1758,12 +966,10 @@ SLONG DCLL_stream_play(CBYTE *fname, SLONG loop)
 
 void DCLL_stream_stop()
 {
-
-#ifndef TARGET_DC
-	// This rout is buggered on the PC.
-	return;
-#endif
-
+	if (!DCLL_stream_dsb)
+	{
+		return;
+	}
 	//
 	// Make sure a sound doesn't sneakily start playing...
 	//
@@ -1773,18 +979,14 @@ void DCLL_stream_stop()
 	DCLL_stream_dsb->Stop();
 
 	//
-	// Close the streaming file and stop the buffer from playing.
+	// Free the streaming buffer and stop the buffer from playing.
 	//
 
-	if (DCLL_stream_file_handle)
+	if (DCLL_stream_sound_buffer)
 	{
-#if 0
-		CloseHandle(DCLL_stream_file_handle);
-#else
-		FileClose ( DCLL_stream_file_handle );
-#endif
+		SDL_FreeWAV(DCLL_stream_sound_buffer);
 
-		DCLL_stream_file_handle   = NULL;
+		DCLL_stream_sound_buffer = NULL;
 		DCLL_stream_silence_count = 0;
 	}
 
@@ -1890,9 +1092,9 @@ void DCLL_stream_volume(float volume)
 
 	volume = powf( volume, 0.1F);
 
-	SLONG ivolume = SLONG(DSBVOLUME_MIN + (DSBVOLUME_MAX - DSBVOLUME_MIN) * volume);
+	DCLL_stream_volume_value = SLONG(DSBVOLUME_MIN + (DSBVOLUME_MAX - DSBVOLUME_MIN) * volume);
 
-	DCLL_stream_dsb->SetVolume(ivolume);
+	DCLL_stream_dsb->SetVolume(DCLL_stream_volume_value);
 }
 
 
@@ -2202,109 +1404,6 @@ void MilesTerm(void)
 {
 }
 
-
-
-
-
-
-
-
-
-
-
-
-#ifndef TARGET_DC
-
-#include "sound_id.h"
-
-//
-// Does the DC conversion of looping samples.
-//
-
-void DCLL_looping_sample_conversion(void)
-{
-	SLONG i;
-
-	SLONG looping_sample[] =
-	{
-		S_SLIDE_START,
-		S_SEARCH_END,
-		S_ZIPWIRE,
-		S_TROPICAL,
-		S_RAIN_START,
-		S_AMBIENCE_END,
-		S_AMB_POLICE1,
-		S_AMB_POSHEETA,
-		S_AMB_OFFICE1,
-		S_TUNE_CLUB_START,
-		S_RECKONING_LOOP,
-		S_HELI,
-		S_TUNE_CLUB,
-		S_ACIEEED,
-		S_FRONT_END_LOOP_EDIT,
-		S_FIRE_HYDRANT,
-		S_FIRE,
-		S_CAR_SIREN1,
-		S_CARX_CRUISE,
-		S_CARX_IDLE,
-		S_CAR_REVERSE_LOOP,
-	   -12345
-	};
-
-	CreateDirectory("t:\\SillyDCwavs", NULL);
-
-	//
-	// Moves all these files to to the directory on t:\
-	//
-
-	FILE *handle = fopen("t:\\SillyDCwavs\\dcconv.bat", "wb");
-
-	if (!handle)
-	{
-		return;
-	}
-
-	fprintf(handle, "mkdir converted\r\n\r\n");
-
-	CBYTE src[256];
-	CBYTE dst[256];
-	CBYTE jst[256];
-
-	CBYTE *ch;
-
-	for (i = 0; looping_sample[i] >= 0; i++)
-	{
-		sprintf(src, "data\\sfx\\1622\\%s", sound_list[looping_sample[i]]);
-
-		for (ch = src; *ch; ch++);
-		while(*ch != '\\') ch--;
-		ch++;
-
-		strcpy(jst, ch);
-
-		sprintf(dst, "t:\\sillyDCwavs\\%s", jst);
-
-		CopyFile(src, dst, FALSE);
-
-		//
-		// Mention this filename in the batch file.
-		//
-
-		fprintf(handle, "wavcon %s converted\\%s\r\n", jst, jst);
-		fprintf(handle, "copy %s n:\\urbanchaos\\thegame\\data\\sfx\\1622DC\\%s /Y\r\n", jst, jst);
-		fprintf(handle, "copy converted\\%s n:\\urbanchaos\\thegame\\data\\sfx\\1622DC\\%s /Y\r\n", jst, jst);
-		fprintf(handle, "\r\n");
-	}
-
-	fclose(handle);
-}
-
-#endif
-
-
-
-
-
 // ========================================================
 //
 // STREAMING FILES FROM MEMORY
@@ -2315,16 +1414,17 @@ void DCLL_looping_sample_conversion(void)
 // The sound to stream.
 //
 
-UBYTE *DCLL_memstream_sound;
-SLONG  DCLL_memstream_sound_length;	// length in bytes
+UBYTE *DCLL_memstream_sound = nullptr;
+unsigned int  DCLL_memstream_sound_length;	// length in bytes
 UBYTE *DCLL_memstream_sound_upto;		// Where we have played upto.
 
 
 #define DCLL_MEMSTREAM_BUFFER_SIZE (32768)
 
-IDirectSoundBuffer *DCLL_memstream_dsb;
+IDirectSoundBuffer *DCLL_memstream_dsb = nullptr;
 HANDLE              DCLL_memstream_event;
 HANDLE              DCLL_memstream_thread;			// Streaming sound thread
+SLONG				DCLL_memstream_volume_value = DSBVOLUME_MAX;
 
 
 //
@@ -2470,12 +1570,6 @@ void DCLL_memstream_init()
 	DCLL_memstream_event = CreateEvent(NULL, FALSE, FALSE, NULL);
 
 	//
-	// Create the memstream buffer.
-	//
-
-	DCLL_memstream_dsb = CreateStreamingSoundBuffer(22050, 16, DCLL_MEMSTREAM_BUFFER_SIZE);
-
-	//
 	// Spawn off the new thread.
 	//
 
@@ -2486,35 +1580,6 @@ void DCLL_memstream_init()
 	#ifdef TARGET_DC
 	SetThreadPriority(DCLL_memstream_thread, THREAD_PRIORITY_HIGHEST);
 	#endif
-
-	//
-	// Setup notifications...
-	//
-
-    IDirectSoundNotify *pdsn;
-	DSBPOSITIONNOTIFY   rgdsbpn[2];
-
-	DCLL_memstream_dsb->QueryInterface(IID_IDirectSoundNotify, (void **)&pdsn);
-
-    rgdsbpn[0].hEventNotify = DCLL_memstream_event;
-    rgdsbpn[1].hEventNotify = DCLL_memstream_event;
-    rgdsbpn[0].dwOffset     = DCLL_MEMSTREAM_BUFFER_SIZE / 2;
-    rgdsbpn[1].dwOffset     = DCLL_MEMSTREAM_BUFFER_SIZE - 2;
-
-    if (pdsn->SetNotificationPositions(2, rgdsbpn) != DS_OK)
-	{
-		//
-		//
-		//
-
-		ASSERT(0);
-	}
-
-	//
-    // No longer need the DirectSoundNotify interface, so release it
-	//
-	
-    pdsn->Release();
 }
 
 void DCLL_memstream_load(CBYTE *fname)
@@ -2522,15 +1587,16 @@ void DCLL_memstream_load(CBYTE *fname)
 	BYTE          temp[256];
 	ULONG         bytes_read;
 	DWORD         size;
-	WAVEFORMATEX *pwfx;
+	WAVEFORMATEX pwfx;
 	BYTE         *data_start;
-	MFFileHandle  handle;
 
 	//
 	// Stop the buffer.
 	//
-
-	DCLL_memstream_dsb->Stop();
+	if (DCLL_memstream_dsb)
+	{
+		DCLL_memstream_dsb->Stop();
+	}
 
 	//
 	// Initialise the sound.
@@ -2542,55 +1608,21 @@ void DCLL_memstream_load(CBYTE *fname)
 	// Open the sound file.
 	//
 
-	handle = FileOpen(fname);
-
-	if (handle == FILE_OPEN_ERROR )
-	{
-		ASSERT ( FALSE );
-		return;
-	}
-
-	//
-	// Read the first 256 bytes to get file header
-	//
-
-	bytes_read = FileRead(handle, temp, 256);
-
-	if (bytes_read != 256)
+	if (!LoadWave(fname, &DCLL_memstream_sound, &DCLL_memstream_sound_length, &pwfx))
 	{
 		return;
 	}
+	DCLL_memstream_sound_upto = DCLL_memstream_sound;
 
-	//
-	// Parse the header information to get to the sound data.
-	//
+	if (DCLL_memstream_dsb)
+	{
+		DCLL_memstream_dsb->Stop();
+		DCLL_memstream_dsb = nullptr;
+	}
+	DCLL_memstream_dsb = CreateStreamingSoundBuffer(&pwfx, DCLL_MEMSTREAM_BUFFER_SIZE);
+	DCLL_memstream_dsb->SetVolume(DCLL_memstream_volume_value);
+	SetupNofications(DCLL_memstream_dsb, DCLL_memstream_event, DCLL_MEMSTREAM_BUFFER_SIZE);
 
-	ParseWaveFile((void *) temp, &pwfx, &data_start, &size);
-
-	//
-	// Set file pointer to point to start of data
-	//
-
-	FileSeek(handle, SEEK_MODE_BEGINNING, (int) (data_start - temp));
-
-	//
-	// Allocate the sound.
-	//
-
-	DCLL_memstream_sound        = (UBYTE *) MemAlloc(size);
-	DCLL_memstream_sound_length = size;
-	DCLL_memstream_sound_upto   = DCLL_memstream_sound;
-
-	ASSERT(DCLL_memstream_sound);
-
-	//
-	// Load in the sound.
-	//
-
-	bytes_read = FileRead(handle, DCLL_memstream_sound, DCLL_memstream_sound_length);
-
-	ASSERT(bytes_read == (unsigned)DCLL_memstream_sound_length);
-	
 	//
 	// Lock the sound buffer.
 	//
@@ -2638,10 +1670,6 @@ void DCLL_memstream_load(CBYTE *fname)
 	//
 
 	DCLL_memstream_dsb->Unlock(block1_mem, block1_length, block2_mem, block2_length);
-
-
-	FileClose(handle);
-
 }
 
 void DCLL_memstream_volume(float volume)
@@ -2655,9 +1683,9 @@ void DCLL_memstream_volume(float volume)
 
 	volume = powf( volume, 0.1F);
 
-	SLONG ivolume = SLONG(DSBVOLUME_MIN + (DSBVOLUME_MAX - DSBVOLUME_MIN) * volume);
+	DCLL_memstream_volume_value = SLONG(DSBVOLUME_MIN + (DSBVOLUME_MAX - DSBVOLUME_MIN) * volume);
 
-	DCLL_memstream_dsb->SetVolume(ivolume);
+	DCLL_memstream_dsb->SetVolume(DCLL_memstream_volume_value);
 }
 
 
@@ -2685,8 +1713,10 @@ void DCLL_memstream_stop()
 	//
 	// Stop the sound.
 	//
-
-	DCLL_memstream_dsb->Stop();
+	if (DCLL_memstream_dsb)
+	{
+		DCLL_memstream_dsb->Stop();
+	}
 }
 
 void DCLL_memstream_unload()
@@ -2695,7 +1725,7 @@ void DCLL_memstream_unload()
 
 	if (DCLL_memstream_sound)
 	{
-		MemFree(DCLL_memstream_sound);
+		SDL_FreeWAV(DCLL_memstream_sound);
 	}
 
 	DCLL_memstream_sound        = NULL;

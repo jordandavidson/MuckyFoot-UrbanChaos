@@ -998,11 +998,6 @@ void SOUND_load_needed_sounds()
 	if (amb_cat      ) {for (i = S_CAT_START;       i <= S_CAT_END      ; i++) MFX_load_sound(i);}
 	if (amb_wind     ) {for (i = S_WIND_START;      i <= S_WIND_END     ; i++) MFX_load_sound(i);}
 	if (amb_thunder  ) {for (i = S_THUNDER_START;   i <= S_THUNDER_END  ; i++) MFX_load_sound(i);}
-
-
-	// Free up the fast-load memory.
-	DCLL_ProbablyDoneMostOfMySoundLoadingForAWhile();
-
 }
 
 

@@ -172,7 +172,7 @@ extern void ATTRACT_loadscreen_draw(SLONG completion);
 
 		if (DCLL_bytes_of_sound_memory_used > 300 * 1024)
 		{
-			ASSERT(0);
+			//ASSERT(0);
 
 			//
 			// Dont load any samples that are too big...
@@ -186,7 +186,7 @@ extern void ATTRACT_loadscreen_draw(SLONG completion);
 				CBYTE str[500];
 
 				sprintf(str, "Not loading huge sound file (%4d k) \"%s\"\n", DCLL_bytes_of_sound_memory_used >> 10, sound_list[i]);
-				ASSERT ( FALSE );
+				//ASSERT ( FALSE );
 				SHARON ( str );
 			}
 

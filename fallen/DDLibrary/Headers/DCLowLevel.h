@@ -38,11 +38,6 @@ void DCLL_init(void);
 DCLL_Sound *DCLL_load_sound(CBYTE *fname);
 
 
-// Call this when a bunch of sounds have finished loading.
-// Can be called whenever you like really.
-void DCLL_ProbablyDoneMostOfMySoundLoadingForAWhile ( void );
-
-
 //
 // Sets the volume of the sample. 0.0F <= volume <= 1.0F
 //

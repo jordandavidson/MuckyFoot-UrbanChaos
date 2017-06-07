@@ -1054,8 +1054,6 @@ extern void POLY_ClearAllPages ( void );
 
 	NotGoingToLoadTexturesForAWhileNowSoYouCanCleanUpABit();
 
-	DCLL_ProbablyDoneMostOfMySoundLoadingForAWhile();
-
 	TRACE ( "game_fini done\n" );
 
 }

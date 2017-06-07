@@ -7198,9 +7198,9 @@ void MENUFONT_MergeLower(void);
 		//
 
 		#ifdef TARGET_DC
-		MFX_QUICK_play("data\\sfx\\1622DC\\GeneralMusic\\FrontLoopMONO.wav",TRUE,0,0,0);
+		MFX_QUICK_play("data\\sfx\\1622DC\\GeneralMusic\\FrontLoop.wav",TRUE,0,0,0);
 		#else
-		MFX_QUICK_play("data\\sfx\\1622\\GeneralMusic\\FrontLoopMONO.wav",TRUE,0,0,0);
+		MFX_QUICK_play("data\\sfx\\1622\\GeneralMusic\\FrontLoop.wav",TRUE,0,0,0);
 		#endif
 	}
 
