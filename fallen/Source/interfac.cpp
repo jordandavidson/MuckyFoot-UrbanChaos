@@ -91,7 +91,7 @@ DWORD m_dwFogTableDebugFogTableMode = D3DFOG_NONE;
 
 SLONG	input_mode=0;
 SLONG	mouse_input=0;
-SLONG	analogue=1;
+SLONG	analogue=0;
 
 
 bool g_bEngineVibrations = TRUE;
