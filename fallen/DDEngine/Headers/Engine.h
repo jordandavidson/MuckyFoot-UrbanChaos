@@ -12,8 +12,6 @@
 #include	"Message.h"
 #include	<math.h>
 
-void		DebugText(CBYTE *error, ...);
-
 
 //
 // This is the palette used by the gouraud-shaded

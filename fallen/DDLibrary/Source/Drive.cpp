@@ -54,17 +54,10 @@ void LocateCDROM(void)
 
 void LocateCDROM(void)
 {
-#ifdef FINAL
-	TexturesCD = ENV_get_value_number("textures", 0, "LocalInstall") ? false : true;
-	SFX_CD = ENV_get_value_number("sfx", 0, "LocalInstall") ? false : true;
-	MoviesCD = ENV_get_value_number("movies", 0, "LocalInstall") ? false : true;
-	SpeechCD = ENV_get_value_number("speech", 0, "LocalInstall") ? false : true;
-#else
 	TexturesCD = ENV_get_value_number("textures", 1, "LocalInstall") ? false : true;
 	SFX_CD = ENV_get_value_number("sfx", 1, "LocalInstall") ? false : true;
 	MoviesCD = ENV_get_value_number("movies", 1, "LocalInstall") ? false : true;
 	SpeechCD = ENV_get_value_number("speech", 1, "LocalInstall") ? false : true;
-#endif
 
 	if (!TexturesCD && !SFX_CD && !MoviesCD && !SpeechCD)	return;	// don't need CD-ROM
 

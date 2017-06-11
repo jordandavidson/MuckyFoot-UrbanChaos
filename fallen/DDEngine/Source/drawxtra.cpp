@@ -430,7 +430,7 @@ void Pyros_EndOfFrameMarker ( void )
 
 // Not using the limiting stuff - these do nothing exciting.
 
-inline int IWouldLikeSomePyroSpritesHowManyCanIHave ( int iIWantThisMany )
+int IWouldLikeSomePyroSpritesHowManyCanIHave ( int iIWantThisMany )
 {
 	// Sure.
 	return ( iIWantThisMany );
