@@ -971,7 +971,7 @@ void	OVERLAY_handle(void)
 
 
 
-#ifdef TARGET_DC
+#if 1
 	// Reset the viewport so that text, etc gets drawn even when in letterbox mode.
 
 	//HRESULT hres = (the_display.lp_D3D_Viewport)->EndScene();
@@ -981,8 +981,8 @@ void	OVERLAY_handle(void)
 	viewData.dwSize = sizeof(D3DVIEWPORT2);
 
 	// A horrible hack for letterbox mode.
-	viewData.dwWidth  = 640;
-	viewData.dwHeight = 480;
+	viewData.dwWidth  = RealDisplayWidth;
+	viewData.dwHeight = RealDisplayHeight;
 	viewData.dwX = 0;
 	viewData.dwY = 0;
 	viewData.dvClipX  = -1.0f;
