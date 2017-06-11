@@ -5238,7 +5238,7 @@ void	FRONTEND_display()
 	UBYTE arrow=0;
 
 
-	DumpTracies();
+	//DumpTracies();
 
 
 #if 1

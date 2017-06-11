@@ -155,7 +155,7 @@ bool LoadWave(const char* fileName, unsigned char** buffer, unsigned int* size, 
 	SDL_AudioSpec spec;
 	if (!SDL_LoadWAV(fileName, &spec, buffer, size) || spec.format != AUDIO_S16)
 	{
-		TRACE("Could not load sound file: %s", fileName);
+		TRACE("Could not load sound file: %s\n", fileName);
 		return false;
 	}
 
@@ -517,7 +517,7 @@ void DCLL_stream_set_volume_range(float max_vol)
 }
 
 
-#ifdef DEBUG
+#if 0
 
 #define NUM_TRACIES 16
 #define MAX_LENGTH_TRACIE 100
@@ -1017,6 +1017,11 @@ SLONG DCLL_stream_is_playing()
 {
 	ULONG   status;
 	HRESULT res;
+
+	if (!DCLL_stream_dsb)
+	{
+		return FALSE;
+	}
 
 	if (DCLL_stream_command == DCLL_STREAM_COMMAND_START_NEW_SOUND)
 	{

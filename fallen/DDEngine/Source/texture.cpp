@@ -1571,7 +1571,7 @@ LOADED_THIS_MANY_TEXTURES(3);
 
 
 #ifndef TARGET_DC
-#if 1
+#if 0
 	// Load and bin a load of textures used by the DC, but not the PC.
 	// This makes sure they get converted to MVQ format.
 	D3DTexture *pTex;

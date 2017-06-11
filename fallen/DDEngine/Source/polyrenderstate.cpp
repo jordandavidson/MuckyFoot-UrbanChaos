@@ -1753,7 +1753,7 @@ extern int iPolyNumPagesRender;
 #endif
 
 #ifndef TARGET_DC
-#ifdef _DEBUG
+#if 0
 	for (int ii = 0; ii < POLY_NUM_PAGES; ii++)
 	{
 		if (char* err = POLY_Page[ii].RS.Validate())

@@ -7305,7 +7305,7 @@ void AENG_draw_city()
 	ANNOYINGSCRIBBLECHECK;
 
 
-	DumpTracies();
+	//DumpTracies();
 
 
 	SLONG i;
