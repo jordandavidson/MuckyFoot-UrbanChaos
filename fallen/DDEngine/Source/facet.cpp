@@ -3880,7 +3880,7 @@ draw_the_facet_common:;
 
 // Can't do these for release yet - no glowing windows, and the fog doesn't work.
 // Fog works, and Mark says he's done the glowing windows. Hooray!
-#define DO_SUPERFACETS_PLEASE_BOB defined
+//#define DO_SUPERFACETS_PLEASE_BOB defined
 
 
 #ifdef DO_SUPERFACETS_PLEASE_BOB
