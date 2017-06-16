@@ -652,7 +652,7 @@ void PolyPage::DrawSinglePoly(PolyPoly* poly, IDirect3DDevice3* dev)
 	}
 
 #if USE_D3D_VBUF
-//	dev->DrawIndexedPrimitiveVB(D3DPT_TRIANGLELIST, m_VB, IxBuffer, dst - IxBuffer, D3DDP_DONOTUPDATEEXTENTS | D3DDP_DONOTCLIP | D3DDP_DONOTLIGHT);
+	dev->DrawIndexedPrimitiveVB(D3DPT_TRIANGLELIST, m_VB, IxBuffer, dst - IxBuffer, D3DDP_DONOTUPDATEEXTENTS | D3DDP_DONOTCLIP | D3DDP_DONOTLIGHT);
 #endif
 }
 
@@ -851,7 +851,7 @@ void PolyPage::MergeSortIteration(ULONG sort_len)
 {
 	ULONG		ii;
 	ULONG		set_len = sort_len * 2;
-	ULONG		limit = m_PolyBufUsed - set_len;	// inclusive
+	ULONG		limit = set_len <= m_PolyBufUsed ? m_PolyBufUsed - set_len : 0;	// inclusive
 	PolyPoly*	src = m_PolyBuffer;
 	PolyPoly*	dst = m_PolySortBuffer;
 
