@@ -545,7 +545,7 @@ void D3DTexture::BeginLoading()
 	EmbedTexture = NULL;
 	EmbedOffset = 0;
 
-#if USE_FANCY_TEXTURE_PAGES_PLEASE_BOB
+#if 0
 	//if ( !m_bTexturePagesInitialised )
 
 

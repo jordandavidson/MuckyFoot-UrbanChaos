@@ -1676,7 +1676,7 @@ extern void POLY_ClearAllPages ( void );
 
 	// now sort the pages on texture
 	TRACE("Sorting texture pages: ");
-	for (ii = 0; ii < POLY_NUM_PAGES; ii++)
+	for (int ii = 0; ii < POLY_NUM_PAGES; ii++)
 	{
 		PageOrdered[ii] = false;
 	}
@@ -1688,6 +1688,7 @@ extern void POLY_ClearAllPages ( void );
 	SLONG	pos = 0;
 	while (pos < POLY_NUM_PAGES)
 	{
+		int ii;
 		for (ii = 0; ii < POLY_NUM_PAGES; ii++)
 		{
 			if (!PageOrdered[ii])	break;

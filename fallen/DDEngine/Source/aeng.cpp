@@ -10771,25 +10771,6 @@ extern	void	ANIMAL_draw(Thing *p_thing);
 
 	ANNOYINGSCRIBBLECHECK;
 
-	//
-	// The dirt.
-	// 
-
-	LOG_ENTER ( AENG_Draw_Dirt )
-
-	if(!INDOORS_INDEX||outside)
-	if(AENG_detail_dirt)
-		AENG_draw_dirt();
-
-	LOG_EXIT ( AENG_Draw_Dirt )
-
-
-	// Cope with some wacky internals.
-	POLY_set_local_rotation_none();
-	POLY_flush_local_rot();
-
-
-	ANNOYINGSCRIBBLECHECK;
 
 	// Grenades should be drawn here.
 	DrawGrenades();
@@ -11336,6 +11317,26 @@ extern	void	ANIMAL_draw(Thing *p_thing);
 	LOG_EXIT ( AENG_Poly_Flush )
 
 	BreakTime("Done final polygon flush");
+
+	ANNOYINGSCRIBBLECHECK;
+
+	//
+	// The dirt.
+	// 
+
+	LOG_ENTER(AENG_Draw_Dirt)
+
+		if (!INDOORS_INDEX || outside)
+			if (AENG_detail_dirt)
+				AENG_draw_dirt();
+
+	LOG_EXIT(AENG_Draw_Dirt)
+
+
+	// Cope with some wacky internals.
+	POLY_set_local_rotation_none();
+	POLY_flush_local_rot();
+
 
 	ANNOYINGSCRIBBLECHECK;
 
