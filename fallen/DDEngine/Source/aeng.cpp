@@ -4513,7 +4513,7 @@ UBYTE AENG_aa_buffer[AENG_AA_BUF_SIZE][AENG_AA_BUF_SIZE];
 #ifdef TARGET_DC
 #define	NEW_FLOOR defined
 #else
-#define	NEW_FLOOR defined
+//#define	NEW_FLOOR defined
 #endif
 
 #ifndef	NEW_FLOOR
