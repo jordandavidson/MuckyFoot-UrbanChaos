@@ -700,196 +700,6 @@ inline void POLY_perspective(POLY_Point *pt, UBYTE wibble_key)
 }
 
 
-
-
-
-#ifdef TARGET_DC
-
-
-
-void POLY_flush_local_rot ( void )
-{
-	m_iCurrentCombo = COMBO_DIRTY;
-	SetupFTRVMatrix ( COMBO_FALSE );
-}
-
-
-void POLY_transform_c(
-		float       world_x,
-		float       world_y,
-		float       world_z,
-		POLY_Point *pt,
-		bool		bResetTheFTRV)
-{
-
-
-	LOG_ENTER ( Poly_Transform_c )
-
-	if ( bResetTheFTRV )
-	{
-		SetupFTRVMatrix ( COMBO_FALSE );
-	}
-	else
-	{
-		EnsureFTRVMatrix ( COMBO_FALSE );
-	}
-	pt->x = world_x - POLY_cam_x;
-	pt->y = world_y - POLY_cam_y;
-	pt->z = world_z - POLY_cam_z;
-	_XDXform3dV( &(pt->x), &(pt->x) );
-
-#ifdef DEBUG
-	// Check the results.
-	POLY_Point mypt;
-	mypt.x = world_x - POLY_cam_x;
-	mypt.y = world_y - POLY_cam_y;
-	mypt.z = world_z - POLY_cam_z;
-
-	MATRIX_MUL(
-		POLY_cam_matrix,
-		mypt.x,
-		mypt.y,
-		mypt.z);
-
-	// If these trigger, you probably need to call POLY_set_local_rotation_none() sometime before.
-	ASSERT ( fabs ( mypt.x - pt->x ) < 0.01f );
-	ASSERT ( fabs ( mypt.y - pt->y ) < 0.01f );
-	ASSERT ( fabs ( mypt.z - pt->z ) < 0.01f );
-
-#endif
-
-
-	static int iCount = 0;
-	iCount++;
-
-
-	if (pt->z < POLY_Z_NEARPLANE)
-	{
-		pt->clip = POLY_CLIP_NEAR;
-	}
-	else if (pt->z > 1.0F)
-	{
-		pt->clip = POLY_CLIP_FAR;
-	}
-	else
-	{
-		//
-		// The z-range of the point is okay.
-		//
-
-		pt->Z = POLY_ZCLIP_PLANE / pt->z;
-
-		pt->X = POLY_screen_mid_x - POLY_screen_mul_x * pt->x * pt->Z;
-		pt->Y = POLY_screen_mid_y - POLY_screen_mul_y * pt->y * pt->Z;
-
-		//
-		// Set the clipping flags.
-		//
-
-		pt->clip = POLY_CLIP_TRANSFORMED;
-
-		if (pt->X < POLY_screen_clip_left)			pt->clip |= POLY_CLIP_LEFT;
-		else if (pt->X > POLY_screen_clip_right)	pt->clip |= POLY_CLIP_RIGHT;
-
-		if (pt->Y < POLY_screen_clip_top)			pt->clip |= POLY_CLIP_TOP;
-		else if (pt->Y > POLY_screen_clip_bottom)	pt->clip |= POLY_CLIP_BOTTOM;
-	}
-
-	LOG_EXIT ( Poly_Transform_c )
-}
-
-
-
-
-#else //#ifdef TARGET_DC
-
-
-
-
-
-
-void POLY_transform_c(
-		float       world_x,
-		float       world_y,
-		float       world_z,
-		POLY_Point *pt,
-		bool		bUnused)
-{
-	pt->x = world_x - POLY_cam_x;
-	pt->y = world_y - POLY_cam_y;
-	pt->z = world_z - POLY_cam_z;
-
-	MATRIX_MUL(
-		POLY_cam_matrix,
-		pt->x,
-		pt->y,
-		pt->z);
-
-#if 0
-	POLY_perspective(pt);
-#else
-	if (pt->z < POLY_Z_NEARPLANE)
-	{
-		pt->clip = POLY_CLIP_NEAR;
-	}
-	else
-	if (pt->z > 1.0F)
-	{
-		pt->clip = POLY_CLIP_FAR;
-	}
-	else
-	{
-		//
-		// The z-range of the point is okay.
-		//
-
-		pt->Z = POLY_ZCLIP_PLANE / pt->z;
-
-#if 1
-		pt->X = POLY_screen_mid_x - POLY_screen_mul_x * pt->x * pt->Z;
-		pt->Y = POLY_screen_mid_y - POLY_screen_mul_y * pt->y * pt->Z;
-
-		//
-		// Set the clipping flags.
-		//
-		pt->clip = POLY_CLIP_TRANSFORMED;
-
-		if (pt->X < POLY_screen_clip_left)			pt->clip |= POLY_CLIP_LEFT;
-		else if (pt->X > POLY_screen_clip_right)	pt->clip |= POLY_CLIP_RIGHT;
-
-		if (pt->Y < POLY_screen_clip_top)			pt->clip |= POLY_CLIP_TOP;
-		else if (pt->Y > POLY_screen_clip_bottom)	pt->clip |= POLY_CLIP_BOTTOM;
-#else
-		ASSERT(POLY_CLIP_LEFT == 1);
-		ASSERT(POLY_CLIP_RIGHT == 2);
-		ASSERT(POLY_CLIP_TOP == 4);
-		ASSERT(POLY_CLIP_BOTTOM == 8);
-
-		float	xml, rmx, ymt, bmy;
-
-		pt->clip = POLY_CLIP_TRANSFORMED;
-
-		pt->X = POLY_screen_mid_x - POLY_screen_mul_x * pt->x * pt->Z;
-		xml = pt->X - POLY_screen_clip_left;
-		rmx = POLY_screen_clip_right - pt->X;
-
-		pt->clip |= *((ULONG*)&xml) >> 31;
-		pt->clip |= (*((ULONG*)&rmx) >> 31) << 1;
-
-		pt->Y = POLY_screen_mid_y - POLY_screen_mul_y * pt->y * pt->Z;
-		ymt = pt->Y - POLY_screen_clip_top;
-		bmy = POLY_screen_clip_bottom - pt->Y;
-
-		pt->clip |= (*((ULONG*)&ymt) >> 31) << 2;
-		pt->clip |= (*((ULONG*)&bmy) >> 31) << 3;
-#endif
-	}
-#endif
-}
-
-#endif //#else //#ifdef TARGET_DC
-
-
 void POLY_transform_c_saturate_z(
 		float       world_x,
 		float       world_y,
@@ -1170,116 +980,6 @@ void POLY_set_local_rotation_none ( void )
 	LOG_EXIT ( Poly_set_local_rotation )
 }
 
-
-#ifdef TARGET_DC
-
-void POLY_transform_using_local_rotation_c(
-		float       local_x,
-		float       local_y,
-		float       local_z,
-		POLY_Point *pt)
-{
-	LOG_ENTER ( Poly_transform_using_local_rotation_c )
-
-#if 0
-	pt->x = local_x;
-	pt->y = local_y;
-	pt->z = local_z;
-
-	MATRIX_MUL(
-		POLY_cam_matrix_comb,
-		pt->x,
-		pt->y,
-		pt->z);
-
-	pt->x += POLY_cam_off_x;
-	pt->y += POLY_cam_off_y;
-	pt->z += POLY_cam_off_z;
-#else
-	float fVec[4];
-	EnsureFTRVMatrix ( COMBO_TRUE );
-	fVec[0] = local_x;
-	fVec[1] = local_y;
-	fVec[2] = local_z;
-	fVec[3] = 1.0f;
-
-	_XDXform4dV( fVec, fVec );
-
-	pt->x = fVec[0];
-	pt->y = fVec[1];
-	pt->z = fVec[2];
-#endif
-
-
-	static int iCount = 0;
-	iCount++;
-
-
-	if (pt->z < POLY_Z_NEARPLANE)
-	{
-		pt->clip = POLY_CLIP_NEAR;
-	}
-	else if (pt->z > 1.0F)
-	{
-		pt->clip = POLY_CLIP_FAR;
-	}
-	else
-	{
-		//
-		// The z-range of the point is okay.
-		//
-
-		pt->Z = POLY_ZCLIP_PLANE / pt->z;
-
-		pt->X = POLY_screen_mid_x - POLY_screen_mul_x * pt->x * pt->Z;
-		pt->Y = POLY_screen_mid_y - POLY_screen_mul_y * pt->y * pt->Z;
-
-		//
-		// Set the clipping flags.
-		//
-
-		pt->clip = POLY_CLIP_TRANSFORMED;
-
-		if (pt->X < POLY_screen_clip_left)			pt->clip |= POLY_CLIP_LEFT;
-		else if (pt->X > POLY_screen_clip_right)	pt->clip |= POLY_CLIP_RIGHT;
-
-		if (pt->Y < POLY_screen_clip_top)			pt->clip |= POLY_CLIP_TOP;
-		else if (pt->Y > POLY_screen_clip_bottom)	pt->clip |= POLY_CLIP_BOTTOM;
-	}
-	LOG_EXIT ( Poly_transform_using_local_rotation_c )
-
-}
-
-
-#else
-
-
-
-void POLY_transform_using_local_rotation_c(
-		float       local_x,
-		float       local_y,
-		float       local_z,
-		POLY_Point *pt)
-{
-	pt->x = local_x;
-	pt->y = local_y;
-	pt->z = local_z;
-
-	MATRIX_MUL(
-		POLY_cam_matrix_comb,
-		pt->x,
-		pt->y,
-		pt->z);
-
-	pt->x += POLY_cam_off_x;
-	pt->y += POLY_cam_off_y;
-	pt->z += POLY_cam_off_z;
-
-	POLY_perspective(pt);
-}
-
-
-#endif
 
 void POLY_transform_using_local_rotation_and_wibble(
 		float       local_x,
@@ -2641,15 +2341,6 @@ void POLY_add_quad_fast(POLY_Point *pt[4], SLONG page, SLONG backface_cull, SLON
 
 void POLY_add_triangle_slow(POLY_Point *pp[3], SLONG page, SLONG backface_cull, SLONG generate_clip_flags)
 {
-	ULONG counter_start;
-	ULONG counter_end;
-
-	_asm
-	{
-		rdtsc
-		mov	counter_start, eax
-	}
-
 	{
 		if (generate_clip_flags)
 		{
@@ -2675,16 +2366,6 @@ void POLY_add_triangle_slow(POLY_Point *pp[3], SLONG page, SLONG backface_cull, 
 			POLY_add_poly(pp, 3, page);
 		}
 	}
-
-	_asm
-	{
-		rdtsc
-		mov	counter_end, eax
-	}
-
-	extern ULONG AENG_poly_add_quad_time;
-
-	AENG_poly_add_quad_time += counter_end - counter_start;
 }
 
 //
@@ -2787,15 +2468,6 @@ void POLY_add_quad_slow(POLY_Point *pp[4], SLONG page, SLONG backface_cull, SLON
 
 void POLY_add_quad(POLY_Point *pp[4], SLONG page, SLONG backface_cull, SLONG generate_clip_flags)
 {
-	ULONG counter_start;
-	ULONG counter_end;
-
-	_asm
-	{
-		rdtsc
-		mov	counter_start, eax
-	}
-
 #if 0
 	if (!Keys[KB_F8])
 	{
@@ -2806,29 +2478,10 @@ void POLY_add_quad(POLY_Point *pp[4], SLONG page, SLONG backface_cull, SLONG gen
 	{
 		POLY_add_quad_fast(pp, page, backface_cull, generate_clip_flags);
 	}
-
-	_asm
-	{
-		rdtsc
-		mov	counter_end, eax
-	}
-
-	extern ULONG AENG_poly_add_quad_time;
-
-	AENG_poly_add_quad_time += counter_end - counter_start;
 }
 
 void POLY_add_triangle(POLY_Point *pp[4], SLONG page, SLONG backface_cull, SLONG generate_clip_flags)
 {
-	ULONG counter_start;
-	ULONG counter_end;
-
-	_asm
-	{
-		rdtsc
-		mov	counter_start, eax
-	}
-
 #if 0
 	if (!Keys[KB_F8])
 	{
@@ -2839,16 +2492,6 @@ void POLY_add_triangle(POLY_Point *pp[4], SLONG page, SLONG backface_cull, SLONG
 	{
 		POLY_add_triangle_fast(pp, page, backface_cull, generate_clip_flags);
 	}
-
-	_asm
-	{
-		rdtsc
-		mov	counter_end, eax
-	}
-
-	extern ULONG AENG_poly_add_quad_time;
-
-	AENG_poly_add_quad_time += counter_end - counter_start;
 }
 
 #endif //#ifndef TARGET_DC
@@ -4402,59 +4045,6 @@ SLONG POLY_inside_quad(
 	}
 }
 
-
-
-
-
-#if !defined(TARGET_DC)
-
-
-
-// ftol replacements
-extern "C"
-{
-
-// The Borg's original version
-
-__declspec(naked) long _ftol_borg(float arg)
-{
-	__asm
-	{
-		push	ebp
-		mov		ebp,esp
-		add		esp, -12
-		wait
-		fnstcw	WORD PTR [ebp-2]
-		wait
-		mov		ax, WORD PTR [ebp-2]
-		or		ah, 0ch
-		mov		WORD PTR [ebp-4], ax
-		fldcw	WORD PTR [ebp-4]
-		fistp	QWORD PTR [ebp-12]
-		fldcw	WORD PTR [ebp-2]
-		mov		eax, DWORD PTR [ebp-12]
-		mov		edx, DWORD PTR [ebp-8]
-		leave
-		ret
-	}
-}
-
-// Quick-and-dirty version
-
-__declspec(naked) long _ftol_fasteddie(float arg)
-{
-	static double	temp = 0;
-
-	__asm
-	{
-		fistp	QWORD PTR temp;
-		mov		eax,DWORD PTR temp
-		mov		edx,DWORD PTR temp+4
-		ret
-	}
-}
-}
-
 // from the Intel compiler:
 
 void POLY_transform(
@@ -4464,191 +4054,17 @@ void POLY_transform(
 		POLY_Point *pt,
 		bool		bUnused)
 {
-	static const float	_nearz	= POLY_Z_NEARPLANE;
-	static const float	_farz	= 1.0F;
-	static const float	_zplane = POLY_ZCLIP_PLANE;
+	pt->x = world_x - POLY_cam_x;
+	pt->y = world_y - POLY_cam_y;
+	pt->z = world_z - POLY_cam_z;
 
-	__asm
-	{
-		fld		world_x							// wx
-		mov		eax, pt
-		fsub	POLY_cam_x						// cx
-		mov		edx,eax
-		fld		world_z							// cx | wz
-		fld		world_y							// cx | wz | wy
-		fxch	st(2)							// wy | wz | cx
-		fstp	DWORD PTR [edx]					// wy | wz
-		fld		DWORD PTR [edx]					// wy | wz | cx
-		fxch	st(2)							// cx | wz | wy
-		fsub	POLY_cam_y						// cx | wz | cy
-		fld		_nearz							// cx | wz | cy | Zn
-		fxch	st(1)							// cx | wz | Zn | cy
-		fstp	DWORD PTR [edx+4]				// cx | wz | Zn
-		fld		DWORD PTR [edx+4]				// cx | wz | Zn | cy
-		fxch	st(2)							// cx | cy | Zn | wz
-		fsub	POLY_cam_z						// cx | cy | Zn | cz
-		fld		DWORD PTR [edx+4]				// cx | cy | Zn | cz | cy
-		fxch	st(1)							// cx | cy | Zn | cy | cz
-		fst		DWORD PTR [edx+8]				// cx | cy | Zn | cy | cz
-		fld		DWORD PTR POLY_cam_matrix + 32	// cx | cy | Zn | cy | cz | M[8]
-		fmul	st,st(1)						// cx | cy | Zn | cy | cz | cz * M[8]
-		fld		DWORD PTR [edx]					// cx | cy | Zn | cy | cz | cz * M[8] | cx
-		fmul	DWORD PTR POLY_cam_matrix		// cx | cy | Zn | cy | cz | cz * M[8] | cx * M[0]
-		fld		DWORD PTR POLY_cam_matrix + 8	// cx | cy | Zn | cy | cz | cz * M[8] | cx * M[0] | M[2]
-		fmul	st,st(3)						// cx | cy | Zn | cy | cz | cz * M[8] | cx * M[0] | cz * M[2]
-		fxch	st(6)							// cx | cz * M[2] | Zn | cy | cz | cz * M[8] | cx * M[0] | cy
-		fmul	DWORD PTR POLY_cam_matrix + 28	// cx | cz * M[2] | Zn | cy | cz | cz * M[8] | cx * M[0] | cy * M[7]
-		fxch	st(7)							// cy * M[7] | cz * M[2] | Zn | cy | cz | cz * M[8] | cx * M[0] | cx
-		fmul	DWORD PTR POLY_cam_matrix + 24	// cy * M[7] | cz * M[2] | Zn | cy | cz | cz * M[8] | cx * M[0] | cx * M[6]
-		faddp	st(7),st						// cx * M[6] + cy * M[7] | cz * M[2] | Zn | cy | cz | cz * M[8] | cx * M[0]
-		fxch	st(3)							// cx * M[6] + cy * M[7] | cz * M[2] | Zn | cx * M[0] | cz | cz * M[8] | cy
-		fmul	DWORD PTR POLY_cam_matrix + 4	// cx * M[6] + cy * M[7] | cz * M[2] | Zn | cx * M[0] | cz | cz * M[8] | cy * M[1]
-		faddp	st(3),st						// cx * M[6] + cy * M[7] | cz * M[2] | Zn | cx * M[0] + cy * M[1] | cz | cz * M[8]
-		faddp	st(5),st						// Z | cz * M[2] | Zn | cx * M[0] + cy * M[1] | cz
-		fmul	DWORD PTR POLY_cam_matrix + 20	// Z | cz * M[2] | Zn | cx * M[0] + cy * M[1] | cz * M[5]
-		fxch	st(2)							// Z | cz * M[2] | cz * M[5] | cx * M[0] + cy * M[1] | Zn
-		fcomp	st(4)							// Z | cz * M[2] | cz * M[5] | cx * M[0] + cy * M[1] (COMPARE WITH Z)
-		fnstsw	ax
-		faddp	st(2),st						// Z | X | cz * M[5]
-		fld		DWORD PTR POLY_cam_matrix + 12	// Z | X | cz * M[5] | M[3]
-		fmul	DWORD PTR [edx]					// Z | X | cz * M[5] | cx * M[3]
-		fld		DWORD PTR POLY_cam_matrix + 16	// Z | X | cz * M[5] | cx * M[3] | M[4]
-		fmul	DWORD PTR [edx+4]				// Z | X | cz * M[5] | cx * M[3] | cz * M[4]
-		faddp	st(1),st						// Z | X | cz * M[5] | cx * M[3] + cz * M[4]
-		faddp	st(1),st						// Z | X | Y
-		fxch	st(1)							// Z | Y | X
-		fstp	DWORD PTR [edx]					// Z | Y
-		fstp	DWORD PTR [edx+4]				// Z
-		fst		DWORD PTR [edx+8]				// Z
-		sahf
-		jbe		LABEL4
+	MATRIX_MUL(
+		POLY_cam_matrix,
+		pt->x,
+		pt->y,
+		pt->z);
 
-LABEL2:	// too near
-		fstp	st(0)
-		mov		eax,64
-		mov		WORD PTR [edx+24],ax
-	
-LABEL3: // return
-
-#ifdef _DEBUG
-		pop	edi
-		pop	esi
-		pop	ebx
-		mov	esp, ebp
-#endif
-		pop		ebp
-		ret
-
-LABEL4: // not too near
-		fld		_farz							// Z | Zf
-		fcomp									// Z
-		fnstsw	ax
-		sahf
-		jae		LABEL6
-
-LABEL5: // too far
-		fstp	st(0)
-		mov		eax,32
-		mov		WORD PTR [edx+24],ax
-
-
-#ifdef _DEBUG
-		pop	edi
-		pop	esi
-		pop	ebx
-		mov	esp, ebp
-#endif
-		pop		ebp
-		ret
-
-LABEL6: // not too near or too far
-		fdivr	DWORD PTR _zplane				// sz
-		fld		DWORD PTR [edx]					// sz | X
-		fld		DWORD PTR [edx+4]				// sz | X | Y
-		fxch	st(2)							// Y | X | sz
-		mov		eax,16
-		fmul	st(1),st						// Y | X * sz | sz
-		fstp	DWORD PTR [edx+20]				// Y | X * sz
-		fmul	POLY_screen_mul_x				// Y | X * sz * smx
-		fsubr	POLY_screen_mid_x				// Y | sx
-		fstp	DWORD PTR [edx+12]				// Y
-		fmul	DWORD PTR [edx+20]				// Y * sz
-		fld		POLY_screen_mid_y				// Y * sz | smy
-		fxch	st(1)							// smidy | Y * sz
-		fmul	POLY_screen_mul_y				// smidy | Y * sz * smy
-		fsubp	st(1),st						// sy
-		mov		WORD PTR [edx+24],ax
-		fstp	DWORD PTR [edx+16]
-		fld		POLY_screen_clip_left
-		fcomp	DWORD PTR [edx+12]
-		fnstsw	ax
-		fld		DWORD PTR [edx+12]				// sx
-		sahf
-		jbe		LABEL12
-
-LABEL7:	// left clip
-		fstp	st(0)
-		movzx	eax,WORD PTR [edx+24]
-		or		eax,1
-		mov		WORD PTR [edx+24],ax
-
-LABEL8: // try top clip
-		fld		DWORD PTR [edx+16]				// sy
-		fld		POLY_screen_clip_top			// sy | top
-//		fldz
-		fcomp									// sy
-		fnstsw	ax
-		sahf
-		jbe		LABEL10
-
-LABEL9: // top clip
-		fstp	st(0)
-		movzx	eax,WORD PTR [edx+24]
-		or		eax,4
-		mov		WORD PTR [edx+24],ax
-
-
-#ifdef _DEBUG
-		pop	edi
-		pop	esi
-		pop	ebx
-		mov	esp, ebp
-#endif
-		pop		ebp
-		ret
-
-LABEL10: // try bottom clip
-		fcomp	POLY_screen_clip_bottom
-		fnstsw	ax
-		sahf
-		jbe		LABEL3
-
-LABEL11: // bottom clip
-		movzx	eax,WORD PTR [edx+24]
-		or		eax,8
-		mov		WORD PTR [edx+24],ax
-		
-#ifdef _DEBUG
-		pop	edi
-		pop	esi
-		pop	ebx
-		mov	esp, ebp
-#endif
-		pop		ebp
-		ret
-
-LABEL12: // try right clip
-		fcomp	POLY_screen_clip_right
-		fnstsw	ax
-		sahf
-		jbe		LABEL8
-
-LABEL13: // right clip
-		movzx	eax,WORD PTR [edx+24]
-		or		eax,2
-		mov		WORD PTR [edx+24],ax
-		jmp		LABEL8
-	}
+	POLY_perspective(pt);
 }
 
 void POLY_transform_using_local_rotation(
@@ -4657,249 +4073,24 @@ void POLY_transform_using_local_rotation(
 		float       local_z,
 		POLY_Point *pt)
 {
-	static const float	_nearz	= POLY_Z_NEARPLANE;
-	static const float	_farz	= 1.0F;
-	static const float	_zplane = POLY_ZCLIP_PLANE;
+	pt->x = local_x;
+	pt->y = local_y;
+	pt->z = local_z;
 
-	__asm
-	{
-//		push	ebx
-		mov		edx,pt
-		mov		eax,local_y
-		mov		ecx,local_z
-		fld		local_z								// lz
-		fld		local_z								// lz | lz
-		fld		local_z								// lz | lz | lz
-		mov		ebx,local_x
-		mov		DWORD PTR [edx+4],eax	// <- ly
-		fld		DWORD PTR [edx+4]					// lz | lz | lz | ly
-		mov		DWORD PTR [edx+8],ecx	// <- lz
-		mov		DWORD PTR [edx],ebx		// <- lx
-		fmul	DWORD PTR POLY_cam_matrix_comb + 4	// lz | lz | lz | ly * M[1]
-		fld		DWORD PTR [edx]						// lz | lz | lz | ly * M[1] | lx
-		fmul	DWORD PTR POLY_cam_matrix_comb		// lz | lz | lz | ly * M[1] | lx * M[0]
-		faddp	st(1),st							// lz | lz | lz | ly * M[1] + lx * M[0]
-		fld		DWORD PTR POLY_cam_matrix_comb + 12	// lz | lz | lz | ly * M[1] + lx * M[0] | M[3]
-		fmul	DWORD PTR [edx]						// lz | lz | lz | ly * M[1] + lx * M[0] | lx * M[3]
-		fld		DWORD PTR POLY_cam_matrix_comb + 24	// lz | lz | lz | ly * M[1] + lx * M[0] | lx * M[3] | M[6]
-		fmul	DWORD PTR [edx]						// lz | lz | lz | ly * M[1] + lx * M[0] | lx * M[3] | lx * M[6]
-		fld		DWORD PTR POLY_cam_matrix_comb + 16	// lz | lz | lz | ly * M[1] + lx * M[0] | lx * M[3] | lx * M[6] | M[4]
-		fmul	DWORD PTR [edx+4]					// lz | lz | lz | ly * M[1] + lx * M[0] | lx * M[3] | lx * M[6] | ly * M[4]
-		faddp	st(2),st							// lz | lz | lz | ly * M[1] + lx * M[0] | lx * M[3] + ly * M[4] | lx * M[6]
-		fxch	st(5)								// lx * M[6] | lz | lz | ly * M[1] + lx * M[0] | lx * M[3] + ly * M[4] | lz
-		fmul	DWORD PTR POLY_cam_matrix_comb + 8	// lx * M[6] | lz | lz | ly * M[1] + lx * M[0] | lx * M[3] + ly * M[4] | lz * M[2]
-		faddp	st(2),st							// lx * M[6] | lz | lz | rx | lx * M[3] + ly * M[4]
-		fld		DWORD PTR POLY_cam_matrix_comb + 28	// lx * M[6] | lz | lz | rx | lx * M[3] + ly * M[4] | M[7]
-		fmul	DWORD PTR [edx+4]					// lx * M[6] | lz | lz | rx | lx * M[3] + ly * M[4] | ly * M[7]
-		faddp	st(5),st							// lx * M[6] + ly * M[7] | lz | lz | rx | lx * M[3] + ly * M[4]
-		fld		DWORD PTR _nearz					// lx * M[6] + ly * M[7] | lz | lz | rx | lx * M[3] + ly * M[4] | Zn
-		fxch	st(3)								// lx * M[6] + ly * M[7] | lz | Zn | rx | lx * M[3] + ly * M[4] | lz
-		fmul	DWORD PTR POLY_cam_matrix_comb + 20	// lx * M[6] + ly * M[7] | lz | Zn | rx | lx * M[3] + ly * M[4] | lz * M[5]
-		faddp	st(1),st							// lx * M[6] + ly * M[7] | lz | Zn | rx | ry
-		fxch	st(3)								// lx * M[6] + ly * M[7] | ry | Zn | rx | lz
-		fmul	DWORD PTR POLY_cam_matrix_comb + 32	// lx * M[6] + ly * M[7] | ry | Zn | rx | lz * M[8]
-		faddp	st(4),st							// rz | ry | Zn | rx
-		fstp	DWORD PTR [edx]						// rz | ry | Zn
-		fld		DWORD PTR [edx]						// rz | ry | Zn | rx
-		fxch	st(3)								// rx | ry | Zn | rz
-		fstp	DWORD PTR [edx+8]					// rx | ry | Zn
-		fld		DWORD PTR [edx+8]					// rx | ry | Zn | rz
-		fxch	st(2)								// rx | rz | Zn | ry
-		fstp	DWORD PTR [edx+4]					// rx | rz | Zn
-		fld		DWORD PTR [edx+4]					// rx | rz | Zn | ry
-		fxch	st(3)								// ry | rz | Zn | rx
-		fadd	DWORD PTR POLY_cam_off_x			// ry | rz | Zn | trx
-		fstp	DWORD PTR [edx]						// ry | rz | Zn
-		fxch	st(2)								// Zn | rz | ry
-		fadd	DWORD PTR POLY_cam_off_y			// Zn | rz | try
-		fstp	DWORD PTR [edx+4]					// Zn | rz
-		fadd	DWORD PTR POLY_cam_off_z			// Zn | trz
-		fxch	st(1)								// trz | Zn
-		fcomp										// trz
-		fnstsw	ax
-		fst		DWORD PTR [edx+8]					// trz
-		sahf
-		jbe		LABEL4
+	MATRIX_MUL(
+		POLY_cam_matrix_comb,
+		pt->x,
+		pt->y,
+		pt->z);
 
-LABEL2:
-		fstp	st(0)								// <empty>
-		mov		eax,64
-		mov		WORD PTR [edx+24],ax
+	pt->x += POLY_cam_off_x;
+	pt->y += POLY_cam_off_y;
+	pt->z += POLY_cam_off_z;
 
-LABEL3:
-		pop		ebx
-
-#ifdef _DEBUG
-		pop	edi
-		pop	esi
-		pop	ebx
-		mov	esp, ebp
-#endif
-		pop		ebp
-		ret
-
-LABEL4:
-		fld		_farz								// trz | Zf
-		fcomp										// trz
-		fnstsw	ax
-		sahf
-		jae		LABEL6
-
-LABEL5:
-		fstp	st(0)
-		mov		eax,32
-		mov		WORD PTR [edx+24],ax
-		
-		pop		ebx
-
-#ifdef _DEBUG
-		pop	edi
-		pop	esi
-		pop	ebx
-		mov	esp, ebp
-#endif
-		pop		ebp
-		ret
-
-LABEL6:
-		fdivr	_zplane								// sz
-		fld		DWORD PTR [edx]						// sz | trx
-		fld		DWORD PTR [edx+4]					// sz | trx | try
-		fxch	st(2)								// try | trx | sz
-		mov		eax,16
-		fmul	st(1),st							// try | trx * sz | sz
-		fstp	DWORD PTR [edx+20]					// try | trx * sz
-		fmul	POLY_screen_mul_x					// try | trx * sz * smx
-		fsubr	POLY_screen_mid_x					// try | sx
-		fstp	DWORD PTR [edx+12]					// try
-		fmul	DWORD PTR [edx+20]					// try * sz
-		fld		POLY_screen_mid_y					// try * sz | smidy
-		fxch	st(1)								// smidy | try * sz
-		fmul	POLY_screen_mul_y					// smidy | try * sz * smy
-		fsubp	st(1),st							// sy
-		mov		WORD PTR [edx+24],ax
-		fstp	DWORD PTR [edx+16]					// <empty>
-		fld		POLY_screen_clip_left
-		fcomp	DWORD PTR [edx+12]
-		fnstsw	ax
-		fld		DWORD PTR [edx+12]					// sx
-		sahf
-		jbe		LABEL12
-
-LABEL7:
-		fstp	st(0)
-		movzx	eax,WORD PTR [edx+24]
-		or		eax,1
-		mov		WORD PTR [edx+24],ax
-
-LABEL8:
-		fld		DWORD PTR [edx+16]					// sy
-		fld		POLY_screen_clip_top				// sy | top
-		fcomp										// sy
-		fnstsw	ax
-		sahf
-		jbe		LABEL10
-
-LABEL9:
-		fstp	st(0)
-		movzx	eax,WORD PTR [edx+24]
-		or		eax,4
-		mov		WORD PTR [edx+24],ax
-		pop		ebx
-
-#ifdef _DEBUG
-		pop	edi
-		pop	esi
-		pop	ebx
-		mov	esp, ebp
-#endif
-		pop		ebp
-		ret
-
-LABEL10:
-		fcomp	POLY_screen_clip_bottom
-		fnstsw	ax
-		sahf
-		jbe		LABEL3
-
-LABEL11:
-		movzx	eax,WORD PTR [edx+24]
-		or		eax,8
-		mov		WORD PTR [edx+24],ax
-		pop		ebx
-
-#ifdef _DEBUG
-		pop	edi
-		pop	esi
-		pop	ebx
-		mov	esp, ebp
-#endif
-		pop		ebp
-		ret
-
-LABEL12:
-		fcomp	POLY_screen_clip_right
-		fnstsw	ax
-		sahf
-		jbe		LABEL8
-
-LABEL13:
-		movzx	eax,WORD PTR [edx+24]
-		or		eax,2
-		mov		WORD PTR [edx+24],ax
-		jmp		LABEL8
-	}
+	POLY_perspective(pt);
 }
 
 
-#else //#if !defined(TARGET_DC)
-
-
-// DC version.
-
-
-// These are all just wrapped up for now, just to get it working.
-
-long _ftol_borg(float arg)
-{
-	return ( (int)arg );
-}
-
-long _ftol_fasteddie(float arg)
-{
-	return ( (int)arg );
-}
-
-long _ftol(float arg)
-{
-	return ( (int)arg );
-}
-
-
-#if 0
-// Now done in poly.h and inlined.
-void POLY_transform(
-		float       world_x,
-		float       world_y,
-		float       world_z,
-		POLY_Point *pt,
-		bool		bUnused)
-{
-	POLY_transform_c(world_x,world_y,world_z,pt);
-}
-
-void POLY_transform_using_local_rotation(
-		float       local_x,
-		float       local_y,
-		float       local_z,
-		POLY_Point *pt)
-{
-	POLY_transform_using_local_rotation_c(local_x,local_y,local_z,pt);
-}
-#endif
-
-
-#endif //#else //#if !defined(TARGET_DC)
 
 
 

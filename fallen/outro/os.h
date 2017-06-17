@@ -34,7 +34,6 @@ void  OS_string       (CBYTE *fmt, ...);
 void  OS_reset_ticks  (void);
 SLONG OS_ticks        (void);
 void  OS_ticks_reset  (void);
-SLONG OS_processor_mhz(void);
 
 
 // ========================================================

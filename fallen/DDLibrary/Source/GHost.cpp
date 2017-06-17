@@ -467,7 +467,7 @@ BOOL	LibShellMessage(const char *pMessage, const char *pFile, ULONG dwLine)
 		case	IDIGNORE:
 			break;
 		case	IDRETRY:
-			_asm int 3;
+			DebugBreak();
 			break;
 	}
 

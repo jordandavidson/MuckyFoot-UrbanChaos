@@ -17,37 +17,10 @@
 
 #endif
 
-
-
-
-#if defined(TARGET_DC)
-
 static inline int ftol(float f)
 {
-	return ( (int)f );
+	return (int)f;
 }
-
-
-#else //#if defined(TARGET_DC)
-
-#ifndef PSX
-static inline int ftol(float f)
-{
-	int ans;
-
-	__asm
-	{
-		mov		eax,f
-		fld		f
-		fistp	ans
-	}
-
-	return ans;
-}
-#endif
-
-#endif //#else //#if defined(TARGET_DC)
-
 
 //
 // Only points further than 1/64'th of the draw range are drawn.

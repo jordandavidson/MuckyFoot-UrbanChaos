@@ -60,7 +60,7 @@
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <StringPooling>true</StringPooling>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <Optimization>Disabled</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <WarningLevel>Level3</WarningLevel>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
@@ -200,7 +200,6 @@
     <ClCompile Include="DDEngine\Source\superfacet.cpp" />
     <ClCompile Include="DDEngine\Source\Text.cpp" />
     <ClCompile Include="DDEngine\Source\texture.cpp" />
-    <ClCompile Include="DDEngine\Source\tom.cpp" />
     <ClCompile Include="DDEngine\Source\truetype.cpp" />
     <ClCompile Include="DDEngine\Source\vertexbuffer.cpp" />
     <ClCompile Include="DDEngine\Source\wibble.cpp" />

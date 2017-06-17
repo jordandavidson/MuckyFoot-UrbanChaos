@@ -153,62 +153,6 @@ extern void	ReleaseHardware(void);
 #else
 
 
-#ifndef TARGET_DC
-
-static inline void ftol_init(void)
-{
-	short control;
-
-	__asm
-	{
-		wait
-		fnstcw	control
-		wait
-		mov		ax, control
-		or		ah, 0Ch
-		mov		control, ax
-		fldcw	control
-	}
-}
-
-//
-// Converts a float to an int using the current rounding. For normal
-// C-style rounding, make sure you call ftol_init() at the start
-// of your program.
-//
-
-static inline int ftol(float f)
-{
-	int ans;
-
-	__asm
-	{
-		mov		eax,f
-		fld		f
-		fistp	ans
-	}
-
-	return ans;
-}
-
-#else //#ifndef TARGET_DC
-
-// Just use the standard C ones - perfectly good on DC.
-
-static inline void ftol_init(void)
-{
-}
-
-static inline int ftol(float f)
-{
-	return ( (int)f );
-}
-
-#endif //#else //#ifndef TARGET_DC
-
-
-
-
 // VerifyDirectX
 //
 // init DirectDraw and Direct3D and check they're OK
@@ -284,8 +228,6 @@ extern HINSTANCE hGlobalThisInst;
 
 SLONG main(UWORD argc, TCHAR *argv[])
 {
-	ftol_init();
-
 #ifdef TARGET_DC
 	// DC doesn't use relative names, only full path names.
 #ifdef FILE_PC

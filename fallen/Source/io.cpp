@@ -1479,65 +1479,6 @@ void	normalise_max_matrix(float fe_matrix[3][3],float *x,float *y,float *z)
 
 //************************************************************************************************
 //************************************************************************************************
-//!! JCL Delete Me!
-
-
-/*
-SLONG	jp_total = 0;
-SLONG	jpg[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-
-UBYTE	*jp_counts;
-
-void	jcl_setup()
-{
-	jp_counts = new UBYTE[256*256*256];
-	ASSERT(jp_counts);
-
-	ZeroMemory(jp_counts, 256*256*256);
-}
-
-void	jcl_process_offset_check(SLONG x, SLONG y, SLONG z)
-{
-	jp_total += 3;
-
-	SLONG	c0;
-
-	for (c0 = 0; c0 < 16; c0 ++)
-	{
-		if (abs(x) > (1 << c0)) jpg[c0]++;
-		if (abs(y) > (1 << c0)) jpg[c0]++;
-		if (abs(z) > (1 << c0)) jpg[c0]++;
-	}
-
-	if ((abs(x) < 127) &&
-		(abs(y) < 127) &&
-		(abs(z) < 127))
-	{
-		jp_counts[((x + 128) * 256 * 256) + ((y + 128) * 256) + (z + 128)] ++;
-	}
-}
-
-void	jcl_fini()
-{
-	SLONG	counts[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-	SLONG	c0;
-
-	for (c0 = 0; c0 < 256*256*256; c0++)
-	{
-		SLONG v = jp_counts[c0];
-		if (v > 15)
-			v = 15;
-
-		counts[v] ++;
-	}
-
-	__asm int 3;
-
-	delete [] jp_counts;
-}*/
-
-//************************************************************************************************
-//************************************************************************************************
 
 #ifndef PSX
 #ifndef TARGET_DC

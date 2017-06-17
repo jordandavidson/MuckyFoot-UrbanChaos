@@ -562,7 +562,7 @@ void MF_specular_spotlight(
 
 					bright *= len;
 
-					is->colour  = ftol(bright * (255.0F * it->shinstr));
+					is->colour  = (int)(bright * (255.0F * it->shinstr));
 					is->colour |= is->colour << 8;
 					is->colour |= is->colour << 8;
 				}

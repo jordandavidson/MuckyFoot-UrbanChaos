@@ -4804,26 +4804,10 @@ void PANEL_last()
 		float	strip;
 		SLONG	c;
 
-		extern ULONG AENG_draw_time;
-		extern ULONG AENG_poly_add_quad_time;
-
 #ifdef	STRIP_STATS
 extern	ULONG	strip_stats[];
 		if(strip_stats[0])
 			strip=(float)strip_stats[1]/(float)strip_stats[0];
-
-
-
-		sprintf(
-			timing,
-			"Frame time %d strip len %f",
-			AENG_draw_time >> 12,strip);
-		
-		FONT2D_DrawString(
-			timing,
-			50,
-			65,
-			0xffffff);
 
 		for(c=2;c<34;c++)
 		{
@@ -4840,17 +4824,6 @@ extern	ULONG	strip_stats[];
 
 		}
 #endif
-
-		sprintf(
-			timing,
-			"Poly add quad %d",
-			AENG_poly_add_quad_time >> 12);
-		
-		FONT2D_DrawString(
-			timing,
-			50,
-			80,
-			0xffffff);
 	}
 	#endif
 

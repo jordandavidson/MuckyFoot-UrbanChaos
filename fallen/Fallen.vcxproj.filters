@@ -537,9 +537,6 @@
     <ClCompile Include="DDEngine\Source\texture.cpp">
       <Filter>DDEngine\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DDEngine\Source\tom.cpp">
-      <Filter>DDEngine\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DDEngine\Source\truetype.cpp">
       <Filter>DDEngine\Source Files</Filter>
     </ClCompile>

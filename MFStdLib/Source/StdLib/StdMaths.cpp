@@ -89,54 +89,10 @@ nnyprimary:
 
 //---------------------------------------------------------------
 
-#ifndef TARGET_DC
-
-UWORD	ini_table[]	=
+SLONG Root(SLONG square)
 {
-	1,		2,		2,		4,
-	5,		8,		11,		16,
-	22,		32,		45,		64,
-	90,		128,	181,	256,
-	362,	512,	724,	1024,
-	1448,	2048,	2896,	4096,
-	5792,	8192,	11585,	16384,
-	23170,	32768,	46340,	65535
-};
-
-SLONG	Root(SLONG square)
-{
-	__asm
-	{
-		xor		ebx,ebx
-		mov		ecx,square
-		bsr		eax,ecx
-		je		done_it
-		movzx	ebx,ini_table[eax*2]
-do_it:
-		mov		eax,ecx
-		xor		edx,edx
-		div		ebx
-		cmp		eax,ebx
-		jge		done_it
-		add		ebx,eax
-		shr		ebx,1
-		jmp		do_it
-done_it:
-		mov		eax,ebx
-	}
+	return (int)sqrt(square);
 }
-
-#else //#ifndef TARGET_DC
-
-// Just use the standard rout for the moment - it uses a fast path anyway.
-SLONG Root ( SLONG square )
-{
-	return ( (int) sqrtf ( (float)square ) );
-}
-
-#endif //#else //#ifndef TARGET_DC
-
-
 
 //---------------------------------------------------------------
 

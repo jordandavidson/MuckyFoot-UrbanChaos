@@ -155,7 +155,7 @@ void			DebugText(CBYTE *error, ...);
 #define	LogText				DebugText
 #define	MFMessage			LibShellMessage
 #define	ERROR_MSG(e,m)		{if(!(e)) {LibShellMessage(m,__FILE__,__LINE__);}}
-//#define ASSERT(e)			{if (!(e)) { _asm{int 3} }else{/*TRACE("file %s line %d \n",__FILE__,__LINE__);*/}}
+//#define ASSERT(e)			{if (!(e)) { DebugBreak(); }else{/*TRACE("file %s line %d \n",__FILE__,__LINE__);*/}}
 #ifndef ASSERT
 #define ASSERT(e)			ERROR_MSG(e,"ASSERT TRIGGERED");
 #endif

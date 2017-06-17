@@ -1668,119 +1668,6 @@ void  OS_ticks_reset()
 	OS_game_start_tick_count = GetTickCount();
 }
 
-
-SLONG OS_mhz;
-
-//
-// Returns TRUE if the processor has support for the RDTSC instruction.
-// 
-
-SLONG OS_has_rdtsc(void)
-{
-	SLONG res;
-
-	_asm
-	{
-		mov		eax, 0
-		cpuid
-		mov		res, eax
-	}
-
-	if (res == 0)
-	{
-		//
-		// This is an old 486!
-		//
-
-		return FALSE;
-	}
-
-	//
-	// Check the processor feature info.
-	//
-
-	_asm
-	{
-		mov		eax, 1
-		cpuid
-		mov		res, edx
-	}
-
-	if (res & (1 << 4))
-	{
-		return TRUE;
-	}
-	else
-	{
-		return FALSE;
-	}
-}
-
-//
-// Returns the number of processor ticks since the processor was reset / 65536
-//
-
-ULONG OS_rdtsc(void)
-{
-	ULONG hi;
-	ULONG lo;
-
-	_asm
-	{
-		rdtsc
-		mov		hi, edx
-		mov		lo, eax
-	}
-
-	ULONG ans;
-
-	ans  = lo >> 16;
-	ans |= hi << 16;
-
-	return ans;
-}
-
-
-void OS_work_out_mhz(void)
-{
-	if (OS_has_rdtsc())
-	{
-		SLONG tick;
-		ULONG tsc1 = OS_rdtsc();
-
-		//
-		// Wait a second.
-		//
-
-		tick = OS_ticks();
-
-		while(OS_ticks() < tick + 1000);
-
-		ULONG tsc2 = OS_rdtsc();
-
-		float persec = float(tsc2 - tsc1);
-
-		persec *= 65536.0F / 1000000.0F;
-
-		OS_mhz = SLONG(persec);
-	}
-	else
-	{
-		//
-		// It must be a 486... lets say its 66Mhz and be hopeful.
-		//
-
-		OS_mhz = 66;
-	}
-}
-
-SLONG OS_processor_mhz(void)
-{
-	return OS_mhz;
-}
-
-
-
 // ========================================================
 //
 // MOUSE STUFF
@@ -2662,14 +2549,6 @@ int WINAPI WinMain(
 
 			OS_screen_width  = float(dimensions->right);
 			OS_screen_height = float(dimensions->bottom);
-
-			//
-			// Make the fast floating point to SLONG conversion macro work. It
-			// changes the default setting of the floating point unit to truncate
-			// instead of round-to-nearest.
-			//
-
-			ftol_init();
 
 			//
 			// Work out how to multi-texture
@@ -4036,14 +3915,6 @@ void OS_hack(void)
 
 	OS_screen_width  = float(RealDisplayWidth );
 	OS_screen_height = float(RealDisplayHeight);
-
-	//
-	// Make the fast floating point to SLONG conversion macro work. It
-	// changes the default setting of the floating point unit to truncate
-	// instead of round-to-nearest.
-	//
-
-	ftol_init();
 
 	//
 	// Work out how to multi-texture

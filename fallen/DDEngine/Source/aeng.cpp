@@ -137,37 +137,6 @@ static void ScribbleCheck ( void )
 
 
 
-#ifdef TARGET_DC
-
-
-#define AENG_rdtsc() 0
-#else
-ULONG AENG_rdtsc()
-{
-	ULONG hi;
-	ULONG lo;
-
-	_asm
-	{
-		rdtsc
-		mov		hi, edx
-		mov		lo, eax
-	}
-
-	ULONG ans;
-
-	ans  = lo >> 16;
-	ans |= hi << 16;
-	ans  = lo;
-
-	return ans;
-}
-#endif
-
-
-
-
-
 void	AENG_draw_far_facets(void);
 void AENG_draw_box_around_recessed_door(DFacet *df, SLONG inside_out);
 void AENG_get_rid_of_unused_dfcache_lighting(SLONG splitscreen);
@@ -15884,18 +15853,8 @@ void AENG_clear_viewport()
 SLONG AENG_drawing_a_warehouse;
 
 
-
-ULONG AENG_draw_time;
-ULONG AENG_poly_add_quad_time;
-
-
-
 void AENG_draw(SLONG draw_3d)
 {
-	ULONG start_rdtsc = AENG_rdtsc();
-
-	AENG_poly_add_quad_time = 0;
-
 	/*
 
 	if (Keys[KB_PPOINT])
@@ -16279,18 +16238,6 @@ extern void store_thing_data();
 	POLY_frame_init(FALSE, FALSE);
 #endif
 //#endif
-
-
-	ULONG end_rdtsc = AENG_rdtsc();
-
-	if (end_rdtsc > start_rdtsc)
-	{
-		//
-		// The counter hasn't wrapped...
-		//
-
-		AENG_draw_time = end_rdtsc - start_rdtsc;
-	}
 }
 
 
