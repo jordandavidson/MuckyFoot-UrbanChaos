@@ -1026,13 +1026,7 @@ void	draw_flames(SLONG x,SLONG y,SLONG z,SLONG lod,SLONG offset)
 	// Now moved to the actual callers instead.
 	SLONG lod_mul;
 
-#ifndef TARGET_DC
-	extern UBYTE sw_hack;
-
-	if (sw_hack || !AENG_detail_skyline)//||ShiftFlag)
-#else
 	if (!AENG_detail_skyline)//||ShiftFlag)
-#endif
 	{
 		lod_mul = 2;
 	}
@@ -3716,10 +3710,6 @@ extern DWORD g_dw3DStuffY;
 				g = NIGHT_amb_green << 0;
 				b = NIGHT_amb_blue  << 0;
 
-#ifndef TARGET_DC
-				extern UBYTE sw_hack;
-#endif
-
 				if (dprod > 0)
 				{
 					dr = NIGHT_amb_red   * dprod >> 15;
@@ -3762,15 +3752,6 @@ extern DWORD g_dw3DStuffY;
 					g = (g > p->counter) ? (g - p->counter) :  4;
 					b = (b > p->counter) ? (b - p->counter) :  3;
 				}
-
-#ifndef TARGET_DC
-				if (sw_hack)
-				{
-					r <<= 1;
-					g <<= 1;
-					b <<= 1;
-				}
-#endif
 
 				SATURATE(r, 0, 255);
 				SATURATE(g, 0, 255);
@@ -4157,10 +4138,6 @@ extern DIJOYSTATE the_state;
 		else
 			page+=FACE_PAGE_OFFSET;
 
-#ifndef TARGET_DC
-		extern UBYTE sw_hack;
-#endif
-
 		PolyPage *pa = &(POLY_Page[page]);
 		if ( !pa->RS.NeedsSorting() && ( FIGURE_alpha == 255 ) )
 		{
@@ -4282,10 +4259,6 @@ extern DIJOYSTATE the_state;
 		}
 		else
 			page+=FACE_PAGE_OFFSET;
-
-#ifndef TARGET_DC
-		extern UBYTE sw_hack;
-#endif
 
 		PolyPage *pa = &(POLY_Page[page]);
 		if ( !pa->RS.NeedsSorting() && ( FIGURE_alpha == 255 ) )
@@ -4455,10 +4428,6 @@ extern DIJOYSTATE the_state;
 				else
 					page+=FACE_PAGE_OFFSET;
 
-#ifndef TARGET_DC
-				extern UBYTE sw_hack;
-#endif
-
 				PolyPage *pa = &(POLY_Page[page]);
 #if USE_TOMS_ENGINE_PLEASE_BOB
 				if ( !pa->RS.NeedsSorting() && ( FIGURE_alpha == 255 ) )
@@ -4606,7 +4575,7 @@ extern DIJOYSTATE the_state;
 						POLY_Page[page].RS.SetTempTransparent();
 					}
 	#ifndef TARGET_DC
-					else if (the_display.GetDeviceInfo()->AdamiLightingSupported() && !sw_hack)
+					else if (the_display.GetDeviceInfo()->AdamiLightingSupported())
 	#else
 					else if (the_display.GetDeviceInfo()->AdamiLightingSupported())
 	#endif
@@ -4764,12 +4733,6 @@ extern DIJOYSTATE the_state;
 				else
 					page+=FACE_PAGE_OFFSET;
 				//ASSERT(TEXTURE_dontexist[page]==0);
-
-#ifndef TARGET_DC
-				extern UBYTE sw_hack;
-#endif
-
-
 
 				PolyPage *pa = &(POLY_Page[page]);
 
@@ -4931,7 +4894,7 @@ extern DIJOYSTATE the_state;
 
 
 	#ifndef TARGET_DC
-					else if (the_display.GetDeviceInfo()->AdamiLightingSupported() && !sw_hack)
+					else if (the_display.GetDeviceInfo()->AdamiLightingSupported())
 	#else
 					else if (the_display.GetDeviceInfo()->AdamiLightingSupported())
 	#endif

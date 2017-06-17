@@ -575,50 +575,6 @@ void TEXTURE_DC_pack_load_page(SLONG page)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-// Mark all standard textures as not-to-be-loaded in SOFTWARE mode.
-//
-
-void this_may_well_be_the_last_ever_function_call_put_into_the_game(void)
-{
-	SLONG i;
-
-	if (!SOFTWARE)
-	{
-		return;
-	}
-
-	for (i = 0; i < TEXTURE_NUM_STANDARD; i++)
-	{
-		TEXTURE_texture[i].DontBotherLoadingInSoftwareMode = TRUE;
-	}
-}
-
-
-
 //
 // The number of textures.
 //
@@ -1350,18 +1306,7 @@ LOADED_THIS_MANY_TEXTURES(5);
 	TEXTURE_texture[TEXTURE_page_barbwire  ].LoadTextureTGA(TEXTURE_EXTRA_DIR"barbed.tga", TEXTURE_page_barbwire);
 LOADED_THIS_MANY_TEXTURES(6);
 
-#ifdef TARGET_DC
 	TEXTURE_texture[TEXTURE_page_font2d    ].LoadTextureTGA(TEXTURE_EXTRA_DIR"multifontPC.tga", TEXTURE_page_font2d, FALSE);
-#else
-	if (SOFTWARE)
-	{
-		TEXTURE_texture[TEXTURE_page_font2d    ].LoadTextureTGA(TEXTURE_EXTRA_DIR"multifontPC640.tga", TEXTURE_page_font2d);
-	}
-	else
-	{
-		TEXTURE_texture[TEXTURE_page_font2d    ].LoadTextureTGA(TEXTURE_EXTRA_DIR"multifontPC.tga", TEXTURE_page_font2d, FALSE);
-	}
-#endif
 	TEXTURE_needed[TEXTURE_page_font2d] = 1;
 
 	//	TEXTURE_texture[TEXTURE_page_lcdfont   ].LoadTextureTGA(TEXTURE_EXTRA_DIR"font3.tga", TEXTURE_page_

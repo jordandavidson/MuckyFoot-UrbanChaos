@@ -1073,24 +1073,10 @@ void cable_draw(struct DFacet *p_facet)
 
 			if (POLY_valid_quad(pqp))
 			{
-#ifndef TARGET_DC
-				extern UBYTE sw_hack;
-
-				if (sw_hack)
-				{
-					qp[0].colour = pp[0].colour;
-					qp[1].colour = pp[0].colour;
-					qp[2].colour = pp[1].colour;
-					qp[3].colour = pp[1].colour;
-				}
-				else
-#endif
-				{
-					qp[0].colour = 0;
-					qp[1].colour = 0;
-					qp[2].colour = 0;
-					qp[3].colour = 0;
-				}
+				qp[0].colour = 0;
+				qp[1].colour = 0;
+				qp[2].colour = 0;
+				qp[3].colour = 0;
 
 				POLY_add_quad(pqp, POLY_PAGE_COLOUR, false, true);
 

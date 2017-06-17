@@ -2256,22 +2256,10 @@ void	FRONTEND_kibble_init() {
 	UWORD c0, densities[] = { 25, 255, 40, 10 };
 	Kibble*k;
 
-#ifndef TARGET_DC
-	if (SOFTWARE)
-	{
-		densities[0] = 20;
-		densities[1] = 175;
-		densities[2] = 30;
-		densities[3] = 10;
-	}
-	else
-#endif
-	{
-		densities[0] = 25;
-		densities[1] = 255;
-		densities[2] = 40;
-		densities[3] = 10;
-	}
+	densities[0] = 25;
+	densities[1] = 255;
+	densities[2] = 40;
+	densities[3] = 10;
 
 #ifdef TARGET_DC
 	// Allocate the kibble
@@ -2308,22 +2296,10 @@ void	FRONTEND_kibble_flurry() {
 
 	ASSERT ( kibble != NULL );
 
-#ifndef TARGET_DC
-	if (SOFTWARE)
-	{
-		densities[0] = 50;
-		densities[1] = 200;
-		densities[2] = 50;
-		densities[3] = 10;
-	}
-	else
-#endif
-	{
-		densities[0] = 125;
-		densities[1] = 512;
-		densities[2] = 125;
-		densities[3] = 10;
-	}
+	densities[0] = 125;
+	densities[1] = 512;
+	densities[2] = 125;
+	densities[3] = 10;
 
 	n=densities[menu_theme];
 
@@ -7793,13 +7769,6 @@ extern int g_iCheatNumber;
 
 	if (res == FE_CREDITS)
 	{
-		if (SOFTWARE && 0)
-		{
-			//
-			// This won't work in software... we need other credits :(
-			//
-		}
-		else
 		{
 
 #ifdef TARGET_DC

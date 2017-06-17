@@ -1574,8 +1574,6 @@ BEGIN
                     BS_AUTORADIOBUTTON | WS_GROUP,13,39,100,10
     CONTROL         "Use secondary 3D card",IDC_SECONDARY_3D,"Button",
                     BS_AUTORADIOBUTTON,13,52,100,10
-    CONTROL         "Use software rendering",IDC_SOFTWARE_3D,"Button",
-                    BS_AUTORADIOBUTTON,13,66,100,10
     GROUPBOX        "3D Card Selection ",IDC_STATIC_3DCARD,7,26,108,58
     GROUPBOX        "Number of Colours",IDC_STATIC_BITDEPTH,119,26,90,45
     CONTROL         "16-bit ""high"" colour",IDC_COLOURS_16,"Button",

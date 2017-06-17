@@ -113,7 +113,6 @@ class	D3DTexture
 #endif
 		HRESULT					Reload_TGA (void);
 		HRESULT					Reload_user(void);
-		BOOL					DontBotherLoadingInSoftwareMode;
 		BOOL					GreyScale;
 		BOOL					UserWantsAlpha;	// The user page needs an alpha-channel.
 #ifdef TEX_EMBED
@@ -153,7 +152,6 @@ class	D3DTexture
 #endif
 #endif
 													// IT WOULD FUCKING HELP IF SOME OF THESE ACTUALLY GOT SET UP WITH DEFAULTS
-													DontBotherLoadingInSoftwareMode = FALSE;
 													GreyScale = FALSE;
 													UserWantsAlpha = FALSE;
 													ID = -1;

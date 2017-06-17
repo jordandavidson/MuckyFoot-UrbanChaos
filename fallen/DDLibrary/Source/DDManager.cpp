@@ -1912,33 +1912,25 @@ D3DDeviceInfo	*DDDriverInfo::FindDevice	(
 	// Search mode list for best match
     while(current_device)
 	{
-		if(!SOFTWARE)
-		{
-			if(current_device->Match(the_guid)) 
-				return	current_device;
+		if(current_device->Match(the_guid)) 
+			return	current_device;
 
 
 	        
-			if(current_device->IsHardware())
-				if(!hardware_device)
-					hardware_device	=	current_device;
-	
-		}
+		if(current_device->IsHardware())
+			if(!hardware_device)
+				hardware_device	=	current_device;
 		
 		if(current_device->guid==IID_IDirect3DRGBDevice)
 			if(!rgb_device)
 			{
 				rgb_device		=	current_device;
-				if(SOFTWARE)
-					return	current_device; //added by MD to force software
 			}
 
 		if(current_device->guid==IID_IDirect3DMMXDevice)
 			if(!mmx_device)
 			{
 				mmx_device		=	current_device;
-				if(SOFTWARE)
-					return	current_device; //added by MD to force software
 			}
 
 		current_device	=	current_device->Next;
@@ -1998,14 +1990,11 @@ D3DDeviceInfo	*DDDriverInfo::FindDeviceSupportsMode	(
 	{
 		if(current_device->Match(the_guid))
 		{
-
-//			if(SOFTWARE==0 || !current_device->IsHardware()) //accept this mode if software not required or if it is software_required and not hardware
 			if(the_mode->ModeSupported(current_device))
 				return	current_device;
 		}
 		else if(current_device->IsHardware())
         {
-//			if(SOFTWARE==0) // if asking for software dont let any hardware drivers through the net
 			if(next_best_device)
 			{
 				if(the_mode->ModeSupported(current_device))

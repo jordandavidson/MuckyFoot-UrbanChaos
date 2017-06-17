@@ -896,7 +896,7 @@ SLONG	SetDisplay(ULONG width,ULONG height,ULONG depth)
 		return	-1;
 
 	//	Attempt to change the device to hardware.
-	if(!the_display.IsFullScreen()|| SOFTWARE)
+	if(!the_display.IsFullScreen())
 	{
 		result	=	the_display.ChangeDevice(&the_display.CurrDriver->hardware_guid,NULL);
 		if(FAILED(result))
@@ -1193,10 +1193,6 @@ HRESULT	Display::Init(void)
 {
 	HRESULT		result;
 	static bool	run_fmv = false;
-
-#ifndef TARGET_DC
-	SOFTWARE = (Video3DMode == 2) ? 1 : 0;
-#endif
 
 	if(!IsInitialised())
 	{
@@ -6059,7 +6055,6 @@ static void InitDialog(HWND hWnd)
 	SetDlgItemTextA(hWnd,IDC_STATIC_RES,XLAT_str(X_RESOLUTION));
 	SetDlgItemTextA(hWnd,IDC_PRIMARY_3D,XLAT_str(X_USE_PRIMARY));
 	SetDlgItemTextA(hWnd,IDC_SECONDARY_3D,XLAT_str(X_USE_SECONDARY));
-	SetDlgItemTextA(hWnd,IDC_SOFTWARE_3D,XLAT_str(X_USE_SOFTWARE));
 	SetDlgItemTextA(hWnd,IDC_COLOURS_16,XLAT_str(X_16BIT));
 	SetDlgItemTextA(hWnd,IDC_COLOURS_32,XLAT_str(X_24BIT));
 	SetDlgItemTextA(hWnd,IDC_NOSHOW,XLAT_str(X_DO_NOT_SHOW));
@@ -6069,7 +6064,6 @@ static void InitDialog(HWND hWnd)
 	// get windows
 	HWND	primary3D = GetDlgItem(hWnd, IDC_PRIMARY_3D);
 	HWND	secondary3D = GetDlgItem(hWnd, IDC_SECONDARY_3D);
-	HWND	software3D = GetDlgItem(hWnd, IDC_SOFTWARE_3D);
 
 	HWND	colour16 = GetDlgItem(hWnd, IDC_COLOURS_16);
 	HWND	colour32 = GetDlgItem(hWnd, IDC_COLOURS_32);
@@ -6082,19 +6076,9 @@ static void InitDialog(HWND hWnd)
 	EnableWindow(primary3D, is_primary);
 	EnableWindow(secondary3D, is_secondary);
 
-#ifdef VERSION_DEMO
-	EnableWindow(software3D, FALSE);
-#else
-	if (is_primary || is_secondary)	EnableWindow(software3D, FALSE);
-#endif
-
 	//
 	// Always have software available- just for now.
 	//
-
-#ifndef VERSION_DEMO
-	EnableWindow(software3D, TRUE);
-#endif
 
 	if (Video3DMode == 1 && !is_secondary)
 	{
@@ -6126,7 +6110,6 @@ static void InitDialog(HWND hWnd)
 
 	SendMessage(primary3D,   BM_SETCHECK, (Video3DMode == 0) ? BST_CHECKED : BST_UNCHECKED, 0);
 	SendMessage(secondary3D, BM_SETCHECK, (Video3DMode == 1) ? BST_CHECKED : BST_UNCHECKED, 0);
-	SendMessage(software3D,  BM_SETCHECK, (Video3DMode == 2) ? BST_CHECKED : BST_UNCHECKED, 0);
 
 	// set colour buttons
 	SendMessage(colour16, BM_SETCHECK, !VideoTrueColour ? BST_CHECKED : BST_UNCHECKED, 0);
@@ -6191,7 +6174,6 @@ static void FinishDialog(HWND hWnd)
 	// get windows
 	HWND	primary3D = GetDlgItem(hWnd, IDC_PRIMARY_3D);
 	HWND	secondary3D = GetDlgItem(hWnd, IDC_SECONDARY_3D);
-	HWND	software3D = GetDlgItem(hWnd, IDC_SOFTWARE_3D);
 
 	HWND	colour16 = GetDlgItem(hWnd, IDC_COLOURS_16);
 	HWND	colour32 = GetDlgItem(hWnd, IDC_COLOURS_32);
@@ -6354,67 +6336,6 @@ static BOOL CALLBACK dlgproc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 					SendMessage(res, CB_SETCURSEL, VideoRes, 0);
 
 					break;
-				}
-
-			case IDC_SOFTWARE_3D:
-
-				{
-					HWND colour16 = GetDlgItem(hWnd, IDC_COLOURS_16);
-					HWND colour32 = GetDlgItem(hWnd, IDC_COLOURS_32);
-					HWND res      = GetDlgItem(hWnd, IDC_RESOLUTION);
-
-					if (primary_driver->DriverFlags & DD_DRIVER_SUPPORTS_32BIT)
-					{
-						#ifdef NDEBUG
-
-						//
-						// Enable and diable the colour buttons.
-						//
-
-						EnableWindow(colour16, FALSE);
-						EnableWindow(colour32, TRUE);
-
-						if (SendMessage(colour16, BM_GETCHECK, 0, 0))
-						{
-							SendMessage(colour16, BM_SETCHECK, FALSE, 0);
-							SendMessage(colour32, BM_SETCHECK, TRUE,  0);
-						}
-
-						#else
-
-						//
-						// Enable all the colour buttons.
-						//
-
-						EnableWindow(colour16, TRUE);
-						EnableWindow(colour32, TRUE);
-
-						#endif
-					}
-					else
-					{
-						//
-						// We have to use 16-bit software :(
-						//
-
-						EnableWindow(colour16, TRUE);
-						EnableWindow(colour32, FALSE);
-
-						SendMessage(colour16, BM_SETCHECK, TRUE,  0);
-						SendMessage(colour32, BM_SETCHECK, FALSE, 0);
-
-					}
-
-					// set resolutions
-
-					SendMessage(res, CB_RESETCONTENT, 0,0);
-
-					SendMessage(res, CB_INSERTSTRING, -1, (LPARAM)"320 x 240");
-					SendMessage(res, CB_INSERTSTRING, -1, (LPARAM)"512 x 384");
-
-					SATURATE(VideoRes, 0, 1);
-
-					SendMessage(res, CB_SETCURSEL, VideoRes, 0);
 				}
 
 				break;

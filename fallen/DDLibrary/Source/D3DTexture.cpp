@@ -1575,35 +1575,6 @@ found_and_continue:;
 
 	#endif
 
-	if (the_manager.CurrDriver && (the_manager.CurrDriver->DriverFlags & DD_DRIVER_LOW_MEMORY))
-	{
-		if (strstr(texture_name, "multifont") ||
-			strstr(texture_name, "PCdisplay") ||
-			strstr(texture_name, "olyfont"))
-		{
-			//
-			// Don't halve these textures...
-			//
-		}
-		else
-		{
-			//
-			// Shall we halve the size of this texture? YEAH!
-			//
-
-#ifndef TARGET_DC
-			extern void SW_halfsize(TGA_Pixel *tga, SLONG size);
-
-			SW_halfsize(tga, ti.width);
-
-			ti.width  >>= 1;
-			ti.height >>= 1;
-
-			tga = (TGA_Pixel *)MemReAlloc((void*)tga, ti.width * ti.height * sizeof(TGA_Pixel));
-#endif
-		}
-	}
-
 	size = ti.width;
 	
 	//
@@ -4200,15 +4171,6 @@ HRESULT D3DTexture::Reload(void)
 			current_font	=	next_font;
 		}
 		FontList	=	NULL;
-	}
-
-	if (DontBotherLoadingInSoftwareMode)
-	{
-		//
-		// Hey- no use loading this texture if we ain't gonna use it!
-		//
-
-		return D3D_OK;
 	}
 
 	//

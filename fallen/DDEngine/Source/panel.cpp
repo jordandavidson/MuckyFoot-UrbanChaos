@@ -272,19 +272,9 @@ void PANEL_draw_press_button(SLONG x, SLONG y, SLONG size, SLONG frame)
 }
 #endif
 
-
-#ifndef TARGET_DC
-extern UBYTE sw_hack;
-#endif
-
 void	PANEL_draw_health_bar(SLONG x,SLONG y,SLONG percentage)
 {
-#ifndef TARGET_DC
-	if (!sw_hack)
-#endif
-	{
-		AENG_draw_rect(x,y,HEALTH_BAR_WIDTH,HEALTH_BAR_HEIGHT,0x000000,2,POLY_PAGE_COLOUR);
-	}
+	AENG_draw_rect(x,y,HEALTH_BAR_WIDTH,HEALTH_BAR_HEIGHT,0x000000,2,POLY_PAGE_COLOUR);
 
 	if(percentage<0)
 	{
@@ -696,10 +686,7 @@ void PANEL_draw_local_health(SLONG mx,SLONG my,SLONG mz,SLONG percentage,SLONG r
 
 	if(p1.IsValid())
 	{
-		if (!sw_hack)
-		{
-			POLY_add_rect(&p1, 54,4,POLY_PAGE_COLOUR,0);
-		}
+		POLY_add_rect(&p1, 54,4,POLY_PAGE_COLOUR,0);
 	}
 	else
 		return;
@@ -5299,19 +5286,13 @@ extern	ULONG	strip_stats[];
 				mb = &MAP_beacon[best_beacon];
 
 				extern CBYTE *EWAY_get_mess(SLONG index);
-#ifndef TARGET_DC
-				extern UBYTE  sw_hack;
 
-				if (!sw_hack)
-#endif
-				{
-					FONT2D_DrawString(
-						EWAY_get_mess(mb->index),
-						m_iPanelXPos + 12  + 2,		//12  + 2,
-						m_iPanelYPos - 23 + 2,		//457 + 2,
-						0x00000000,
-						256);
-				}
+				FONT2D_DrawString(
+					EWAY_get_mess(mb->index),
+					m_iPanelXPos + 12  + 2,		//12  + 2,
+					m_iPanelYPos - 23 + 2,		//457 + 2,
+					0x00000000,
+					256);
 
 				FONT2D_DrawString(
 					EWAY_get_mess(mb->index),

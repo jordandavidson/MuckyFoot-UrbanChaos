@@ -179,7 +179,6 @@
 #define IDC_CANT_INTERRUPT              1168
 #define IDC_PRIMARY_3D                  1170
 #define IDC_SECONDARY_3D                1171
-#define IDC_SOFTWARE_3D                 1172
 #define IDC_RESOLUTION                  1173
 #define IDC_COLOURS_16                  1174
 #define IDC_COLOURS_32                  1175

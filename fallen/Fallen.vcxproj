@@ -198,7 +198,6 @@
     <ClCompile Include="DDEngine\Source\sprite.cpp" />
     <ClCompile Include="DDEngine\Source\supercrinkle.cpp" />
     <ClCompile Include="DDEngine\Source\superfacet.cpp" />
-    <ClCompile Include="DDEngine\Source\sw.cpp" />
     <ClCompile Include="DDEngine\Source\Text.cpp" />
     <ClCompile Include="DDEngine\Source\texture.cpp" />
     <ClCompile Include="DDEngine\Source\tom.cpp" />
@@ -760,7 +759,6 @@
     <ClInclude Include="DDEngine\Headers\sprite.h" />
     <ClInclude Include="DDEngine\Headers\supercrinkle.h" />
     <ClInclude Include="DDEngine\Headers\superfacet.h" />
-    <ClInclude Include="DDEngine\Headers\sw.h" />
     <ClInclude Include="DDEngine\Headers\Text.h" />
     <ClInclude Include="DDEngine\Headers\texture.h" />
     <ClInclude Include="DDEngine\Headers\truetype.h" />

@@ -170,20 +170,7 @@ void FONT2D_init(SLONG font_id)
 	FONT2D_data = (MyArrayType *)MemAlloc ( sizeof ( TGA_Pixel ) * 256 * 256 );
 	ASSERT ( FONT2D_data != NULL );
 
-
-#ifdef TARGET_DC
 	sprintf(fname, "%s%s", TEXTURE_EXTRA_DIR, "multifontPC.tga");
-#else
-	if (SOFTWARE)
-	{	
-		sprintf(fname, "%s%s", TEXTURE_EXTRA_DIR, "multifontPC640.tga");
-	}
-	else
-	{
-		sprintf(fname, "%s%s", TEXTURE_EXTRA_DIR, "multifontPC.tga");
-	}
-#endif
-
 
 	ti = TGA_load(
 			fname,

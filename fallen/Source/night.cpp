@@ -3536,15 +3536,6 @@ void	calc_lighting__for_point(SLONG prim_x,SLONG prim_y,SLONG prim_z,NIGHT_Colou
 			green += nsl->green * bright >> 8;
 			blue  += nsl->blue  * bright >> 8;
 
-#ifndef TARGET_DC
-			if (SOFTWARE)
-			{
-				red   -= red   >> 2;
-				green -= green >> 2;
-				blue  -= blue  >> 2;
-			}
-#endif
-
 			SATURATE(red,   0, 255);
 			SATURATE(green, 0, 255);
 			SATURATE(blue,  0, 255);
@@ -3943,15 +3934,6 @@ void NIGHT_generate_walkable_lighting()
 				red   += nsl->red   * bright >> 8;
 				green += nsl->green * bright >> 8;
 				blue  += nsl->blue  * bright >> 8;
-
-#ifndef TARGET_DC
-				if (SOFTWARE)
-				{
-					red   -= red   >> 2;
-					green -= green >> 2;
-					blue  -= blue  >> 2;
-				}
-#endif
 
 				SATURATE(red,   0, 255);
 				SATURATE(green, 0, 255);

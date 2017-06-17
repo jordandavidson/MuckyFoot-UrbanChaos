@@ -19,7 +19,6 @@
 #include "renderstate.h"
 #include "polypage.h"
 #include "env.h"
-#include "sw.h"
 
 extern RenderState	DefRenderState;
 extern PolyPage		POLY_Page[POLY_NUM_PAGES];
@@ -178,8 +177,6 @@ int iPolyRenderStateFrameNum = 0;
 
 void POLY_init_render_states()
 {
-	SLONG sw_page;
-
 #if 0
 //#ifdef TARGET_DC
 	iPolyRenderStateFrameNum++;
@@ -234,10 +231,6 @@ void POLY_init_render_states()
 		else
 #endif //#ifdef TARGET_DC
 		{
-
-			sw_page = SW_PAGE_IGNORE;
-
-
 			// Default is on!
 			SET_RENDER_STATE(D3DRENDERSTATE_FOGENABLE,TRUE);
 
@@ -276,8 +269,6 @@ void POLY_init_render_states()
 					SET_RENDER_STATE(D3DRENDERSTATE_ALPHABLENDENABLE,TRUE);
 					SET_RENDER_STATE(D3DRENDERSTATE_SPECULARENABLE,TRUE);
 
-					sw_page = SW_PAGE_ALPHA;
-
 					break;
 
 				case POLY_PAGE_LASTPANEL_ADDALPHA:
@@ -291,8 +282,6 @@ void POLY_init_render_states()
 					SET_RENDER_STATE(D3DRENDERSTATE_SPECULARENABLE,TRUE);
 					SET_EFFECT(RS_AlphaPremult);
 
-					sw_page = SW_PAGE_ADDITIVE;
-
 					break;
 
 				case POLY_PAGE_LASTPANEL_ADD:
@@ -303,8 +292,6 @@ void POLY_init_render_states()
 					SET_RENDER_STATE(D3DRENDERSTATE_ALPHABLENDENABLE,TRUE);
 					SET_RENDER_STATE(D3DRENDERSTATE_SRCBLEND,D3DBLEND_ONE);
 					SET_RENDER_STATE(D3DRENDERSTATE_DESTBLEND,D3DBLEND_ONE);
-
-					sw_page = SW_PAGE_ADDITIVE;
 
 					break;
 
@@ -328,8 +315,6 @@ void POLY_init_render_states()
 					SET_RENDER_STATE(D3DRENDERSTATE_SRCBLEND,D3DBLEND_ONE);
 					SET_RENDER_STATE(D3DRENDERSTATE_DESTBLEND,D3DBLEND_ONE);
 
-					sw_page = SW_PAGE_ADDITIVE;
-
 					break;
 
 				case POLY_PAGE_LASTPANEL2_ADDALPHA:
@@ -341,8 +326,6 @@ void POLY_init_render_states()
 					SET_RENDER_STATE(D3DRENDERSTATE_SRCBLEND,D3DBLEND_SRCALPHA);
 					SET_RENDER_STATE(D3DRENDERSTATE_DESTBLEND,D3DBLEND_ONE);
 					SET_EFFECT(RS_AlphaPremult);
-
-					sw_page = SW_PAGE_ALPHA;
 
 					break;
 
@@ -366,8 +349,6 @@ void POLY_init_render_states()
 					SET_RENDER_STATE(D3DRENDERSTATE_SRCBLEND,D3DBLEND_SRCALPHA);
 					SET_RENDER_STATE(D3DRENDERSTATE_DESTBLEND,D3DBLEND_INVSRCALPHA);
 
-					sw_page = SW_PAGE_ALPHA;
-
 					break;
 
 				case POLY_PAGE_LITE_BOLT:
@@ -390,8 +371,6 @@ void POLY_init_render_states()
 					SET_RENDER_STATE(D3DRENDERSTATE_DESTBLEND,D3DBLEND_INVSRCALPHA);
 					SET_RENDER_STATE(D3DRENDERSTATE_ZWRITEENABLE,FALSE);
 					SET_RENDER_STATE(D3DRENDERSTATE_FOGENABLE,FALSE);
-
-					// sw_page = SW_PAGE_ALPHA;
 
 					break;
 
@@ -428,8 +407,6 @@ void POLY_init_render_states()
 				case POLY_PAGE_LADDER:
 					SET_TEXTURE((TEXTURE_page_ladder));
 					SET_RENDER_STATE(D3DRENDERSTATE_TEXTUREADDRESS,D3DTADDRESS_WRAP);
-
-					sw_page = SW_PAGE_NORMAL;
 
 					break;
 
@@ -559,8 +536,6 @@ void POLY_init_render_states()
 					SET_RENDER_STATE(D3DRENDERSTATE_ALPHAREF,0);
 					SET_RENDER_STATE(D3DRENDERSTATE_ALPHATESTENABLE,TRUE);
 
-					sw_page = SW_PAGE_MASKED;
-
 					break;
 
 				case POLY_PAGE_RUBBISH:
@@ -571,8 +546,6 @@ void POLY_init_render_states()
 					SET_RENDER_STATE(D3DRENDERSTATE_ALPHAFUNC,D3DCMP_NOTEQUAL);
 					SET_RENDER_STATE(D3DRENDERSTATE_ALPHAREF,0);
 					SET_RENDER_STATE(D3DRENDERSTATE_ALPHATESTENABLE,TRUE);
-
-					sw_page = SW_PAGE_ALPHA;
 
 					break;
 
@@ -770,8 +743,6 @@ void POLY_init_render_states()
 					SET_TEXTURE((TEXTURE_page_face1));
 					SET_RENDER_STATE(D3DRENDERSTATE_FOGENABLE,FALSE);
 
-					sw_page = SW_PAGE_ALPHA;	// So it'll be sorted to the front...
-
 					break;
 
 				case POLY_PAGE_FACE2:
@@ -779,8 +750,6 @@ void POLY_init_render_states()
 					SET_RENDER_STATE(D3DRENDERSTATE_TEXTUREMIN,D3DFILTER_NEAREST);
 					SET_TEXTURE((TEXTURE_page_face2));
 					SET_RENDER_STATE(D3DRENDERSTATE_FOGENABLE,FALSE);
-
-					sw_page = SW_PAGE_ALPHA;	// So it'll be sorted to the front...
 
 					break;
 
@@ -812,15 +781,11 @@ void POLY_init_render_states()
 					SET_RENDER_STATE(D3DRENDERSTATE_FOGENABLE,FALSE);
 					SET_NO_TEXTURE;
 
-					sw_page = SW_PAGE_ALPHA;
-
 					break;
 
 				case POLY_PAGE_COLOUR:
 					SET_RENDER_STATE(D3DRENDERSTATE_FOGENABLE,FALSE);
 					SET_NO_TEXTURE;
-
-					sw_page = SW_PAGE_MASKED;
 
 					break;
 
@@ -948,8 +913,6 @@ void POLY_init_render_states()
 					//SET_RENDER_STATE(D3DRENDERSTATE_FOGENABLE,FALSE);
 					SET_EFFECT(RS_AlphaPremult);
 
-					sw_page = SW_PAGE_ADDITIVE;
-
 					break;
 
 				case POLY_PAGE_SMOKE:
@@ -1030,8 +993,6 @@ void POLY_init_render_states()
 					SET_RENDER_STATE(D3DRENDERSTATE_SRCBLEND,D3DBLEND_SRCALPHA);
 					SET_RENDER_STATE(D3DRENDERSTATE_DESTBLEND,D3DBLEND_INVSRCALPHA);
 
-					sw_page = SW_PAGE_ALPHA;
-
 					break;
 
 				case POLY_PAGE_BIGBANG:
@@ -1044,8 +1005,6 @@ void POLY_init_render_states()
 					//SET_RENDER_STATE(D3DRENDERSTATE_FOGENABLE,FALSE);
 					SET_RENDER_STATE(D3DRENDERSTATE_TEXTUREADDRESS,D3DTADDRESS_WRAP);
 					SET_EFFECT(RS_InvAlphaPremult);
-
-					sw_page = SW_PAGE_ADDITIVE;
 							
 					break;
 
@@ -1072,8 +1031,6 @@ void POLY_init_render_states()
 					//SET_RENDER_STATE(D3DRENDERSTATE_TEXTUREADDRESS,D3DTADDRESS_WRAP);
 					SET_EFFECT(RS_InvAlphaPremult);
 
-					sw_page = SW_PAGE_ADDITIVE;
-
 					break;
 
 				case POLY_PAGE_BLOODSPLAT:
@@ -1084,8 +1041,6 @@ void POLY_init_render_states()
 					SET_RENDER_STATE(D3DRENDERSTATE_DESTBLEND,D3DBLEND_INVSRCALPHA);
 					SET_TEXTURE((TEXTURE_page_bloodsplat));
 					SET_RENDER_STATE(D3DRENDERSTATE_FOGENABLE,TRUE);
-
-					sw_page = SW_PAGE_ALPHA;
 
 					break;
 
@@ -1098,8 +1053,6 @@ void POLY_init_render_states()
 					SET_TEXTURE((TEXTURE_page_bloom1));
 					//SET_RENDER_STATE(D3DRENDERSTATE_FOGENABLE,FALSE);
 					SET_EFFECT(RS_AlphaPremult);
-
-					sw_page = SW_PAGE_ADDITIVE;
 
 					break;
 
@@ -1122,8 +1075,6 @@ void POLY_init_render_states()
 					SET_RENDER_STATE(D3DRENDERSTATE_DESTBLEND,D3DBLEND_ONE);
 					SET_TEXTURE((TEXTURE_page_snowflake));
 					//SET_RENDER_STATE(D3DRENDERSTATE_FOGENABLE,FALSE);
-
-					sw_page = SW_PAGE_ADDITIVE;
 
 					break;
 				case POLY_PAGE_HITSPANG:
@@ -1230,8 +1181,6 @@ void POLY_init_render_states()
 					SET_RENDER_STATE(D3DRENDERSTATE_FOGENABLE,FALSE);
 #endif
 
-					sw_page = SW_PAGE_ADDITIVE;
-
 					break;
 
 				case POLY_PAGE_MENULOGO:
@@ -1301,8 +1250,6 @@ void POLY_init_render_states()
 					SET_TEXTURE((TEXTURE_page_explode1));
 					//SET_RENDER_STATE(D3DRENDERSTATE_FOGENABLE,FALSE);
 
-					sw_page = SW_PAGE_ADDITIVE;
-
 					break;
 
 				case POLY_PAGE_EXPLODE2:
@@ -1332,8 +1279,6 @@ void POLY_init_render_states()
 					//SET_RENDER_STATE(D3DRENDERSTATE_FOGENABLE,FALSE);
 					SET_EFFECT(RS_AlphaPremult);
 
-					sw_page = SW_PAGE_ADDITIVE;
-
 					break;
 
 				case POLY_PAGE_EXPLODE2_ADDITIVE:
@@ -1348,8 +1293,6 @@ void POLY_init_render_states()
 					SET_TEXTURE((TEXTURE_page_explode2));
 					//SET_RENDER_STATE(D3DRENDERSTATE_FOGENABLE,FALSE);
 					SET_EFFECT(RS_AlphaPremult);
-
-					sw_page = SW_PAGE_ADDITIVE;
 
 					break;
 
@@ -1406,8 +1349,6 @@ void POLY_init_render_states()
 					SET_RENDER_STATE(D3DRENDERSTATE_DESTBLEND,D3DBLEND_INVSRCALPHA);
 					SET_TEXTURE((TEXTURE_page_smokecloud));
 					//SET_RENDER_STATE(D3DRENDERSTATE_FOGENABLE,FALSE);
-					
-					sw_page = SW_PAGE_ALPHA;
 
 					break;
 
@@ -1462,8 +1403,6 @@ void POLY_init_render_states()
 					SET_RENDER_STATE(D3DRENDERSTATE_TEXTUREADDRESS,D3DTADDRESS_WRAP);
 					SET_EFFECT(RS_InvAlphaPremult);
 
-					sw_page = SW_PAGE_ADDITIVE;
-
 					break;
 
 	#ifdef TARGET_DC
@@ -1516,8 +1455,6 @@ void POLY_init_render_states()
 
 					if (ii < TEXTURE_page_num_standard && !(draw_3d && (ii == 510 || ii == 511)))
 					{
-						sw_page = SW_PAGE_NORMAL;
-
 						SET_TEXTURE((ii));
 
 						if (POLY_page_flag[ii])
@@ -1550,8 +1487,6 @@ void POLY_init_render_states()
 									SET_RENDER_STATE(D3DRENDERSTATE_ALPHAREF,0);
 									SET_RENDER_STATE(D3DRENDERSTATE_ALPHATESTENABLE,TRUE);
 								}
-
-								sw_page = SW_PAGE_MASKED;
 							}
 
 							if (POLY_page_flag[ii] & POLY_PAGE_FLAG_WRAP)
@@ -1608,8 +1543,6 @@ void POLY_init_render_states()
 								SET_RENDER_STATE(D3DRENDERSTATE_ALPHABLENDENABLE,TRUE);
 								SET_RENDER_STATE(D3DRENDERSTATE_SRCBLEND,D3DBLEND_SRCALPHA);
 								SET_RENDER_STATE(D3DRENDERSTATE_DESTBLEND,D3DBLEND_INVSRCALPHA);
-
-								sw_page = SW_PAGE_MASKED;
 							}
 						}
 
@@ -1650,9 +1583,6 @@ void POLY_init_render_states()
 	*/
 					break;
 			}
-#ifndef TARGET_DC
-			SW_set_page(ii, sw_page);
-#endif
 		}
 
 

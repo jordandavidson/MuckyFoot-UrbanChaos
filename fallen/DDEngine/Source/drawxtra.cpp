@@ -834,12 +834,7 @@ void PYRO_draw_pyro(Thing *p_pyro) {
 extern	int AENG_detail_skyline;
 
 			int iNumFlames = 40;
-#ifndef TARGET_DC
-extern UBYTE sw_hack;
-			if (sw_hack || !AENG_detail_skyline)//||ShiftFlag)
-#else
 			if (!AENG_detail_skyline)//||ShiftFlag)
-#endif
 			{
 				iNumFlames *= 2;
 			}
@@ -2437,14 +2432,6 @@ void PYRO_draw_armageddon(Pyro *pyro)
 	SLONG and_1;
 	SLONG and_2;
 
-#ifndef TARGET_DC
-	if (SOFTWARE)
-	{
-		and_1 = 7;
-		and_2 = 7;
-	}
-	else
-#endif
 	{
 #ifdef TARGET_DC
 		// Ease off a bit.

@@ -23,7 +23,6 @@
 #include "crinkle.h"
 #include "night.h"
 #include "BreakTimer.h"
-#include "sw.h"
 #include "superfacet.h"
 
 
@@ -1906,13 +1905,6 @@ SLONG POLY_clip_against_side_Y(POLY_Point** rptr, float* dptr, SLONG count, POLY
 #endif //#ifndef TARGET_DC
 
 
-
-#ifndef TARGET_DC
-extern UBYTE sw_hack;
-#endif
-
-
-
 static float		s_DistBuffer[128];
 static POLY_Point*	s_PtrBuffer[128];
 
@@ -1984,63 +1976,6 @@ void POLY_add_poly(POLY_Point** poly, SLONG poly_points, SLONG page)
 		clip_or &= s_ClipMask;
 	}
 	
-#ifndef TARGET_DC
-	if (sw_hack)
-	{
-		SLONG R[16];
-		SLONG G[16];
-		SLONG B[16];
-		SLONG X[16];
-		SLONG Y[16];
-		SLONG Z[16];
-
-		SLONG fog;
-
-		SLONG fogout[16];
-
-		ASSERT(poly_points <= 16);
-
-		for (ii = 0; ii < poly_points; ii++)
-		{
-			fog = rptr[ii]->specular >> 24;
-
-			R[ii] = ((rptr[ii]->colour >> 16) & 0xff) * fog >> 8;
-			G[ii] = ((rptr[ii]->colour >>  8) & 0xff) * fog >> 8;
-			B[ii] = ((rptr[ii]->colour >>  0) & 0xff) * fog >> 8;
-
-			extern float not_private_smiley_xscale;
-			extern float not_private_smiley_yscale;
-
-			X[ii] = rptr[ii]->X * not_private_smiley_xscale;
-			Y[ii] = rptr[ii]->Y * not_private_smiley_yscale;
-			Z[ii] = rptr[ii]->z * 1024.0F;
-
-			fogout[ii] = (fog == 0);
-		}
-
-		//
-		// Add the fan a triangle at a time.
-		//
-
-		for (ii = 1; ii < poly_points - 1; ii++)
-		{
-			if (fogout[0] & fogout[ii] & fogout[ii + 1])
-			{
-				continue;
-			}
-
-			SW_add_triangle(
-				X[     0], Y[     0], Z[     0], R[     0],G[     0],B[     0], rptr[     0]->u * 256, rptr[     0]->v * 256,
-				X[ii + 0], Y[ii + 0], Z[ii + 0], R[ii + 0],G[ii + 0],B[ii + 0], rptr[ii + 0]->u * 256, rptr[ii + 0]->v * 256,
-				X[ii + 1], Y[ii + 1], Z[ii + 1], R[ii + 1],G[ii + 1],B[ii + 1], rptr[ii + 1]->u * 256, rptr[ii + 1]->v * 256,
-				page,
-				rptr[ii]->colour >> 24);
-		}
-
-		return;
-	}
-#endif
-
 #if _DEBUG
 	// check that clip flags are correctly set
 	for (ii = 0; ii < poly_points; ii++)

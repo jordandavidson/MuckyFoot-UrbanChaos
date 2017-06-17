@@ -1215,17 +1215,14 @@ extern	FONT2D_DrawString_3d(CBYTE*str, ULONG world_x, ULONG world_y,ULONG world_
 		//
 		// Draw the car shadow...
 		//
-		if(!SOFTWARE)
-		{
-			OVAL_add(
-				p_car->WorldPos.X                                                       >> 8,
-				p_car->WorldPos.Y - get_vehicle_body_offset(p_car->Genus.Vehicle->Type) >> 8,
-				p_car->WorldPos.Z                                                       >> 8,
-				float(veh_info[p_car->Genus.Vehicle->Type].shad_size    ) * 2.0F,
-				float(veh_info[p_car->Genus.Vehicle->Type].shad_elongate) * (1.0F / 64.0F),
-				float(p_car->Genus.Vehicle->Angle) * (2.0F * PI / 2048.0F),
-				OVAL_TYPE_SQUARE);
-		}
+		OVAL_add(
+			p_car->WorldPos.X                                                       >> 8,
+			p_car->WorldPos.Y - get_vehicle_body_offset(p_car->Genus.Vehicle->Type) >> 8,
+			p_car->WorldPos.Z                                                       >> 8,
+			float(veh_info[p_car->Genus.Vehicle->Type].shad_size    ) * 2.0F,
+			float(veh_info[p_car->Genus.Vehicle->Type].shad_elongate) * (1.0F / 64.0F),
+			float(p_car->Genus.Vehicle->Angle) * (2.0F * PI / 2048.0F),
+			OVAL_TYPE_SQUARE);
 
 		#endif
 
@@ -1237,7 +1234,7 @@ extern	FONT2D_DrawString_3d(CBYTE*str, ULONG world_x, ULONG world_y,ULONG world_
 		{
 			// headlights
 #ifndef PSX
-			if ( (!(NIGHT_flag & NIGHT_FLAG_DAYTIME)) && (!SOFTWARE))
+			if (!(NIGHT_flag & NIGHT_FLAG_DAYTIME))
 			{
 				static SLONG	xyz[5][3] = { -255,0,0, -254,12,16, -251,24,32, -247,36,48, -243,48,60 };
 

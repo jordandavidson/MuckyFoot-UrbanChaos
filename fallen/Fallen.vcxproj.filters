@@ -531,9 +531,6 @@
     <ClCompile Include="DDEngine\Source\superfacet.cpp">
       <Filter>DDEngine\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DDEngine\Source\sw.cpp">
-      <Filter>DDEngine\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DDEngine\Source\Text.cpp">
       <Filter>DDEngine\Source Files</Filter>
     </ClCompile>
@@ -1296,9 +1293,6 @@
       <Filter>DDEngine\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DDEngine\Headers\superfacet.h">
-      <Filter>DDEngine\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DDEngine\Headers\sw.h">
       <Filter>DDEngine\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DDEngine\Headers\Text.h">

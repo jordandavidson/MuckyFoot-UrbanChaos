@@ -73,7 +73,6 @@
 #include "animate.h"
 #include "oval.h"
 #include "crinkle.h"
-#include "sw.h"
 #include "..\headers\sound.h"
 
 #include "vertexbuffer.h"
@@ -177,11 +176,6 @@ void	AENG_draw_inside_floor(UWORD inside_index,UWORD inside_room,UBYTE fade);
 UBYTE	aeng_draw_cloud_flag = 1;
 UWORD	light_inside=0;
 UWORD	fade_black=1;
-#ifdef TARGET_DC
-#define sw_hack FALSE
-#else
-UBYTE   sw_hack;
-#endif
 
 #ifndef TARGET_DC
 UBYTE	cloud_data[32][32];
@@ -807,11 +801,6 @@ UBYTE *movie_data_upto;
 
 void AENG_init(void)
 {
-	extern void this_may_well_be_the_last_ever_function_call_put_into_the_game(void);
-
-	this_may_well_be_the_last_ever_function_call_put_into_the_game();
-
-
 	MESH_init();
 //	FONT2D_init();
 #ifndef TARGET_DC
@@ -8794,9 +8783,6 @@ extern	UBYTE	player_visited[16][128];
 
 #ifndef	NEW_FLOOR
 	if (AENG_detail_people_reflection)
-#ifndef TARGET_DC
-	if(!SOFTWARE)
-#endif
 	{
 		SLONG oldcolour  [4];
 		SLONG oldspecular[4];
@@ -9833,10 +9819,9 @@ extern HWND GEDIT_edit_wnd;
 								col,
 								fade,
 								oi->crumple);
-						if(!SOFTWARE)
-							SHAPE_prim_shadow(oi);
+						SHAPE_prim_shadow(oi);
 
-						if ((prim_objects[oi->prim].flag & PRIM_FLAG_GLARE)&& !SOFTWARE)
+						if ((prim_objects[oi->prim].flag & PRIM_FLAG_GLARE))
 						{
 							if (oi->prim == 230)
 							{
@@ -9848,7 +9833,7 @@ extern HWND GEDIT_edit_wnd;
 							}
 						}
 						else
-						if (!(NIGHT_flag & NIGHT_FLAG_DAYTIME) && !SOFTWARE) 
+						if (!(NIGHT_flag & NIGHT_FLAG_DAYTIME)) 
 						{
 
 							switch (oi->prim) 
@@ -10672,96 +10657,93 @@ extern	void	ANIMAL_draw(Thing *p_thing);
 
 	LOG_ENTER ( AENG_Draw_Oval_Shadows )
 
-	if(!SOFTWARE)
+	//
+	// Do oval shadows.
+	//
+
+	for (z = NGAMUT_lo_zmin; z <= NGAMUT_lo_zmax; z++)
 	{
-		//
-		// Do oval shadows.
-		//
-
-		for (z = NGAMUT_lo_zmin; z <= NGAMUT_lo_zmax; z++)
+		for (x = NGAMUT_lo_gamut[z].xmin; x <= NGAMUT_lo_gamut[z].xmax; x++)
 		{
-			for (x = NGAMUT_lo_gamut[z].xmin; x <= NGAMUT_lo_gamut[z].xmax; x++)
+			t_index = PAP_2LO(x,z).MapWho;
+
+			while(t_index)
 			{
-				t_index = PAP_2LO(x,z).MapWho;
+				p_thing = TO_THING(t_index);
 
-				while(t_index)
+				if (p_thing->Flags & FLAGS_IN_VIEW)
 				{
-					p_thing = TO_THING(t_index);
+					bool	draw = true;
 
-					if (p_thing->Flags & FLAGS_IN_VIEW)
+					for (int ii = 0; ii < shadow_person_upto; ii++)
 					{
-						bool	draw = true;
-
-						for (int ii = 0; ii < shadow_person_upto; ii++)
+						if (shadow_person[ii].p_person == p_thing)
 						{
-							if (shadow_person[ii].p_person == p_thing)
-							{
-								draw = false;
-								break;
-							}
-						}
-
-						if (draw)
-						{
-							switch(p_thing->Class)
-							{
-								case CLASS_PERSON:
-
-									{
-
-										SLONG px;
-										SLONG py;
-										SLONG pz;
-
-										calc_sub_objects_position(
-											p_thing,
-											p_thing->Draw.Tweened->AnimTween,
-											SUB_OBJECT_PELVIS,
-										   &px,
-										   &py,
-										   &pz);
-
-										px += p_thing->WorldPos.X >> 8;
-										py += p_thing->WorldPos.Y >> 8;
-										pz += p_thing->WorldPos.Z >> 8;
-
-										OVAL_add(
-											px,
-											py,
-											pz,
-											130);
-									}
-
-									break;
-
-								case CLASS_SPECIAL:
-
-									OVAL_add(
-										p_thing->WorldPos.X >> 8,
-										p_thing->WorldPos.Y >> 8,
-										p_thing->WorldPos.Z >> 8,
-										100);
-
-									break;
-
-								case CLASS_BARREL:
-
-									OVAL_add(
-										p_thing->WorldPos.X >> 8,
-										p_thing->WorldPos.Y >> 8,
-										p_thing->WorldPos.Z >> 8,
-										128);
-
-									break;
-
-								default:
-									break;
-							}
+							draw = false;
+							break;
 						}
 					}
-				
-					t_index = p_thing->Child;
+
+					if (draw)
+					{
+						switch(p_thing->Class)
+						{
+							case CLASS_PERSON:
+
+								{
+
+									SLONG px;
+									SLONG py;
+									SLONG pz;
+
+									calc_sub_objects_position(
+										p_thing,
+										p_thing->Draw.Tweened->AnimTween,
+										SUB_OBJECT_PELVIS,
+										&px,
+										&py,
+										&pz);
+
+									px += p_thing->WorldPos.X >> 8;
+									py += p_thing->WorldPos.Y >> 8;
+									pz += p_thing->WorldPos.Z >> 8;
+
+									OVAL_add(
+										px,
+										py,
+										pz,
+										130);
+								}
+
+								break;
+
+							case CLASS_SPECIAL:
+
+								OVAL_add(
+									p_thing->WorldPos.X >> 8,
+									p_thing->WorldPos.Y >> 8,
+									p_thing->WorldPos.Z >> 8,
+									100);
+
+								break;
+
+							case CLASS_BARREL:
+
+								OVAL_add(
+									p_thing->WorldPos.X >> 8,
+									p_thing->WorldPos.Y >> 8,
+									p_thing->WorldPos.Z >> 8,
+									128);
+
+								break;
+
+							default:
+								break;
+						}
+					}
 				}
+				
+				t_index = p_thing->Child;
 			}
 		}
 	}
@@ -14828,25 +14810,11 @@ void AENG_unlock()
 
 void AENG_flip()
 {
-#ifndef TARGET_DC
-	if (sw_hack)
-	{
-		SW_copy_to_bb();
-	}
-#endif
-
 	FLIP(NULL, DDFLIP_WAIT);	// PerMedia2 needs this, or else!
 }
 
 void AENG_blit()
 {
-#ifndef TARGET_DC
-	if (sw_hack)
-	{
-		SW_copy_to_bb();
-	}
-#endif
-
 	the_display.blit_back_buffer();
 }
 
@@ -15928,50 +15896,15 @@ void AENG_draw(SLONG draw_3d)
 
 	AENG_poly_add_quad_time = 0;
 
-
-
-#ifndef TARGET_DC
-	if (SOFTWARE)
-	{
-		//
-		// Leave dirt as it is. Turn everything else off.
-		//
-
-		AENG_detail_crinkles          = FALSE;
-		AENG_detail_stars             = FALSE;
-		AENG_detail_shadows           = FALSE;
-		AENG_detail_moon_reflection   = FALSE;
-		AENG_detail_people_reflection = FALSE;
-		AENG_detail_puddles           = FALSE;
-		AENG_detail_mist              = FALSE;
-		AENG_detail_rain              = FALSE;
-		AENG_detail_skyline           = FALSE;
-		AENG_detail_filter            = FALSE;
-	}
-#endif //#ifndef TARGET_DC
-
 	/*
 
 	if (Keys[KB_PPOINT])
 	{
 		Keys[KB_PPOINT] = 0;
 
-		sw_hack ^= TRUE;
-
-		if (sw_hack)
-		{
-			SW_reload_textures();
-
-			NIGHT_amb_red   >>= 1;
-			NIGHT_amb_green >>= 1;
-			NIGHT_amb_blue  >>= 1;
-		}
-		else
-		{
-			NIGHT_amb_red   <<= 1;
-			NIGHT_amb_green <<= 1;
-			NIGHT_amb_blue  <<= 1;
-		}
+		NIGHT_amb_red   <<= 1;
+		NIGHT_amb_green <<= 1;
+		NIGHT_amb_blue  <<= 1;
 
 		NIGHT_Colour amb_colour;
 
@@ -16001,15 +15934,6 @@ void AENG_draw(SLONG draw_3d)
 	CurDrawDistance = FC_cam[1].focus ? 16 : NormalDrawDistance;
 #endif
 
-#ifndef TARGET_DC
-	if (SOFTWARE)
-	{
-		CurDrawDistance = 16;
-	}
-#endif
-
-
-
 #ifdef TARGET_DC
 	fiddle_draw_distance_DC();
 #endif
@@ -16035,16 +15959,6 @@ void AENG_draw(SLONG draw_3d)
 	move_clouds();
 #endif
 	POLY_set_wibble(62, 137, 17, 178, 20, 25);
-
-#ifndef TARGET_DC
-	if (sw_hack)
-	{
-		SLONG width  = MIN(RealDisplayWidth,  SW_MAX_WIDTH);
-		SLONG height = MIN(RealDisplayHeight, SW_MAX_HEIGHT);
-
-		SW_init(width, height);
-	}
-#endif
 
 	AENG_clear_viewport();
 
@@ -16500,16 +16414,8 @@ void AENG_draw_box_around_recessed_door(DFacet *df, SLONG inside_out)
 		SWAP(df->z[0], df->z[1]);
 	}
 
-	if (sw_hack)
-	{
-		col_page = POLY_PAGE_COLOUR;
-		specular = 0xee000000;
-	}
-	else
-	{
-		col_page = POLY_PAGE_COLOUR_WITH_FOG;
-		specular = 0xff000000;
-	}
+	col_page = POLY_PAGE_COLOUR_WITH_FOG;
+	specular = 0xff000000;
 
 	//
 	// Create the points.

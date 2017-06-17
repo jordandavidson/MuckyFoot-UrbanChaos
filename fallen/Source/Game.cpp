@@ -169,7 +169,6 @@ extern BOOL allow_debug_keys;
 
 
 Game the_game;
-UBYTE	draw_software=0;
 UBYTE	VIOLENCE=VIOLENCE_ALLOWED;
 
 extern SLONG go_into_game;	// This is in attract.cpp If it is TRUE when we leave the loop, then attract goes into the game again.
@@ -2223,46 +2222,6 @@ round_again:;
 extern void envmap_specials(void);
 		envmap_specials();
 
-
-#ifndef TARGET_DC
-		extern UBYTE sw_hack;
-		extern void  SW_reload_textures(void);
-
-		if (SOFTWARE)
-		{
-			sw_hack = TRUE;
-			SW_reload_textures();
-
-			//
-			// Half the lighting everywhere...
-			//
-
-			SLONG i;
-
-			for (i = 0; i < NIGHT_slight_upto; i++)
-			{
-				NIGHT_slight[i].red   >>= 1;
-				NIGHT_slight[i].green >>= 1;
-				NIGHT_slight[i].blue  >>= 1;
-			}
-
-			NIGHT_amb_red   >>= 1;
-			NIGHT_amb_green >>= 1;
-			NIGHT_amb_blue  >>= 1;
-
-			NIGHT_Colour amb_colour;
-
-			amb_colour.red   = NIGHT_amb_red;
-			amb_colour.green = NIGHT_amb_green;
-			amb_colour.blue  = NIGHT_amb_blue;
-
-			NIGHT_get_d3d_colour(
-				amb_colour,
-			   &NIGHT_amb_d3d_colour,
-			   &NIGHT_amb_d3d_specular);
-		
-		}
-#endif //#ifndef TARGET_DC
 #endif
 
 		TRACE ( "game_loop init8\n" );
@@ -2685,9 +2644,7 @@ extern	void	do_packets(void);
 				break;
 			}
 		}
-#if !defined(PSX) && !defined(TARGET_DC)
-		sw_hack = FALSE;
-#endif
+
 		// end timing
 		BreakEnd("C:\\Windows\\Desktop\\BreakTimes.txt");	   
 

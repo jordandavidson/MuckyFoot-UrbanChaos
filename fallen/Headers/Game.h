@@ -329,7 +329,6 @@ typedef	struct
 
 
 extern	Game			the_game;
-extern	UBYTE			draw_software;
 
 extern	UBYTE			VIOLENCE;
 
@@ -338,12 +337,6 @@ extern	UBYTE			VIOLENCE;
 //
 // Multiplayer stuff
 //
-
-#ifdef TARGET_DC
-#define	SOFTWARE				0
-#else
-#define	SOFTWARE				draw_software
-#endif
 
 #define	USER_INTERFACE			the_game.UserInterface
 #define	NO_PLAYERS				CNET_num_players
