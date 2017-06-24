@@ -2079,7 +2079,7 @@ void	do_cutscene_setup(EventPoint *the_ep)
 	while(1)
 	{
 //		MFX_set_listener(cam_x,cam_y,cam_z,-(cam_yaw),0,-(cam_pitch));
-		MFX_render();
+		MFX_update();
 		if(!PeekMessage(&msg, NULL, NULL, NULL, PM_NOREMOVE))
 		{
 			// No messages pending- send a user message so we can

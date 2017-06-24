@@ -3952,5 +3952,5 @@ void OS_sound_loop_start()
 void OS_sound_loop_process()
 {
 	MUSIC_mode_process();
-	MFX_render();
+	MFX_update();
 }

@@ -550,7 +550,7 @@ SLONG angle_diff(SLONG angle1, SLONG angle2);
 
 
 // Useful.
-void stop_all_fx_and_music ( bool bAllowMemstream = FALSE );
+void stop_all_fx_and_music ();
 
 
 //---------------------------------------------------------------

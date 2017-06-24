@@ -572,7 +572,7 @@ extern void calc_camera_pos(void);
 		res=MainWidgetLoop();
 		POLY_frame_draw(FALSE,TRUE);
 		MFX_set_listener(0,0,0,0,0,0);
-		MFX_render();
+		MFX_update();
 		return res;
 	} else 
 		draw_a_new_menu(menu, localctr+=6);
@@ -588,7 +588,7 @@ extern void calc_camera_pos(void);
 	POLY_frame_draw(FALSE,TRUE);
 
 	MFX_set_listener(0,0,0,0,0,0);
-	MFX_render();
+	MFX_update();
 
 #ifndef USE_WIDGETS
 

@@ -555,9 +555,6 @@
     <ClCompile Include="DDLibrary\Source\D3DTexture.cpp">
       <Filter>DDLibrary\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DDLibrary\Source\DCLowLevel.cpp">
-      <Filter>DDLibrary\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DDLibrary\Source\DDManager.cpp">
       <Filter>DDLibrary\Source Files</Filter>
     </ClCompile>
@@ -594,10 +591,7 @@
     <ClCompile Include="DDLibrary\Source\GWorkScreen.cpp">
       <Filter>DDLibrary\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DDLibrary\Source\MFx.cpp">
-      <Filter>DDLibrary\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DDLibrary\Source\MFX_DC.cpp">
+    <ClCompile Include="DDLibrary\Source\MFX.cpp">
       <Filter>DDLibrary\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DDLibrary\Source\net.cpp">
@@ -1355,9 +1349,6 @@
     <ClInclude Include="DDLibrary\Headers\MFx.h">
       <Filter>DDLibrary\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DDLibrary\Headers\MFX_Miles.h">
-      <Filter>DDLibrary\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DDLibrary\Headers\net.h">
       <Filter>DDLibrary\Header Files</Filter>
     </ClInclude>
@@ -1368,9 +1359,6 @@
       <Filter>DDLibrary\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DDLibrary\Headers\SampleManager.h">
-      <Filter>DDLibrary\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DDLibrary\Headers\snd_type.h">
       <Filter>DDLibrary\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DDLibrary\Headers\Tga.h">

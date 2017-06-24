@@ -40,7 +40,6 @@
 #include "font2d.h"
 #include "env.h"
 #include "drive.h"
-#include "snd_type.h"
 #include "sound.h"
 #include "MFX.h"
 #include "music.h"
@@ -431,11 +430,6 @@ RawMenuData raw_menu_data[] = {
 	{				  0,	OT_SLIDER,	X_MUSIC,		0,	128					},
 #ifdef TARGET_DC
 	{				  0,	OT_MULTI,	X_STEREO,	MC_YN,	1					},
-#endif
-#ifdef M_SOUND
-#ifdef ALLOW_DANGEROUS_OPTIONS
-	{				  0,	 OT_MULTI,	X_DRIVERS,	    0,	128					},
-#endif
 #endif
 	{				  0,	OT_BUTTON,	X_OKAY,			0,	FE_BACK				},
 #ifdef WANT_A_KEYBOARD_ITEM
@@ -1201,7 +1195,7 @@ void FRONTEND_scr_new_theme(
 	SLONG last = 1;
 
 	// Stop all music while we load stuff from disk.
-	stop_all_fx_and_music(TRUE);
+	stop_all_fx_and_music();
 
 
 
@@ -3821,57 +3815,7 @@ void	FRONTEND_MissionBrief(CBYTE *script, UBYTE i) {
 #endif
 		strcat(path,brief_wav[mdata->ObjID]);
 
-		MFX_QUICK_play(path, FALSE);
-
-		// And hang until the thing has actually started playing.
-		// Or five seconds, whichever is shorter.
-		// The seek time can be really quite high.
-		// NOTE! Some of them don't have briefings, so watch it!
-		// Things seem to hang nastily if we don't let the briefing happen.
-		// Fuck knows why, and I can't get it when debugging, only when
-		// emulating a real disk. Which sucks quite badly.
-		DWORD dwTimeout = timeGetTime() + 5000;
-		while ( TRUE )
-		{
-extern bool DCLL_stream_has_started_streaming ( void );
-			if ( DCLL_stream_has_started_streaming() )
-			{
-				break;
-			}
-			if ( ( ( dwTimeout - timeGetTime() ) & 0x80000000 ) != 0 )
-			{
-				// Timeout!
-				TRACE ( "TIMEOUT!" );
-				break;
-			}
-			TRACE ( "w" );
-			Sleep(100);
-		}
-		TRACE ( "w\n" );
-
-		//
-		// Set the MEMSTREAM volume to the music volume.
-		//
-
-		//extern void MFX_play_at_stream_volume(UWORD, ULONG, ULONG);
-
-		//MFX_play_at_stream_volume(0, S_FRONT_END_LOOP_EDIT, MFX_LOOPED);
-
-
-#if 1
-		// And then wait for half a second anyway, just in case.
-		dwTimeout = timeGetTime() + 500;
-		while ( TRUE )
-		{
-			if ( ( ( dwTimeout - timeGetTime() ) & 0x80000000 ) != 0 )
-			{
-				break;
-			}
-			TRACE ( "W" );
-			Sleep(100);
-		}
-		TRACE ( "W\n" );
-#endif
+		MFX_QUICK_play(path);
 	}
 	else
 	{
@@ -3881,10 +3825,6 @@ extern bool DCLL_stream_has_started_streaming ( void );
 
 
 	MFdelete(mdata);
-
-
-	DCLL_memstream_play();
-
 }
 
 
@@ -4329,29 +4269,6 @@ void FRONTEND_store_video_data()
 
 }
 
-
-#ifdef M_SOUND
-
-void	set_miles_drivers() {
-	MFX_3D *prov;
-	UBYTE   c0;
-	UWORD	ct;
-	CBYTE  *str=menu_buffer;
-
-	ct=Get3DProviderList(&prov);
-	menu_data[3].Data=Get3DProvider()|(ct<<8);
-	for (c0=0;c0<ct;c0++) {
-		strcpy(str,prov->name);
-		str+=strlen(str)+1;
-		prov++;
-	}
-	*str=0;
-	menu_data[3].Choices=menu_buffer;
-}
-
-#endif
-
-
 #ifndef TARGET_DC
 
 void	FRONTEND_do_drivers() {
@@ -4536,14 +4453,12 @@ extern bool g_bDreamcastABXYStartShouldGoToBootRomImmediately;
 		// Moving from the briefing screen... reinitialise the music.
 		//
 
-		DCLL_memstream_stop();
-
 		//MFX_stop(0, S_FRONT_END_LOOP_EDIT);
 
 #ifdef TARGET_DC
-		MFX_QUICK_play("data\\sfx\\1622DC\\GeneralMusic\\FrontLoopMONO.wav",TRUE,0,0,0);
+		MFX_QUICK_play("data\\sfx\\1622DC\\GeneralMusic\\FrontLoop.wav",0,0,0);
 #else
-		MFX_QUICK_play("data\\sfx\\1622\\GeneralMusic\\FrontLoopMONO.wav",TRUE,0,0,0);
+		MFX_QUICK_play("data\\sfx\\1622\\GeneralMusic\\FrontLoop.wav",0,0,0);
 #endif
 	}
 
@@ -4763,16 +4678,6 @@ extern bool g_bDreamcastABXYStartShouldGoToBootRomImmediately;
 		FRONTEND_easy(mode);
 		// now put in correct values...
 
-/*
-
-#if defined(M_SOUND) || defined(DC_SOUND)
-#else
-		fx = 127;
-		amb = 127;
-		mus = 127;
-#endif
-*/
-
 		MFX_get_volumes(&fx,&amb,&mus);
 
 
@@ -4790,11 +4695,6 @@ extern bool g_bDreamcastABXYStartShouldGoToBootRomImmediately;
 		{
 			menu_data[3].Data = 0 | (2<<8);
 		}
-#endif
-#ifdef M_SOUND
-#ifdef ALLOW_DANGEROUS_OPTIONS
-		set_miles_drivers();
-#endif
 #endif
 		}
 		break;
@@ -6367,7 +6267,7 @@ extern BOOL AreAnyDevicesConnected ( void );
 		{
 			// Starting a mission.
 			// Stop any briefing.
-			MFX_QUICK_stop(TRUE);
+			MFX_QUICK_stop();
 			return FE_START;
 		}
 		if ((menu_state.mode==FE_LOADSCREEN)&&(item->Data==FE_SAVE_CONFIRM))
@@ -6829,7 +6729,7 @@ void	FRONTEND_init ( bool bGoToTitleScreen )
 	dwAutoPlayFMVTimeout = timeGetTime() + AUTOPLAY_FMV_DELAY;
 
 	// Stop the music while loading stuff.
-	stop_all_fx_and_music(TRUE);
+	stop_all_fx_and_music();
 	//MFX_QUICK_stop();
 
 	// These two are so that when a mission ends with a camera still active, the music
@@ -7099,11 +6999,9 @@ void MENUFONT_MergeLower(void);
 		UseBackSurface(screenfull_back);
 	}
 
-//#if defined(M_SOUND) || defined(DC_SOUND)
 	SLONG fx,amb,mus;
 	MFX_get_volumes(&fx,&amb,&mus);
 	MUSIC_gain(mus);
-//#endif
 
 	FRONTEND_districts(MISSION_SCRIPT);
 	FRONTEND_MissionHierarchy(MISSION_SCRIPT);
@@ -7158,25 +7056,13 @@ void MENUFONT_MergeLower(void);
 		CBYTE fname[256];
 
 		//
-		// Load in the front-end specific sound
-		//
-
-		#ifdef TARGET_DC	
-		sprintf(fname, "Data\\Sfx\\1622DC\\%s", sound_list[S_FRONT_END_LOOP_EDIT]);
-		#else
-		sprintf(fname, "Data\\Sfx\\1622\\%s", sound_list[S_FRONT_END_LOOP_EDIT]);
-		#endif
-
-		DCLL_memstream_load(fname);
-
-		//
 		// Start playing the music!
 		//
 
 		#ifdef TARGET_DC
-		MFX_QUICK_play("data\\sfx\\1622DC\\GeneralMusic\\FrontLoop.wav",TRUE,0,0,0);
+		MFX_QUICK_play("data\\sfx\\1622DC\\GeneralMusic\\FrontLoop.wav",0,0,0);
 		#else
-		MFX_QUICK_play("data\\sfx\\1622\\GeneralMusic\\FrontLoop.wav",TRUE,0,0,0);
+		MFX_QUICK_play("data\\sfx\\1622\\GeneralMusic\\FrontLoop.wav",0,0,0);
 		#endif
 	}
 
@@ -7307,9 +7193,7 @@ void	FRONTEND_sound() {
 	MFX_set_gain(WEATHER_REF,S_AMBIENCE_END,255);
 //	MFX_set_gain(MUSIC_REF,S_TUNE_FRONTEND,menu_data[2].Data>>1);
 	MUSIC_gain(menu_data[2].Data>>1);
-//#if defined(M_SOUND) || defined(DC_SOUND)
 	MFX_set_volumes(menu_data[0].Data>>1,menu_data[1].Data>>1,menu_data[2].Data>>1);
-//#endif
 
 	// Update the music volume.
 //extern void DCLL_stream_volume(float volume);
@@ -7324,7 +7208,7 @@ void	FRONTEND_sound() {
 		FRONTEND_playambient3d(SIREN_REF, wave_id, 0, 1);
 	}
 	MFX_set_listener(0,0,0,0,0,0);
-	MFX_render();
+	MFX_update();
 }
 
 
@@ -7470,7 +7354,7 @@ SBYTE	FRONTEND_loop() {
 
 
 			// Start the music again.
-			MFX_QUICK_play("data\\sfx\\1622DC\\GeneralMusic\\FrontLoopMONO.wav",TRUE,0,0,0);
+			MFX_QUICK_play("data\\sfx\\1622DC\\GeneralMusic\\FrontLoop.wav",0,0,0);
 
 			// Start the music again.
 			// Doesn't seem to work.
@@ -7517,7 +7401,7 @@ extern DWORD g_dwLastInputChangeTime;
 	else
 	{
 		MFX_set_listener(0,0,0,0,0,0);
-		MFX_render();
+		MFX_update();
 	}
 #ifndef TARGET_DC
 	PolyPage::EnableAlphaSort();

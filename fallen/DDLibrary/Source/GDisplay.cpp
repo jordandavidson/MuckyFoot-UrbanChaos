@@ -29,9 +29,6 @@
 // From mfx_miles.h...
 //
 
-extern void init_my_dialog (HWND hWnd);
-extern void my_dialogs_over(HWND hWnd);
-
 
 SLONG				RealDisplayWidth;
 SLONG				RealDisplayHeight;
@@ -6165,8 +6162,6 @@ static void InitDialog(HWND hWnd)
 	//
 	// Get MFX_MILES.cpp to initialise the sound part of our dialog box.
 	//
-
-	init_my_dialog(hWnd);
 }
 
 static void FinishDialog(HWND hWnd)
@@ -6204,8 +6199,6 @@ static void FinishDialog(HWND hWnd)
 	}
 
 	*/
-
-	my_dialogs_over(hWnd);
 }
 
 static BOOL CALLBACK dlgproc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -6230,9 +6223,9 @@ static BOOL CALLBACK dlgproc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 				// End everything!
 				// 
 
-				extern void MilesTerm(void);
+				extern void MFX_term(void);
 
-				MilesTerm();
+				MFX_term();
 				the_manager.Fini();
 
 				exit(1);

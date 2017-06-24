@@ -44,15 +44,15 @@
     <OutDir>.\Release\</OutDir>
     <IntDir>.\Release\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\MFStdLib\Headers;..\SDL2\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(DX61SDK_DIR)\Lib;$(SolutionDir)$(Configuration);$(LibraryPath)</LibraryPath>
+    <IncludePath>..\MFStdLib\Headers;..\SDL2\include;..\openal-soft\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(DX61SDK_DIR)\Lib;$(SolutionDir)$(Configuration);..\openal-soft\libs\Win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>.\Debug\</OutDir>
     <IntDir>.\Debug\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\MFStdLib\Headers;..\SDL2\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(DX61SDK_DIR)\Lib;$(SolutionDir)$(Configuration);$(LibraryPath)</LibraryPath>
+    <IncludePath>..\MFStdLib\Headers;..\SDL2\include;..\openal-soft\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(DX61SDK_DIR)\Lib;$(SolutionDir)$(Configuration);..\openal-soft\libs\Win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -97,9 +97,12 @@
       <SubSystem>Windows</SubSystem>
       <OutputFile>.\Release\Fallen.exe</OutputFile>
       <AdditionalLibraryDirectories>c:\fallen\bink;c:\miles;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>dplayx.lib;odbc32.lib;odbccp32.lib;comctl32.lib;amstrmid.lib;quartz.lib;strmbase.lib;ddraw.lib;dinput.lib;dxguid.lib;SDL2.lib;imm32.lib;Version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dplayx.lib;odbc32.lib;odbccp32.lib;comctl32.lib;amstrmid.lib;quartz.lib;strmbase.lib;ddraw.lib;dinput.lib;dxguid.lib;SDL2.lib;imm32.lib;Version.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
+    <PostBuildEvent>
+      <Command>copy "$(SolutionDir)\..\openal-soft\bin\Win32\soft_oal.dll" "$(TargetDir)\openal32.dll"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -142,9 +145,12 @@
       <SubSystem>Windows</SubSystem>
       <OutputFile>.\Debug\Fallen.exe</OutputFile>
       <AdditionalLibraryDirectories>c:\fallen\bink;c:\miles;c:\fallen\miles;c:\mflib1\libs;C:\qsound\QM411SDK\qmdx;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>dplayx.lib;odbc32.lib;odbccp32.lib;comctl32.lib;amstrmid.lib;quartz.lib;strmbase.lib;ddraw.lib;dinput.lib;dxguid.lib;SDL2.lib;imm32.lib;Version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dplayx.lib;odbc32.lib;odbccp32.lib;comctl32.lib;amstrmid.lib;quartz.lib;strmbase.lib;ddraw.lib;dinput.lib;dxguid.lib;SDL2.lib;imm32.lib;Version.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
+    <PostBuildEvent>
+      <Command>copy "$(SolutionDir)\..\openal-soft\bin\Win32\soft_oal.dll" "$(TargetDir)\openal32.dll"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\MFStdLib\Source\StdLib\StdFile.cpp" />
@@ -206,7 +212,6 @@
     <ClCompile Include="DDLibrary\Source\AsyncFile2.cpp" />
     <ClCompile Include="DDLibrary\Source\BinkClient.cpp" />
     <ClCompile Include="DDLibrary\Source\D3DTexture.cpp" />
-    <ClCompile Include="DDLibrary\Source\DCLowLevel.cpp" />
     <ClCompile Include="DDLibrary\Source\DDManager.cpp" />
     <ClCompile Include="DDLibrary\Source\DIManager.cpp" />
     <ClCompile Include="DDLibrary\Source\Drive.cpp" />
@@ -219,8 +224,7 @@
     <ClCompile Include="DDLibrary\Source\GKeyboard.cpp" />
     <ClCompile Include="DDLibrary\Source\GMouse.cpp" />
     <ClCompile Include="DDLibrary\Source\GWorkScreen.cpp" />
-    <ClCompile Include="DDLibrary\Source\MFx.cpp" />
-    <ClCompile Include="DDLibrary\Source\MFX_DC.cpp" />
+    <ClCompile Include="DDLibrary\Source\MFX.cpp" />
     <ClCompile Include="DDLibrary\Source\net.cpp" />
     <ClCompile Include="DDLibrary\Source\SampleManager.cpp" />
     <ClCompile Include="DDLibrary\Source\Tga.cpp" />
@@ -780,12 +784,10 @@
     <ClInclude Include="DDLibrary\Headers\GDisplay.h" />
     <ClInclude Include="DDLibrary\Headers\GWorkScreen.h" />
     <ClInclude Include="DDLibrary\Headers\MFx.h" />
-    <ClInclude Include="DDLibrary\Headers\MFX_Miles.h" />
     <ClInclude Include="DDLibrary\Headers\net.h" />
     <ClInclude Include="DDLibrary\Headers\QSManager.h" />
     <ClInclude Include="DDLibrary\Headers\resource.h" />
     <ClInclude Include="DDLibrary\Headers\SampleManager.h" />
-    <ClInclude Include="DDLibrary\Headers\snd_type.h" />
     <ClInclude Include="DDLibrary\Headers\Tga.h" />
     <ClInclude Include="DDLibrary\Headers\WindProcs.h" />
     <ClInclude Include="Editor\Headers\Alert.hpp" />

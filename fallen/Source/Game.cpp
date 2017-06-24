@@ -177,20 +177,13 @@ extern SLONG go_into_game;	// This is in attract.cpp If it is TRUE when we leave
 
 
 
-void stop_all_fx_and_music ( bool bAllowMemstream )
+void stop_all_fx_and_music ()
 {
-	MFX_QUICK_stop ( bAllowMemstream );
+	MFX_QUICK_stop ();
 	MUSIC_mode(0);
 	MUSIC_mode_process();
 	MUSIC_reset();
-	if ( bAllowMemstream )
-	{
-		MFX_stop(MFX_CHANNEL_ALL, MFX_WAVE_ALMOST_ALL);
-	}
-	else
-	{
-		MFX_stop(MFX_CHANNEL_ALL, MFX_WAVE_ALL);
-	}
+	MFX_stop(MFX_CHANNEL_ALL, MFX_WAVE_ALL);
 }
 
 
@@ -278,8 +271,8 @@ extern void	UCA_LookupSetup();
 
 	// NOW we can load the sounds, coz we have something sensible on-screen
 //#ifdef TARGET_DC
-extern void MFX_DC_init ( void );
-	MFX_DC_init();
+extern void MFX_init ( void );
+	MFX_init();
 //#endif
 
 
@@ -712,12 +705,6 @@ extern	void	load_whole_game(CBYTE	*gamename);
 	}
 	else
 	{
-		
-
-		// Play the loading music, coz it's all in memory.
-		DCLL_memstream_play();
-
-
 		//
 		// Load the game.
 		//
@@ -955,10 +942,6 @@ void game_fini(void)
 	// Start the loading bar.
 	ATTRACT_loadscreen_init();
 
-	// but play the loading music, coz it's all in memory.
-	DCLL_memstream_play();
-
-	
 	//
 	// Free up the FASTPRIM memory.
 	//
@@ -1894,7 +1877,7 @@ extern SLONG BARREL_fx_rate;
 		BARREL_fx_rate-=2;
 	else
 		BARREL_fx_rate=0;
-	MFX_render();
+	MFX_update();
 }
 
 
@@ -2161,29 +2144,7 @@ round_again:;
 #ifndef	PSX
 		SLONG exit_game_loop = FALSE;
 	
-		//
-		// Stop the loading music.
-		//
-
-		extern void DCLL_memstream_stop(void);
-
-		DCLL_memstream_stop();
-
-		//
-		// Load and unload sounds so we only have the
-		// sounds we need.
-		//
-
 		TRACE ( "game_loop init3\n" );
-
-		if ( ( GAME_STATE & GS_REPLAY ) == 0 )
-		{
-			SOUND_load_needed_sounds();
-		}
-
-		//
-		// Initialise the SUPERCRINKLES!
-		//
 
 #ifdef TARGET_DC
 		// Sod 'em on the PC - they just cause problems when converting levels.

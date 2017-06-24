@@ -108,15 +108,4 @@ extern void A3D_Check_Init(void);
 
 #endif
 
-
-//
-// Loads in sounds needed for just this level. Call after
-// everything has already been loaded.
-//
-
-void SOUND_load_needed_sounds(void);
-
-
-
-
 #endif

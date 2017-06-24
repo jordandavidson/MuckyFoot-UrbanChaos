@@ -2789,9 +2789,6 @@ SLONG ELEV_load_name(CBYTE *fname_level)
 			// Reshow the "loading" screen.
 			ATTRACT_loadscreen_init();
 
-			// And play the loading music, coz it's all in memory.
-			DCLL_memstream_play();
-
 		}
 	}
 
@@ -2889,7 +2886,7 @@ SLONG ELEV_load_user(SLONG mission)
 	OPENFILENAME ofn;
 #endif
 
-	MFX_QUICK_stop(TRUE);
+	MFX_QUICK_stop();
 	MUSIC_mode(0);
 	MUSIC_mode_process();
 
@@ -3324,7 +3321,7 @@ extern void Wadmenu_Introduction();
 #endif
 		// Stop all sound effects playing
 		MFX_OffKey=-1;
-		MFX_render();
+		MFX_update();
 		DrawSync(0);
 		PSXOverLay(OVERLAY_NAME,OVERLAY_SIZE);
 		if (!Eidos_Played)
@@ -3408,7 +3405,7 @@ extern	void	end_record(void);
 	 SetupMemory();
 	 mem_all=0;
 	 MFX_OffKey=-1;
-	 MFX_render();
+	 MFX_update();
 	 
 	 ClearOTag(the_display.CurrentDisplayBuffer->ot,OTSIZE);
 	 PSXOverLay(OVERLAY_NAME,OVERLAY_SIZE);

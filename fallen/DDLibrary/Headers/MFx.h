@@ -1,10 +1,3 @@
-//
-// MFx.h
-//
-// Muckyfoot sound fx api for A3D / PSX
-//
-// (same header, different cpp)
-//
 #ifndef _mfx_h_
 #define _mfx_h_
 
@@ -12,12 +5,6 @@
 #include "MFStdLib.h"
 #include "structs.h"
 #include "thing.h"
-
-// set this to enable forcing the PC to only play FX available on the PSX
-#define DODGYPSXIFY 1
-// with this clear, the code to do it is taken out completely, for speed
-// with this set, the code will look in the config.ini to see whether or not to PSXify sound.
-
 
 #define		MFX_LOOPED		(1)				// loop the wave infinitely
 #define		MFX_MOVING		(2)				// update the source's coords automatically
@@ -41,18 +28,15 @@
 
 #define		MFX_CHANNEL_ALL		(0x010000)
 #define		MFX_WAVE_ALL		(0x010000)
-// Excludes the memstream sounds.
-#define		MFX_WAVE_ALMOST_ALL	(0x010001)
 
 //----- volume functions
 
 void	MFX_get_volumes(SLONG* fx, SLONG* amb, SLONG* mus);	// all 0 to 127
 void	MFX_set_volumes(SLONG fx, SLONG amb, SLONG mus);
 
-//----- transport functions -----
+//----- playback functions -----
 
 void	MFX_play_xyz(UWORD channel_id, ULONG wave, ULONG flags, SLONG x, SLONG y, SLONG z);
-//void	MFX_play_pos(UWORD channel_id, ULONG wave, ULONG flags, GameCoord* position);
 void	MFX_play_thing(UWORD channel_id, ULONG wave, ULONG flags, Thing* p);
 void	MFX_play_ambient(UWORD channel_id, ULONG wave, ULONG flags);
 UBYTE	MFX_play_stereo(UWORD channel_id, ULONG wave, ULONG flags);
@@ -65,22 +49,15 @@ void	MFX_stop_attached(Thing *p);
 void	MFX_set_pitch(UWORD channel_id, ULONG wave, SLONG pitchbend);
 void	MFX_set_gain(UWORD channel_id, ULONG wave, UBYTE gain);
 void	MFX_set_queue_gain(UWORD channel_id, ULONG wave, UBYTE gain);
-//void	MFX_set_wave(UWORD channel_id, ULONG wave, ULONG new_wave);
-//void	MFX_set_xyz(UWORD channel_id, ULONG wave, SLONG x, SLONG y, SLONG z);
-//void	MFX_set_pos(UWORD channel_id, ULONG wave, GameCoord* position);
-//void	MFX_set_channel_gain(UWORD channel_id, UBYTE gain);
 
-//----- listener & environment -----
+//----- listener -----
 
 void	MFX_set_listener(SLONG x, SLONG y, SLONG z, SLONG heading, SLONG roll, SLONG pitch);
-//void	MFX_set_environment(SLONG env_type);
 
 //----- sound library functions -----
 
-//void	MFX_load_wave_list(CBYTE *path,CBYTE *script_file); // load list from a text file
-void	MFX_load_wave_list(CBYTE *names[]=0);				// load list from array
-//void	MFX_load_wave_file(CBYTE *wave_file);				// load file
-void	MFX_free_wave_list();								// free list
+void	MFX_load_wave_list();
+void	MFX_free_wave_list();
 
 //----- querying information back -----
 
@@ -88,19 +65,19 @@ UWORD	MFX_get_wave(UWORD channel_id, UBYTE index=0);
 
 //----- general system stuff -----
 
-void	MFX_render ( void );
+void	MFX_update ( void );
 
-//----- init stuff (why the fuck there isn't MFX_init() and MFX_term() I'll never understand.  Someone, somewhere in this company should take a dictionary out and look up the word "design".  It's under D.)
+//----- init stuff -----
 
-void	MilesInit(HINSTANCE hInstance, HWND hWnd);
-void	MilesTerm();
+void	MFX_init();
+void	MFX_term();
 
 
 // Mikes bodge stuff to get conversation in
 
-SLONG	MFX_QUICK_play(CBYTE *str, SLONG loop, SLONG x=0, SLONG y=0, SLONG z=0);	// should be low-res (24.8) coordinates
+SLONG	MFX_QUICK_play(CBYTE *str, SLONG x=0, SLONG y=0, SLONG z=0);	// should be low-res (24.8) coordinates
 void	MFX_QUICK_wait(void);
-void	MFX_QUICK_stop ( bool bAllowMemstream = FALSE );
+void	MFX_QUICK_stop ();
 SLONG	MFX_QUICK_still_playing(void);
 
 #endif

@@ -627,7 +627,7 @@ void PLAYCUTS_Play(CPData *cutscene) {
 		//
 		// OVERLAY_handle(); prolly don't wanna do that for cutscenes
 
-		MFX_render();
+		MFX_update();
 
 		screen_flip();
 

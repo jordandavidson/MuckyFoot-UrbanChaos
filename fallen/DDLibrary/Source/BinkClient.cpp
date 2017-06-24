@@ -9,7 +9,6 @@
 
 #include "DDLib.h"
 //#include "bink.h"
-#include "snd_type.h"
 #include "drive.h"
 
 typedef int s32;

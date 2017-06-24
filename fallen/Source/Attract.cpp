@@ -443,7 +443,7 @@ void	make_all_wads(void);
 						ATTRACT_loadscreen_init();
 
 						// Stop everything.
-						stop_all_fx_and_music(TRUE);
+						stop_all_fx_and_music();
 
 						// but play the loading music, coz it's all in memory.
 						// (No, should already be played, and stopping then starting it

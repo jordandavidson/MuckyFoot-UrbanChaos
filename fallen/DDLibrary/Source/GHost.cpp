@@ -3,7 +3,6 @@
 
 #include	"DDLib.h"
 #include	"..\headers\Sound.h"
-#include	"snd_type.h"
 #include	"mfx.h"
 
 #define	PAUSE_TIMEOUT			500
@@ -189,28 +188,7 @@ BOOL	SetupHost(ULONG flags)
 	if(hDDLibWindow)
 	{
 		// Init the sound manager.  We're not too fussed about the result.
-
-#ifdef A3D_SOUND
-		A3D_Check_Init();
-#endif
-
-#ifdef Q_SOUND
-		the_qs_sound_manager.Init();
-#endif
-
-#ifdef	M_SOUND
-		MilesInit(hGlobalThisInst, hDDLibWindow);
-#endif
-
-
-
-		// This does shed-loads of work, so it's been moved to much later in the boot process.
-//#ifdef TARGET_DC
-//extern void MFX_DC_init ( void );
-//		MFX_DC_init();
-//#endif
-
-
+		MFX_init();
 
 #ifndef TARGET_DC
 		// Load the keyboard accelerators.
@@ -236,9 +214,7 @@ BOOL	SetupHost(ULONG flags)
 
 void	ResetHost(void)
 {
-#ifdef M_SOUND
-	MilesTerm();
-#endif
+	MFX_term();
 
 	ResetKeyboard();
 	ResetMemory();
