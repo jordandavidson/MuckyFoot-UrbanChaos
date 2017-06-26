@@ -152,167 +152,6 @@ void MUSIC_play_the_mode(UBYTE mode)
 	just_asked_for_mode_now    = TRUE;
 	just_asked_for_mode_number = mode;
 
-	SLONG MFX_QUICK_play_id = last_MFX_QUICK_play_id;
-	extern void  DCLL_stream_volume(float volume);	// 0.0F <= volume <= 1.0F
-	extern UBYTE EWAY_conv_active;		// Bool. Is there a conversation going on?
-	extern SLONG EWAY_cam_active;
-
-	if (EWAY_conv_active || EWAY_cam_active || (MFX_QUICK_play_id != last_MFX_QUICK_play_id && last_MFX_QUICK_play_id && MFX_QUICK_still_playing()))
-	{
-		//
-		// Streaming some other sample...
-		//
-
-		return;
-	}
-
-	static SLONG lookup_table[18][3] = { 
-		{ S_TUNE_DRIVING_START, S_TUNE_DRIVING,			S_TUNE_DRIVING2 },
-		{ 0,					S_TUNE_SPRINT,			S_TUNE_SPRINT2	},
-		{ 0,					S_TUNE_CRAWL,			S_TUNE_CRAWL	},
-		{ 0,					S_TUNE_FIGHT,			S_TUNE_FIGHT2	},
-		{ 0,					S_TUNE_COMBAT_TRAINING, S_TUNE_COMBAT_TRAINING },
-		{ 0,					S_TUNE_DRIVING_TRAINING,S_TUNE_DRIVING_TRAINING},
-		{ 0,					S_TUNE_ASSAULT_TRAINING,S_TUNE_ASSAULT_TRAINING},
-		{ 0,					S_TUNE_ASIAN_DUB,		S_TUNE_ASIAN_DUB},
-		{ 0,					S_TUNE_TIMER1,			S_TUNE_TIMER1	},
-		{ 0,					S_DEAD,					S_DEAD			},
-		{ 0,					S_LEVEL_COMPLETE,		S_LEVEL_COMPLETE},
-		{ 0,					S_BRIEFING,				S_BRIEFING		},
-		{ 0,					S_TUNE_FRONTEND,		S_TUNE_FRONTEND },
-		{ 0,					S_TUNE_CHAOS,			S_TUNE_CHAOS	},
-		
-		//
-		// The DC uses the music system to play ambient sound for Posheaters and the warehouses...
-		//
-
-		{ 0,					S_AMB_POLICE1,			S_AMB_POLICE1	 },
-		{ 0,					S_AMB_POSHEETA,			S_AMB_POSHEETA	 },
-		{ 0,					S_AMB_OFFICE1,			S_AMB_OFFICE1	 },
-		{ 0,					S_TUNE_CLUB_START,		S_TUNE_CLUB_START},
-	};
-
-	{
-		static SLONG done_stereo = FALSE;
-
-		if (!done_stereo)
-		{
-			SLONG i;
-			SLONG j;
-
-			TRACE("Stereo sounds...\n");
-
-			for (i = 0; i < 14; i++)
-			{
-				for (j = lookup_table[i][1]; j <= lookup_table[i][2]; j++)
-				{
-					TRACE(sound_list[j]);
-					TRACE("\n");
-				}
-			}
-
-			done_stereo = TRUE;
-		}
-	}
-
-
-	//
-	// DC version... Stream in the sounds!
-	//
-
-	if (!mode)
-	{
-		//
-		// No music should be playing.
-		//
-
-		music_volume -= float(16 * TICK_RATIO >> TICK_SHIFT) * (1.0F / 1024.0F);
-
-		SATURATE(music_volume, 0.0F, 1.0F);
-
-		if (MFX_QUICK_play_id == last_MFX_QUICK_play_id)
-		{
-			if (MFX_QUICK_still_playing())
-			{
-				//
-				// Still streaming our sample...
-				//
-
-				if (music_volume == 0.0F)
-				{
-					MFX_QUICK_stop();
-				}
-			}
-		}
-	}
-	else
-	{
-		//
-		// Should be playing some music!
-		//
-
-		if (MFX_QUICK_play_id == last_MFX_QUICK_play_id && MFX_QUICK_still_playing() && last_MFX_QUICK_mode == mode)
-		{
-			//
-			// Still playing our music.
-			//
-
-			music_volume += float(16 * TICK_RATIO >> TICK_SHIFT) * (1.0F / 1024.0F);
-
-			SATURATE(music_volume, 0.0F, 1.0F);
-		}
-		else
-		{
-			static SLONG once_every_few  = 0;
-			static SLONG once_every_last = 0;
-
-			if (once_every_few >= once_every_last)
-			{
-				//
-				// Start some music going...
-				//
-
-				SLONG start = lookup_table[mode-1][1];
-				SLONG end   = lookup_table[mode-1][2];
-
-				SLONG index;
-
-				if (start == end)
-				{
-					index = start;
-				}
-				else
-				{
-					index = start + rand() % (end - start);
-				}
-
-				music_volume = 0.0F;
-
-				{
-					CBYTE fname[256];
-
-					#ifdef TARGET_DC	
-					sprintf(fname, "Data\\Sfx\\1622DC\\%s", sound_list[index] + offset);
-					#else
-					sprintf(fname, "Data\\Sfx\\1622\\%s", sound_list[index]);
-					#endif
-
-					//last_MFX_QUICK_play_id = MFX_QUICK_play(fname, 0,0,0);
-					last_MFX_QUICK_mode    = mode;
-
-					once_every_last = once_every_few + 10;
-				}
-			}
-			else
-			{
-				once_every_few += 1;
-			}
-		}
-	}
-
-#if 0
-#ifndef PSX
-
 	if (!mode) return;
 
 	// for the PC, do an MFX_play with a random constant within the appropriate range to mode
@@ -357,15 +196,6 @@ void MUSIC_play_the_mode(UBYTE mode)
 
 	MFX_play_stereo(MUSIC_REF,music_current_wave,MFX_SHORT_QUEUE|MFX_QUEUED|MFX_EARLY_OUT|MFX_NEVER_OVERLAP);
 	MFX_set_gain(MUSIC_REF,music_current_wave,music_current_level>>8);
-
-#else
-
-extern UBYTE MUSIC_play(UWORD wave,UBYTE flags);
-
-	music_current_mode=MUSIC_play(mode,MUSIC_FLAG_FADE_OUT|MUSIC_FLAG_QUEUED);
-
-#endif
-#endif
 }
 
 
@@ -382,7 +212,7 @@ void MUSIC_set_the_volume(SLONG vol)
 	// for the PSX, set the CDaudio playback volume
 #ifndef PSX
 
-	// MFX_set_gain(MUSIC_REF,music_current_wave,vol>>8);
+	MFX_set_gain(MUSIC_REF,music_current_wave,vol>>8);
 
 #else
 
@@ -393,25 +223,8 @@ void MUSIC_set_the_volume(SLONG vol)
 
 void MUSIC_stop_the_mode()
 {
-#if 0
-
 	// for the PC, use MFX_stop to halt wave playback
-	// for the PSX, halt (or whatever) the CDaudio
-
-#ifndef PSX
-
-	// Oh by the way, this doesn't actually stop the music or anything sensible like that - TomF.
 	MFX_stop(MUSIC_REF,MFX_WAVE_ALL);
-
-#else
-
-extern void MUSIC_stop(BOOL fade);
-	MUSIC_stop(true);
-
-#endif
-
-#endif
-
 }
 
 

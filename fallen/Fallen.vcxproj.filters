@@ -1298,9 +1298,6 @@
     <ClInclude Include="DDEngine\Headers\wibble.h">
       <Filter>DDEngine\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DDLibrary\Headers\A3DManager.h">
-      <Filter>DDLibrary\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DDLibrary\Headers\AsyncFile.h">
       <Filter>DDLibrary\Header Files</Filter>
     </ClInclude>
@@ -1311,9 +1308,6 @@
       <Filter>DDLibrary\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DDLibrary\Headers\D3DTexture.h">
-      <Filter>DDLibrary\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DDLibrary\Headers\DCLowLevel.h">
       <Filter>DDLibrary\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DDLibrary\Headers\DDlib.h">

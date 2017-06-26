@@ -767,12 +767,10 @@
     <ClInclude Include="DDEngine\Headers\truetype.h" />
     <ClInclude Include="DDEngine\Headers\vertexbuffer.h" />
     <ClInclude Include="DDEngine\Headers\wibble.h" />
-    <ClInclude Include="DDLibrary\Headers\A3DManager.h" />
     <ClInclude Include="DDLibrary\Headers\AsyncFile.h" />
     <ClInclude Include="DDLibrary\Headers\AsyncFile2.h" />
     <ClInclude Include="DDLibrary\Headers\BinkClient.h" />
     <ClInclude Include="DDLibrary\Headers\D3DTexture.h" />
-    <ClInclude Include="DDLibrary\Headers\DCLowLevel.h" />
     <ClInclude Include="DDLibrary\Headers\DDlib.h" />
     <ClInclude Include="DDLibrary\Headers\DDManager.h" />
     <ClInclude Include="DDLibrary\Headers\Debug.h" />

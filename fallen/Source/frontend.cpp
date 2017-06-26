@@ -2124,8 +2124,6 @@ void	FRONTEND_MissionBrief(CBYTE *script, UBYTE i) {
 	text = (CBYTE*)MemAlloc(4096); 
 	memset(text,0,4096);
 
-	MUSIC_mode(0);
-
 	FileOpenScript();
 	while (1) {
 		LoadStringScript(text);
@@ -2778,19 +2776,6 @@ void	FRONTEND_do_gamma() {
 }
 
 void	FRONTEND_mode(SBYTE mode, bool bDoTransition=TRUE) {
-
-	if (menu_state.mode >= 100 && mode < 100)
-	{
-		//
-		// Moving from the briefing screen... reinitialise the music.
-		//
-
-		//MFX_stop(0, S_FRONT_END_LOOP_EDIT);
-
-		MFX_play_stereo(MUSIC_REF, S_TUNE_FRONTEND, MFX_LOOPED | MFX_NEVER_OVERLAP);
-	}
-
-
 	// Reset this now.
 	dwAutoPlayFMVTimeout = timeGetTime() + AUTOPLAY_FMV_DELAY;
 
@@ -4221,15 +4206,6 @@ void MENUFONT_MergeLower(void);
 		return;
 	}
 
-	{
-		CBYTE fname[256];
-
-		//
-		// Start playing the music!
-		//
-		MFX_play_stereo(MUSIC_REF, S_TUNE_FRONTEND, MFX_LOOPED | MFX_NEVER_OVERLAP);
-	}
-
 	bFirstTime = FALSE;
 }
 
@@ -4353,7 +4329,7 @@ void	FRONTEND_sound() {
 	MFX_play_ambient(WEATHER_REF,S_WIND_START,MFX_LOOPED|MFX_QUEUED);
 //	MFX_play_ambient(MUSIC_REF,S_TUNE_DRIVING,MFX_LOOPED);
 	MFX_set_gain(WEATHER_REF,S_AMBIENCE_END,255);
-	MFX_set_gain(MUSIC_REF,S_TUNE_FRONTEND,menu_data[2].Data>>1);
+	//MFX_set_gain(MUSIC_REF,S_TUNE_FRONTEND,menu_data[2].Data>>1);
 	MUSIC_gain(menu_data[2].Data>>1);
 	MFX_set_volumes(menu_data[0].Data>>1,menu_data[1].Data>>1,menu_data[2].Data>>1);
 
