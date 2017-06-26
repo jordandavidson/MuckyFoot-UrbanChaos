@@ -2190,16 +2190,6 @@ extern void envmap_specials(void);
 
 		while(SHELL_ACTIVE&&(GAME_STATE&(GS_PLAY_GAME|GS_LEVEL_LOST|GS_LEVEL_WON)))
 		{
-#ifndef TARGET_DC
-			extern UBYTE build_dc;
-			
-			if (build_dc)
-			{
-				exit_game_loop = GAMEMENU_DO_NEXT_LEVEL;
-			}
-#endif
-
-
 #ifdef TARGET_DC
 extern bool g_bPunishMePleaseICheatedOnThisLevel;
 extern int g_iCheatNumber;
@@ -2670,9 +2660,6 @@ void	FRONTEND_scr_img_load_into_screenfull(CBYTE *name, CompressedBackground *sc
 extern LPDIRECTDRAWSURFACE4 lpBackgroundCache;
 				ASSERT ( lpBackgroundCache != NULL );
 				UnpackBackground ( (BYTE*)( the_display.lp_DD_Background ), lpBackgroundCache );
-
-void DreamCastCredits ( void );
-				DreamCastCredits();
 
 				MUSIC_mode(MUSIC_MODE_FRONTEND);
 				MUSIC_mode_process();

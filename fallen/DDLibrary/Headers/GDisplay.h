@@ -7,13 +7,6 @@
 #include	"DDManager.h"
 #include	"D3DTexture.h"
 
-
-#ifdef TARGET_DC
-#define USE_COMPRESSED_BACKGROUNDS 1
-#else
-#define USE_COMPRESSED_BACKGROUNDS 0
-#endif
-
 //---------------------------------------------------------------
 
 #define	SHELL_ACTIVE			(LibShellActive())
@@ -40,17 +33,8 @@ extern enumDisplayType eDisplayType;
 
 //---------------------------------------------------------------
 
-#if USE_COMPRESSED_BACKGROUNDS
-typedef void *CompressedBackground;
-#endif
-
-
 extern	void	InitBackImage(CBYTE *name);
-#if USE_COMPRESSED_BACKGROUNDS
-extern	void UseBackSurface(CompressedBackground use);
-#else
 extern	void UseBackSurface(LPDIRECTDRAWSURFACE4 use);
-#endif
 extern	void	ResetBackImage(void);
 // Set b3DInFrame to FALSE if there is no 3D going on, i.e. blits will work on the DC.
 // Ignored for the PC.
@@ -183,13 +167,9 @@ class	Display
 								lp_DD_WorkSurface,
 #endif
 								lp_DD_ZBuffer;
-#if USE_COMPRESSED_BACKGROUNDS
-		CompressedBackground	lp_DD_Background,
-								lp_DD_Background_use_instead;
-#else
+
 		LPDIRECTDRAWSURFACE4	lp_DD_Background,
 								lp_DD_Background_use_instead;
-#endif
 #ifdef TARGET_DC
 		LPDIRECT3DTEXTURE2		lp_DD_Background_use_instead_texture;
 		LPDIRECT3DTEXTURE2		lp_DD_Background_use_instead_texture2;
@@ -423,29 +403,10 @@ class	Display
 		//
 
 		void create_background_surface(UBYTE *image_data);	// Must be same dimensions as back buffer!
-#if USE_COMPRESSED_BACKGROUNDS
-		void use_this_background_surface(CompressedBackground this_one);
-#else
 		void use_this_background_surface(LPDIRECTDRAWSURFACE4 this_one);
-#endif
 		void blit_background_surface(bool b3DInFrame = TRUE);
 		void destroy_background_surface(void);
 };
-
-
-#if USE_COMPRESSED_BACKGROUNDS
-// This uses my funky pixel format.
-// This only works to a 640x480,565 format image.
-// Unpacks image_data into surface
-extern void UnpackBackground ( UBYTE* image_data, IDirectDrawSurface4* surface );
-// This uses my funky pixel format.
-// This only works to a 640x480,565 format image.
-// Packs surface (640x480,565 pixels - raw data) into image_data.
-// Returns the size of the packed version. You can pass in NULL for image_data,
-// and it will just return the size, and not try to copy anything.
-extern int PackBackground ( UBYTE* image_data, WORD *surface );
-#endif
-
 
 //---------------------------------------------------------------
 

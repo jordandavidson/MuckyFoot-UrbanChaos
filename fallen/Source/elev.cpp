@@ -319,8 +319,6 @@ void ELEV_load_level(CBYTE *fname_level)
 //#ifdef	EIDOS
 			FAKE_CIVS = junk[1];// = 0;
 
-			extern UBYTE build_dc;
-
 			if(save_psx)
 			{
 				FAKE_CIVS >>=1;
@@ -328,22 +326,6 @@ void ELEV_load_level(CBYTE *fname_level)
 					FAKE_CIVS=3;
 
 			}
-			else
-			if (build_dc)
-			{
-				FAKE_CIVS *= 2;
-				FAKE_CIVS /= 3;
-			}
-			else
-			{
-				if(!the_display.CurrDevice->IsHardware())
-				{
-					if(FAKE_CIVS>5)
-						FAKE_CIVS=5;
-
-				}
-			}
-
 			
 			for(i=0;i<FAKE_CIVS;i++)
 
@@ -2652,29 +2634,6 @@ extern void SND_BeginAmbient();
 	Keys[KB_DOWN]  = 0;
 
 	ATTRACT_loadscreen_draw(100 * 256 / 100);
-
-	//save_dreamcast_wad(fname_level);
-
-	#if TEST_DC
-
-	extern UBYTE build_dc;
-
-	if (build_dc)
-	{
-		extern void PACK_do(void);
-
-		save_dreamcast_wad(fname_level);
-
-#ifdef SAVE_MY_VQ_TEXTURES_PLEASE_BOB
-		//PACK_do();
-#endif
-	}
-	else
-	{
-		save_dreamcast_wad(fname_level);
-	}
-
-	#endif // TEST_DC
 
 	return TRUE;
 

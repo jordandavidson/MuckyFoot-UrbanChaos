@@ -706,23 +706,6 @@ void	InitBackImage(CBYTE *name)
 
 	sprintf(fname,"%sdata\\%s",DATA_DIR,name);
 
-
-#ifdef TARGET_DC
-
-#if !USE_COMPRESSED_BACKGROUNDS
-#error Must use compressed backgrounds on DC.
-#endif
-
-
-	// Horrible cheat - use ".BGS" version instead.
-void	FRONTEND_scr_img_load_into_screenfull(CBYTE *name, CompressedBackground *screen);
-	FRONTEND_scr_img_load_into_screenfull ( name, &(the_display.lp_DD_Background) );
-
-	
-#else
-
-
-
  	if(image_mem==0)
 	{
 		image_mem	=	(UBYTE*)MemAlloc(640*480*3);
@@ -753,33 +736,14 @@ extern void FRONTEND_scr_img_load_into_screenfull(CBYTE *name, LPDIRECTDRAWSURFA
 	FRONTEND_scr_img_load_into_screenfull ( name, &lpJunk );
 
 	lpJunk->Release();
-
-#endif
-
-
-
 }
 
-#if USE_COMPRESSED_BACKGROUNDS
-void UseBackSurface(CompressedBackground use)
-#else
 void UseBackSurface(LPDIRECTDRAWSURFACE4 use)
-#endif
 {
 	the_display.use_this_background_surface(use);
 }
 
-
-
-
-#if USE_COMPRESSED_BACKGROUNDS
-CompressedBackground m_lpLastBackground = NULL;
-#else
 LPDIRECTDRAWSURFACE4 m_lpLastBackground = NULL;
-#endif
-
-
-
 
 void	ResetBackImage(void)
 {
@@ -1275,11 +1239,7 @@ HRESULT	Display::Fini(void)
 
 	if (lp_DD_Background)
 	{
-#if USE_COMPRESSED_BACKGROUNDS
-		MemFree ( lp_DD_Background );
-#else //#if USE_COMPRESSED_BACKGROUNDS
 		lp_DD_Background->Release();
-#endif //#else //#if USE_COMPRESSED_BACKGROUNDS
 		lp_DD_Background = NULL;
 	}
     FiniBack();
@@ -5569,19 +5529,8 @@ int PackBackground ( UBYTE* image_data, WORD *surface )
 
 void CopyBackground(UBYTE* image_data, IDirectDrawSurface4* surface)
 {
-//#ifdef TARGET_DC
-//	// Always use my wacky compressed format. ATF
-//	UnpackBackground ( image_data, surface );
-//#else
-
-#if USE_COMPRESSED_BACKGROUNDS
-	// This just won't work.
-	ASSERT ( FALSE );
-#endif
-
 	if (the_display.CurrMode->GetBPP() == 16)	CopyBackground16(image_data, surface);
 	else										CopyBackground32(image_data, surface);
-//#endif
 }
 
 
@@ -5659,13 +5608,7 @@ HRESULT			Display::Flip(LPDIRECTDRAWSURFACE4 alt,SLONG flags)
 	}
 }
 
-
-
-#if USE_COMPRESSED_BACKGROUNDS
-void Display::use_this_background_surface(CompressedBackground this_one)
-#else
 void Display::use_this_background_surface(LPDIRECTDRAWSURFACE4 this_one)
-#endif
 {
 	lp_DD_Background_use_instead = this_one;
 }
@@ -5674,48 +5617,6 @@ void Display::use_this_background_surface(LPDIRECTDRAWSURFACE4 this_one)
 
 void Display::create_background_surface(UBYTE *image_data)
 {
-
-#if USE_COMPRESSED_BACKGROUNDS
-
-	// Don't call this.
-	ASSERT ( FALSE );
-
-
-	// First convert to 565 format.
-	WORD *pwTemp = (WORD *)MemAlloc ( 640 * 480 * 2 );
-	ASSERT ( pwTemp != NULL );
-	UBYTE *pbSrc = image_data;
-
-	for ( int i = 0; i < 640*480; i++ )
-	{
-		// From 24-bit RGB to 565.
-		*pwTemp  = ( ( *pbSrc++ ) & 0xf8 ) << 8;
-		*pwTemp |= ( ( *pbSrc++ ) & 0xfc ) << 3;
-		*pwTemp |= ( ( *pbSrc++ ) & 0xf8 ) >> 3;
-		pwTemp++;
-	}
-
-	// See how big it is, compressed.
-	int iSize = PackBackground ( NULL, pwTemp );
-
-	TRACE ( "create_background_surface: Original 565 0x%x, now 0x%x, saving of %i percent\n", 640*480*2, iSize, (100*iSize)/(640*480*2) );
-
-	if (lp_DD_Background)
-	{
-		MemFree ( lp_DD_Background );
-		lp_DD_Background = NULL;
-	}
-
-	lp_DD_Background = MemAlloc ( iSize );
-
-	PackBackground ( (UBYTE *)lp_DD_Background, pwTemp );
-
-	// And free the 565 version.
-	MemFree ( (void *)pwTemp );
-
-
-#else //#if USE_COMPRESSED_BACKGROUNDS
-
 	DDSURFACEDESC2 back;
 	DDSURFACEDESC2 mine;
 
@@ -5772,9 +5673,6 @@ void Display::create_background_surface(UBYTE *image_data)
 
 	CopyBackground(image_data, lp_DD_Background);
 
-#endif //#else //#if USE_COMPRESSED_BACKGROUNDS
-
-
 	return;
 }
 
@@ -5783,11 +5681,7 @@ void Display::create_background_surface(UBYTE *image_data)
 
 void Display::blit_background_surface(bool b3DInFrame)
 {
-#if USE_COMPRESSED_BACKGROUNDS
-	CompressedBackground lpBG = NULL;
-#else
 	LPDIRECTDRAWSURFACE4 lpBG = NULL;
-#endif
 
 	if ( lp_DD_Background_use_instead != NULL )
 	{
@@ -5826,19 +5720,6 @@ void Display::blit_background_surface(bool b3DInFrame)
 
 			static iCount = 0;
 
-
-#if USE_COMPRESSED_BACKGROUNDS
-
-			if ( lpBG != NULL )
-			{
-				UnpackBackground ( (UCHAR *)lpBG, lpBackgroundCache );
-			}
-			else
-			{
-				// Bum - black screen time :-(
-				ASSERT ( FALSE );
-			}
-#else
 			{
 				// Copy the data to the texture cache thingie.
 				RECT rect;
@@ -5849,7 +5730,6 @@ void Display::blit_background_surface(bool b3DInFrame)
 				HRESULT hres = lpBackgroundCache->Blt ( &rect, lpBG, &rect, DDBLT_WAIT, NULL );
 				VERIFY(SUCCEEDED(hres));
 			}
-#endif
 		}
 
 		// ARGH! Got to use a poly draw instead. Useless machine.
@@ -5903,11 +5783,7 @@ void Display::destroy_background_surface()
 {
 	if (lp_DD_Background)
 	{
-#if USE_COMPRESSED_BACKGROUNDS
-		MemFree ( lp_DD_Background );
-#else //#if USE_COMPRESSED_BACKGROUNDS
 		lp_DD_Background->Release();
-#endif //#else //#if USE_COMPRESSED_BACKGROUNDS
 		lp_DD_Background = NULL;
 	}
 

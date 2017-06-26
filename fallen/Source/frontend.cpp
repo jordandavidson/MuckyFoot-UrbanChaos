@@ -15,7 +15,6 @@
 //#define BIN_BACKGROUNDS_PLEASE_BOB I have been defined
 #endif
 
-#ifndef TARGET_DC
 // On a PC, you need an exit. On a console, you don't.
 #define WANT_AN_EXIT_MENU_ITEM defined
 // Keyboard not currently supported on DC - might be in future.
@@ -23,12 +22,6 @@
 // On DC, the "Start" button is not allowed to be remapped.
 #define WANT_A_START_JOYSTICK_ITEM defined
 
-#else
-
-// On the DC, we need a title & language selection screen.
-#define WANT_A_TITLE_SCREEN defined
-
-#endif
 
 #ifndef PSX
 
@@ -54,20 +47,8 @@
 #include "..\ddlibrary\headers\dclowlevel.h"
 #include "panel.h"
 
-#ifdef TARGET_DC
-#include <platutil.h>
-#include <ceddcdrm.h>
-#include <segagdrm.h>
-#endif
-
 #include "interfac.h"
 extern	BOOL	allow_debug_keys;
-
-
-#ifndef TARGET_DC
-UBYTE build_dc = FALSE;		// Set to TRUE to save out all the dreamcast DAD files.
-UBYTE build_dc_mission;
-#endif
 
 //----------------------------------------------------------------------------
 // EXTERNS
@@ -81,7 +62,6 @@ extern DIJOYSTATE			the_state;
 
 extern void	init_joypad_config(void);
 
-void DreamCastCredits ( void );
 void	FRONTEND_display ( void );
 
 //----------------------------------------------------------------------------
@@ -149,14 +129,6 @@ void	FRONTEND_display ( void );
 #define FE_QUIT				(12)
 #endif
 #define FE_SAVE_CONFIRM		(14)
-#ifdef WANT_A_TITLE_SCREEN
-#define FE_TITLESCREEN		(15)
-#define FE_LANGUAGESCREEN	(16)
-#define FE_CHANGE_LANGUAGE	(17)
-#endif
-#ifdef TARGET_DC
-#define FE_VMU_SELECT		(18)
-#endif
 
 #ifdef WANT_AN_EXIT_MENU_ITEM
 #define FE_NO_REALLY_QUIT	(-1)
@@ -181,10 +153,7 @@ void	FRONTEND_display ( void );
 
 #define	MC_YN				(CBYTE*)( 1)
 #define	MC_SCANNER			(CBYTE*)( 2)
-#ifdef TARGET_DC
-#define	MC_JOYPAD_MODE		(CBYTE*)( 3)
-#define	MC_ANALOGUE_MODE	(CBYTE*)( 4)
-#endif
+
 
 //----------------------------------------------------------------------------
 // STRUCTS
@@ -248,8 +217,6 @@ struct MissionCache {
 	UBYTE district;
 };
 
-
-
 //
 // This is the order we recommend the missions be played in...
 //
@@ -298,10 +265,6 @@ CBYTE *suggest_order[] =
 
 	"!"
 };
-
-
-
-
 
 //
 // The script... biggest one at the moment is 17k
@@ -367,9 +330,6 @@ void FileCloseScript(void)
 // CONSTANTS
 //
 
-
-
-
 RawMenuData raw_menu_data[] = {
 	{		FE_MAINMENU,	OT_BUTTON,	X_START,		0,	FE_MAPSCREEN		},
 #ifndef VERSION_DEMO
@@ -388,49 +348,22 @@ RawMenuData raw_menu_data[] = {
 #ifdef WANT_AN_EXIT_MENU_ITEM
 	{				  0,	OT_BUTTON,	X_EXIT,			0,	FE_QUIT				},
 #endif
-#ifdef TARGET_DC
-    {     FE_LOADSCREEN,    OT_BUTTON,  X_VMU_SELECT,   0,  FE_VMU_SELECT       },
-    {                 0,    OT_BUTTON,  X_CANCEL,       0,  FE_BACK             },
-
-    {     FE_SAVESCREEN,    OT_BUTTON,  X_VMU_SELECT,   0,  FE_VMU_SELECT       },
-    {                 0,    OT_BUTTON,  X_CANCEL,       0,  FE_MAPSCREEN        },
-
-    {     FE_VMU_SELECT,    OT_BUTTON,  X_CANCEL,       0,  FE_BACK             },
-#else
     {     FE_LOADSCREEN,    OT_BUTTON,  X_CANCEL,       0,  FE_BACK             },
     {     FE_SAVESCREEN,    OT_BUTTON,  X_CANCEL,       0,  FE_MAPSCREEN        },
-#endif
-#ifdef TARGET_DC
-	{	FE_SAVE_CONFIRM,    OT_LABEL,	X_OVERWRITE_SURE,0,	0					},
-	{				  0,	OT_BUTTON,	X_OKAY,			0,	FE_MAPSCREEN     	},
-	{				  0,	OT_BUTTON,	X_CANCEL,		0,	FE_BACK				},
-#else
 	{	FE_SAVE_CONFIRM,    OT_LABEL,	X_ARE_YOU_SURE ,0,	0					},
 	{				  0,	OT_BUTTON,	X_OKAY,			0,	FE_MAPSCREEN     	},
 	{				  0,	OT_BUTTON,	X_CANCEL,		0,	FE_BACK				},
-#endif
-
-#ifdef TARGET_DC
-	{		  FE_CONFIG,	OT_BUTTON,	X_GENERAL,		0,	FE_CONFIG_OPTIONS	},
-#else
 	{		  FE_CONFIG,	OT_BUTTON,	X_OPTIONS,		0,	FE_CONFIG_OPTIONS	},
-#endif
 	{		          0,	OT_BUTTON,	X_GRAPHICS,		0,	FE_CONFIG_VIDEO		},
 	{				  0,	OT_BUTTON,	X_SOUND,		0,	FE_CONFIG_AUDIO		},
 #ifdef WANT_A_KEYBOARD_ITEM
 	{				  0,	OT_BUTTON,	X_KEYBOARD,		0,	FE_CONFIG_INPUT_KB	},
 #endif
 	{				  0,	OT_BUTTON,	X_JOYPAD,		0,	FE_CONFIG_INPUT_JP	},
-#ifdef TARGET_DC
-	{				  0,	OT_BUTTON,	X_CHANGE_JOYPAD,0,	FE_CHANGE_JOYPAD	},
-#endif
 	{				  0,	OT_BUTTON,	X_OKAY,			0,	FE_BACK				},
 	{	FE_CONFIG_AUDIO,	OT_SLIDER,	X_VOLUME,		0,	128					},
 	{				  0,	OT_SLIDER,	X_AMBIENT,		0,	128					},
 	{				  0,	OT_SLIDER,	X_MUSIC,		0,	128					},
-#ifdef TARGET_DC
-	{				  0,	OT_MULTI,	X_STEREO,	MC_YN,	1					},
-#endif
 	{				  0,	OT_BUTTON,	X_OKAY,			0,	FE_BACK				},
 #ifdef WANT_A_KEYBOARD_ITEM
 	{FE_CONFIG_INPUT_KB,  OT_KEYPRESS,	X_LEFT,			0,	0,					},
@@ -455,28 +388,6 @@ RawMenuData raw_menu_data[] = {
 	{				  0,	OT_BUTTON,	X_OKAY,			0,	FE_BACK,			},
 #endif
 
-
-#ifdef TARGET_DC
-
-	{FE_CONFIG_INPUT_JP,     OT_MULTI,	X_PAD_MODE,		MC_JOYPAD_MODE,	0,		},
-	{                 0,     OT_LABEL,	X_PAD_CUSTOM,	0,	0,					},
-	{				  0,  OT_PADPRESS,	X_PUNCH,		0,	0,					},
-	{                 0,  OT_PADPRESS,	X_KICK,			0,	0,					},
-	{				  0,  OT_PADPRESS,	X_JUMP,			0,	0,					},
-	{				  0,  OT_PADPRESS,	X_ACTION,		0,	0,					},
-	{				  0,  OT_PADPRESS,	X_PAD_WALK,		0,	0,					},
-	{				  0,  OT_PADPRESS,	X_SELECT,		0,	0,					},
-	{				  0,	 OT_LABEL,	X_CAMERA,		0,	0,					},
-	{				  0,  OT_PADPRESS,	X_PAD_MODE,		0,	0,					},
-	{				  0,  OT_PADPRESS,	X_LEFT,			0,	0,					},
-	{				  0,  OT_PADPRESS,	X_RIGHT,		0,	0,					},
-	{				  0,  OT_PADPRESS,	X_LOOK_AROUND,	0,	0,					},
-	{				  0,     OT_RESET,  X_RESET_DEFAULT,0,  0,					},
-
-	{				  0,	OT_BUTTON,	X_OKAY,			0,	FE_BACK,			},
-
-#else //#ifdef TARGET_DC
-
 	{FE_CONFIG_INPUT_JP,  OT_PADPRESS,	X_KICK,			0,	0,					},
 	{				  0,  OT_PADPRESS,	X_PUNCH,		0,	0,					},
 	{				  0,  OT_PADPRESS,	X_JUMP,			0,	0,					},
@@ -495,8 +406,6 @@ RawMenuData raw_menu_data[] = {
 
 	{				  0,	OT_BUTTON,	X_OKAY,			0,	FE_BACK,			},
 
-#endif //#else //#ifdef TARGET_DC
-
 
 //	{	FE_CONFIG_VIDEO,	OT_SLIDER,	X_DETAIL,		0,	128,				},
 #ifdef ALLOW_DANGEROUS_OPTIONS
@@ -506,23 +415,6 @@ RawMenuData raw_menu_data[] = {
 	{				  0,	 OT_MULTI,  X_COLOUR_DEPTH, 0,  1,					},
 #endif
 //	{                 0,     OT_LABEL,  X_DETAIL,	    0,  1,                  },
-#ifdef TARGET_DC
-	{   FE_CONFIG_VIDEO,     OT_MULTI,  X_SHADOWS,	MC_YN,  1,                  },
-//	{                 0,     OT_MULTI,  X_PUDDLES,	MC_YN,  1,                  },
-	{                 0,     OT_MULTI,  X_DIRT, 	MC_YN,  1,                  },
-	{                 0,     OT_MULTI,  X_MIST, 	MC_YN,  1,                  },
-	{                 0,     OT_MULTI,  X_RAIN, 	MC_YN,  1,                  },
-	{                 0,     OT_MULTI,  X_SKYLINE,	MC_YN,  1,                  },
-//	{				  0,	 OT_MULTI,  X_CRINKLES, MC_YN,  1,					},
-//	{				  0,	 OT_LABEL,	X_REFLECTIONS  ,0,	0					},
-//	{                 0,     OT_MULTI,  X_MOON,		MC_YN,  1,				    },
-//	{                 0,     OT_MULTI,  X_PEOPLE,	MC_YN,  1,					},
-//	{				  0,     OT_LABEL,  X_TEXTURE_MAP  ,0,  0,                  },
-//	{                 0,     OT_MULTI,  X_PERSPECTIVE,MC_YN,1,                  },
-//	{                 0,     OT_MULTI,  X_BILINEAR, MC_YN,  1,                  },
-//	{				  0,	OT_SLIDER,	"Gamma",		0,	128,				},
-	{				  0,	OT_BUTTON,	X_OKAY,			0,	FE_BACK,			},
-#else
 	{   FE_CONFIG_VIDEO,     OT_MULTI,  X_STARS,	MC_YN,  1,                  },
 	{                 0,     OT_MULTI,  X_SHADOWS,	MC_YN,  1,                  },
 	{                 0,     OT_MULTI,  X_PUDDLES,	MC_YN,  1,                  },
@@ -539,20 +431,8 @@ RawMenuData raw_menu_data[] = {
 	{                 0,     OT_MULTI,  X_BILINEAR, MC_YN,  1,                  },
 //	{				  0,	OT_SLIDER,	"Gamma",		0,	128,				},
 	{				  0,	OT_BUTTON,	X_OKAY,			0,	FE_BACK,			},
-#endif
-#ifdef TARGET_DC
-	{ FE_CONFIG_OPTIONS,	 OT_MULTI,	X_TRACK,MC_SCANNER,  0					},
-	{				  0,	 OT_MULTI,	X_CONTROLS,MC_ANALOGUE_MODE,	0    	},
-	{				  0,	 OT_MULTI,	X_VIBRATION,MC_YN,	0    	            },
-	{				  0,	 OT_MULTI,	X_VIBRATION_ENG,MC_YN,	0    	            },
-	{				  0,	OT_PADMOVE,	X_PANEL,		0,	0    				},
-#ifdef WANT_A_TITLE_SCREEN
-	{				  0,	 OT_BUTTON,	X_LANGUAGE,		0,  FE_LANGUAGESCREEN	},
-#endif
-#else
 	{ FE_CONFIG_OPTIONS,	 OT_LABEL,	X_SCANNER,      0,  0					},
 	{				  0,	 OT_MULTI,	X_TRACK,MC_SCANNER,	0       			},
-#endif
 	{				  0,	OT_BUTTON,	X_OKAY,			0,	FE_BACK,			},
 #ifdef WANT_AN_EXIT_MENU_ITEM
 	{			FE_QUIT,	 OT_LABEL,	X_ARE_YOU_SURE ,0,	0					},
@@ -560,36 +440,12 @@ RawMenuData raw_menu_data[] = {
 	{				  0,	OT_BUTTON,	X_CANCEL,		0,	FE_BACK				},
 #endif
 
-#ifdef WANT_A_TITLE_SCREEN
-	{ FE_LANGUAGESCREEN,	OT_BUTTON,	X_ENGLISH,		0,	FE_CHANGE_LANGUAGE	},
-	{				  0,	OT_BUTTON,	X_FRENCH,		0,	FE_CHANGE_LANGUAGE	},
-	{	 FE_TITLESCREEN,	OT_BUTTON,	X_GAME_NAME,	0,	FE_MAINMENU         },
-#endif
-
 	{				 -1,			0,				    0,	0					},
 };
 
 CBYTE menu_choice_yesno[20];// = { "no\0yes" };
 CBYTE menu_choice_scanner[255];
-#ifdef TARGET_DC
-CBYTE menu_choice_joypad_mode[50];
-CBYTE menu_choice_analogue_mode[50];
-#ifdef WANT_A_TITLE_SCREEN
-CBYTE menu_choice_language[50];
-#endif
-#endif
 
-#if TARGET_DC
-// Underlines, not spaces.
-CBYTE* menu_back_names[] = { "title_leaves1.tga", "title_rain1.tga", 
-	   					     "title_snow1.tga", "title_blood1.tga" };
-CBYTE* menu_map_names[]  = { "map_leaves_darci.tga", "map_rain_darci.tga", 
-						     "map_snow_darci.tga", "map_blood_darci.tga" };
-CBYTE* menu_brief_names[]= { "briefing_leaves_darci.tga", "briefing_rain_darci.tga", 
-						     "briefing_snow_darci.tga", "briefing_blood_darci.tga" };
-CBYTE* menu_config_names[]= { "config_leaves.tga", "config_rain.tga", 
-						     "config_snow.tga", "config_blood.tga" };
-#else
 CBYTE* menu_back_names[] = { "title leaves1.tga", "title rain1.tga", 
 	   					     "title snow1.tga", "title blood1.tga" };
 CBYTE* menu_map_names[]  = { "map leaves darci.tga", "map rain darci.tga", 
@@ -598,17 +454,9 @@ CBYTE* menu_brief_names[]= { "briefing leaves darci.tga", "briefing rain darci.t
 						     "briefing snow darci.tga", "briefing blood darci.tga" };
 CBYTE* menu_config_names[]= { "config leaves.tga", "config rain.tga", 
 						     "config snow.tga", "config blood.tga" };
-#endif
 
 CBYTE frontend_fonttable[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,!\":;'#$*-()[]\\/?»¿‹÷ƒŸ⁄”¡…";
 
-/*ULONG FRONTEND_leaf_colours[4] =
-	{
-		0x332d1d,
-		0x243224,
-		0x123320,
-		0x332f07
-	};*/
 ULONG FRONTEND_leaf_colours[4] =
 	{
 		0x665a3a,
@@ -616,8 +464,6 @@ ULONG FRONTEND_leaf_colours[4] =
 		0x246640,
 		0x665E0E
 	};
-
-
 
 //----------------------------------------------------------------------------
 // GLOBALS
@@ -629,12 +475,7 @@ CBYTE	  menu_buffer[2048];
 BOOL	  grabbing_key=0;
 BOOL	  grabbing_pad=0;
 BOOL	  m_bMovingPanel = FALSE;
-#ifdef TARGET_DC
-// Dynamically allocated instead.
-Kibble	  *kibble = NULL;
-#else
 Kibble	  kibble[512];
-#endif
 UBYTE	  kibble_off[512];
 SLONG	  fade_state=0;
 UBYTE	  fade_mode=1;
@@ -658,7 +499,6 @@ UBYTE	  complete_point=0;
 #endif
 UBYTE	  mission_launch=0;
 UBYTE	  previous_mission_launch=0;
-BOOL	  ragepro_sucks=0;
 BOOL	  cheating=0;
 SLONG	  MidX=0, MidY;
 float	  ScaleX, ScaleY; // bwahahaha... and lo! the floats creep in! see the extent of my evil powers! muahahaha!  *cough*  er...
@@ -698,56 +538,10 @@ bool m_bGoIntoSaveScreen = FALSE;
 
 BOOL bCanChangeJoypadButtons = FALSE;
 
-
-#ifdef TARGET_DC
-#define QUICK_INFO_MAX_LEN 40
-char pcQuickInfo[QUICK_INFO_MAX_LEN+1] = "";
-DWORD dwQuickInfotimeGetTimeExpires = 0;
-bool bQuickInfoReplaceWithSegasMadMessage = FALSE;
-#endif
-
-
-//
-// The three screen images for each theme are now preloaded.
-//
-
-
-#ifdef TARGET_DC
-// If you're short of memory, ditch one.
-//#define ONLY_USE_THREE_BACKGROUNDS_PLEASE_BOB defined
-#endif
-
-
-#if USE_COMPRESSED_BACKGROUNDS
-
-CompressedBackground screenfull_back = NULL;
-CompressedBackground screenfull_map = NULL;
-#ifndef ONLY_USE_THREE_BACKGROUNDS_PLEASE_BOB
-CompressedBackground screenfull_config = NULL;
-#endif
-CompressedBackground screenfull_brief = NULL;
-#ifdef WANT_A_TITLE_SCREEN
-CompressedBackground screenfull_title = NULL;
-#endif
-
-
-//
-// The surface we use to do swipes\fades.
-//
-
-CompressedBackground screenfull = NULL;
-
-#else
-
 LPDIRECTDRAWSURFACE4 screenfull_back = NULL;
 LPDIRECTDRAWSURFACE4 screenfull_map = NULL;
-#ifndef ONLY_USE_THREE_BACKGROUNDS_PLEASE_BOB
 LPDIRECTDRAWSURFACE4 screenfull_config = NULL;
-#endif
 LPDIRECTDRAWSURFACE4 screenfull_brief = NULL;
-#ifdef WANT_A_TITLE_SCREEN
-LPDIRECTDRAWSURFACE4 screenfull_title = NULL;
-#endif
 
 //
 // The surface we use to do swipes\fades.
@@ -755,99 +549,10 @@ LPDIRECTDRAWSURFACE4 screenfull_title = NULL;
 
 LPDIRECTDRAWSURFACE4 screenfull = NULL;
 
-#endif
-
-
-
-
-
 
 //----------------------------------------------------------------------------
 // FUNCTIONS
 //
-
-//--- tools ---
-
-#ifdef TARGET_DC
-
-// TRUE = normal behaviour - reset on door open.
-// FALSE = ignore door resets.
-void ChangeDoorResetStatus ( bool bAllowReset )
-{
-	// And unlock the disk door reset thingie.
-	HANDLE handle = CreateFile(TEXT("\\Device\\CDROM0"), GENERIC_READ, 0, NULL, OPEN_EXISTING, 0, NULL );
-    if ( handle == INVALID_HANDLE_VALUE )
-	{
-		ASSERT ( FALSE );
-		return;
-	}
-
-	DWORD dwDummy;
-	SEGACD_DOOR_BEHAVIOR sdb;
-	if ( bAllowReset )
-	{
-		sdb.dwBehavior = SEGACD_DOOR_REBOOT;
-	}
-	else
-	{
-		sdb.dwBehavior = SEGACD_DOOR_NOTIFY_APP;
-	}
-	DeviceIoControl ( handle, IOCTL_SEGACD_SET_DOOR_BEHAVIOR,
-						&sdb, sizeof ( sdb ),
-						NULL, 0,
-						&dwDummy, NULL );
-
-	CloseHandle ( handle );
-}
-
-#endif
-
-
-
-//#ifndef TARGET_DC
-//// define this to save backgrounds out again in DC file format.
-//#define SAVE_MY_BACKGROUNDS_PLEASE_BOB defined
-//#endif
-
-
-#if USE_COMPRESSED_BACKGROUNDS
-
-void	FRONTEND_scr_add(CompressedBackground *screen, UBYTE *image_data)
-{
-	// First convert to 565 format.
-	WORD *pwTemp = (WORD *)MemAlloc ( 640 * 480 * 2 );
-	ASSERT ( pwTemp != NULL );
-	UBYTE *pbSrc = image_data;
-
-	for ( int i = 0; i < 640*480; i++ )
-	{
-		// From 24-bit RGB to 565.
-		*pwTemp  = ( ( *pbSrc++ ) & 0xf8 ) << 8;
-		*pwTemp |= ( ( *pbSrc++ ) & 0xfc ) << 3;
-		*pwTemp |= ( ( *pbSrc++ ) & 0xf8 ) >> 3;
-		pwTemp++;
-	}
-
-	// See how big it is, compressed.
-	int iSize = PackBackground ( NULL, pwTemp );
-
-	TRACE ( "FRONTEND_scr_add: Original 565 0x%x, now 0x%x, saving of %i percent\n", 640*480*2, iSize, (100*iSize)/(640*480*2) );
-
-	if (*screen)
-	{
-		MemFree ( *screen );
-		*screen = NULL;
-	}
-
-	*screen = MemAlloc ( iSize );
-
-	PackBackground ( (UBYTE *)*screen, pwTemp );
-
-	// And free the 565 version.
-	MemFree ( (void *)pwTemp );
-}
-
-#else //#if USE_COMPRESSED_BACKGROUNDS
 
 void	FRONTEND_scr_add(LPDIRECTDRAWSURFACE4 *screen, UBYTE *image_data)
 {
@@ -863,7 +568,6 @@ void	FRONTEND_scr_add(LPDIRECTDRAWSURFACE4 *screen, UBYTE *image_data)
 	the_display.lp_DD_BackSurface->GetSurfaceDesc(&back);
 
 
-
 	//
 	// Create the mirror surface in system memory.
 	//
@@ -874,25 +578,7 @@ void	FRONTEND_scr_add(LPDIRECTDRAWSURFACE4 *screen, UBYTE *image_data)
 	mine.dwWidth         = back.dwWidth;
 	mine.dwHeight        = back.dwHeight;
 	mine.ddpfPixelFormat = back.ddpfPixelFormat;
-#ifdef TARGET_DC
-	// No software blits on DC, but I'll do it myself.
 	mine.ddsCaps.dwCaps	 = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_SYSTEMMEMORY;
-#else
-	mine.ddsCaps.dwCaps	 = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_SYSTEMMEMORY;
-
-
-
-#ifdef SAVE_MY_BACKGROUNDS_PLEASE_BOB
-	// Force the format to be 640x480x565, because that's what the DC needs.
-	mine.dwWidth = 640;
-	mine.dwHeight = 480;
-	mine.ddpfPixelFormat.dwRBitMask = 0xf800;
-	mine.ddpfPixelFormat.dwGBitMask = 0x07e0;
-	mine.ddpfPixelFormat.dwBBitMask = 0x001f;
-#endif
-
-
-#endif
 
 	HRESULT result = the_display.lp_DD4->CreateSurface(&mine, screen, NULL);
 
@@ -913,73 +599,6 @@ extern void CopyBackground(UBYTE* image_data, IDirectDrawSurface4* surface);
 
 	return;
 }
-#endif //#else //#if USE_COMPRESSED_BACKGROUNDS
-
-
-
-
-
-#if USE_COMPRESSED_BACKGROUNDS
-
-#ifndef TARGET_DC
-#error Compressed backgrounds only work on the DC at the moment.
-#endif
-
-void	FRONTEND_scr_img_load_into_screenfull(CBYTE *name, CompressedBackground *screen)
-{
-	MFFileHandle	image_file;
-	SLONG	height;
-	CBYTE	fname[200];
-	UBYTE*	image;
-	UBYTE  *image_data;
-
-	//if (screenfull) FRONTEND_scr_del();
-
-	if ( *screen != NULL )
-	{
-		MemFree ( *screen );
-		*screen = NULL;
-	}
-
-	// Look for the preprocessed version.
-	sprintf(fname,"%sdata\\%s",DATA_DIR,name);
-	// Change the extension.
-	char *pchTemp = fname + strlen ( fname ) - 4;
-	ASSERT ( pchTemp[0] == '.' );
-	ASSERT ( pchTemp[1] == 't' );
-	ASSERT ( pchTemp[2] == 'g' );
-	ASSERT ( pchTemp[3] == 'a' );
-	pchTemp[1] = 'b';
-	pchTemp[2] = 'g';
-	pchTemp[3] = 's';
-
-	// .BGS - BackGroundScreen.
-
-	MFFileHandle handle = FileOpen ( fname );
-	if ( handle == FILE_OPEN_ERROR )
-	{
-		ASSERT ( FALSE );
-	}
-	else
-	{
-		SLONG slSize = FileSize ( handle );
-
-		*screen = MemAlloc ( slSize );
-		if ( *screen == NULL )
-		{
-			// Out of memory
-			TRACE ( "Out of memory for screen %s\n", fname );
-			return;
-		}
-	
-		SLONG res = FileRead ( handle, *screen, slSize );
-		ASSERT ( res == slSize );
-
-		FileClose ( handle );
-	}
-}
-
-#else //#if USE_COMPRESSED_BACKGROUNDS
 
 void	FRONTEND_scr_img_load_into_screenfull(CBYTE *name, LPDIRECTDRAWSURFACE4 *screen)
 {
@@ -992,7 +611,6 @@ void	FRONTEND_scr_img_load_into_screenfull(CBYTE *name, LPDIRECTDRAWSURFACE4 *sc
 	//if (screenfull) FRONTEND_scr_del();
 
 	*screen = NULL;
-
 
 	sprintf(fname,"%sdata\\%s",DATA_DIR,name);
 
@@ -1021,92 +639,6 @@ void	FRONTEND_scr_img_load_into_screenfull(CBYTE *name, LPDIRECTDRAWSURFACE4 *sc
 		FRONTEND_scr_add(screen, image_data);
 
 		MemFree(image_data);
-
-
-#ifndef TARGET_DC
-#ifdef SAVE_MY_BACKGROUNDS_PLEASE_BOB 
-		// Save the screen out - should already be in 565.
-
-
-		// First see if we need to make a copy, or if it already exists.
-		sprintf(fname,"%sdata\\%s",DATA_DIR,name);
-		// Change the extension.
-		char *pchTemp = fname + strlen ( fname ) - 4;
-		ASSERT ( pchTemp[0] == '.' );
-		ASSERT ( pchTemp[1] == 't' );
-		ASSERT ( pchTemp[2] == 'g' );
-		ASSERT ( pchTemp[3] == 'a' );
-		pchTemp[1] = 'b';
-		pchTemp[2] = 'g';
-		pchTemp[3] = 's';
-		// .BGS - BackGroundScreen. Wank, eh? But there's no format, it's just 640x480, 565 pixels, raw.
-
-
-		// If it already exists, don't bother.
-		MFFileHandle handle = FileCreate ( fname, FALSE );
-		if ( handle == FILE_CREATION_ERROR )
-		{
-			// Probably already exists.
-			TRACE ( "Couldn't save Dreamcast background <%s> - might already exist\n", fname );
-			return;
-		}
-
-
-
-
-		// First make a linear-mem copy.
-		WORD *pwTemp = (WORD *)MemAlloc ( 640 * 480 * 2 );
-		ASSERT ( pwTemp != NULL );
-
-		DDSURFACEDESC2 mine;
-		InitStruct(mine);
-		HRESULT result = (*screen)->Lock ( NULL, &mine, DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT, NULL );
-		ASSERT ( result == DD_OK );
-
-		char *src = (char *)( mine.lpSurface );
-		char *dst = (char *)pwTemp;
-		for ( int i = 0; i < 480; i++ )
-		{
-			memcpy ( dst, src, 640 * 2 );
-			src += mine.lPitch;
-			dst += 640 * 2;
-		}
-
-		(*screen)->Unlock ( NULL );
-
-
-
-		// See how big it is, compressed.
-extern int PackBackground ( UBYTE* image_data, WORD *surface );
-		int iSize = PackBackground ( NULL, pwTemp );
-
-		TRACE ( "FRONTEND_scr_img_load_into_screenfull: Original 565 0x%x, now 0x%x, saving of %i percent\n", 640*480*2, iSize, (100*iSize)/(640*480*2) );
-
-		void *pvCompressed = MemAlloc ( iSize );
-		ASSERT ( pvCompressed != NULL );
-
-		PackBackground ( (UBYTE *)pvCompressed, pwTemp );
-
-		// And free the linear version.
-		MemFree ( (void *)pwTemp );
-
-
-
-		int res = FileWrite ( handle, pvCompressed, iSize );
-		ASSERT ( res == iSize );
-		FileClose ( handle );
-
-		TRACE ( "Saved Dreamcast background <%s>\n", fname );
-
-		MemFree ( pvCompressed );
-
-#endif
-#endif
-
-
-
-
-
 	}
 	else
 	{
@@ -1114,75 +646,16 @@ extern int PackBackground ( UBYTE* image_data, WORD *surface );
 	}
 }
 
-
-#endif //#else //#if USE_COMPRESSED_BACKGROUNDS
-
-
-
-
 void FRONTEND_scr_unload_theme()
 {
 	the_display.lp_DD_Background_use_instead = NULL;
 
-
-#ifdef TARGET_DC
-	// Recover moderately gracefully from having your bollocks stamped on.
-#ifdef WANT_A_TITLE_SCREEN
-	if ( ( screenfull_title != NULL ) && ( screenfull_title == screenfull_back ) )
-	{
-		ASSERT ( FALSE );
-		screenfull_title = NULL;
-	}
-#endif
-#ifndef ONLY_USE_THREE_BACKGROUNDS_PLEASE_BOB
-	if ( ( screenfull_config != NULL ) && ( screenfull_config == screenfull_back ) )
-	{
-		ASSERT ( FALSE );
-		screenfull_config = NULL;
-	}
-#endif
-	if ( ( screenfull_brief != NULL ) && ( screenfull_brief == screenfull_map ) )
-	{
-		ASSERT ( FALSE );
-		screenfull_brief = NULL;
-	}
-	if ( ( screenfull_map != NULL ) && ( screenfull_map == screenfull_back ) )
-	{
-		ASSERT ( FALSE );
-		screenfull_map = NULL;
-	}
-#endif
-
-
-#if USE_COMPRESSED_BACKGROUNDS
-
-	if (screenfull_back  ) {MemFree(screenfull_back)  ; screenfull_back   = NULL;}
-	if (screenfull_map   ) {MemFree(screenfull_map)   ; screenfull_map    = NULL;}
-	if (screenfull_brief ) {MemFree(screenfull_brief) ; screenfull_brief  = NULL;}
-#ifndef ONLY_USE_THREE_BACKGROUNDS_PLEASE_BOB
-	if (screenfull_config) {MemFree(screenfull_config); screenfull_config = NULL;}
-#endif
-#ifdef WANT_A_TITLE_SCREEN
-	if (screenfull_title) {MemFree(screenfull_title); screenfull_title = NULL;}
-#endif
-
-
-#else
-
 	if (screenfull_back  ) {screenfull_back  ->Release(); screenfull_back   = NULL;}
 	if (screenfull_map   ) {screenfull_map   ->Release(); screenfull_map    = NULL;}
 	if (screenfull_brief ) {screenfull_brief ->Release(); screenfull_brief  = NULL;}
-#ifndef ONLY_USE_THREE_BACKGROUNDS_PLEASE_BOB
 	if (screenfull_config) {screenfull_config->Release(); screenfull_config = NULL;}
-#endif
-#ifdef WANT_A_TITLE_SCREEN
-	if (screenfull_title) {screenfull_title->Release(); screenfull_title = NULL;}
-#endif
-
-#endif
 
 	screenfull = NULL;
-
 }
 
 
@@ -1196,103 +669,33 @@ void FRONTEND_scr_new_theme(
 
 	// Stop all music while we load stuff from disk.
 	stop_all_fx_and_music();
-
-
-
 	
 	if (the_display.lp_DD_Background_use_instead == screenfull_back  ) {last = 1;}
 	if (the_display.lp_DD_Background_use_instead == screenfull_map   ) {last = 2;}
 	if (the_display.lp_DD_Background_use_instead == screenfull_brief ) {last = 3;}
-#ifndef ONLY_USE_THREE_BACKGROUNDS_PLEASE_BOB
 	if (the_display.lp_DD_Background_use_instead == screenfull_config) {last = 4;}
-#endif
-#ifdef WANT_A_TITLE_SCREEN
-	if (the_display.lp_DD_Background_use_instead == screenfull_title) {last = 5;}
-#endif
-
 
 	FRONTEND_scr_unload_theme();
 
 	FRONTEND_scr_img_load_into_screenfull(fname_back  , &screenfull_back  );
 	FRONTEND_scr_img_load_into_screenfull(fname_map   , &screenfull_map   );
 	FRONTEND_scr_img_load_into_screenfull(fname_brief , &screenfull_brief );
-#ifndef ONLY_USE_THREE_BACKGROUNDS_PLEASE_BOB
 	FRONTEND_scr_img_load_into_screenfull(fname_config, &screenfull_config);
-#endif
-#ifdef WANT_A_TITLE_SCREEN
-
-	// Always the same - doesn't change with theme.
-	// Does change with nationality though!
-extern LPSTR lpszGlobalArgs;
-	if ( NULL != strstr ( lpszGlobalArgs, "NO_PAL" ) )
-	{
-		// An NTSC build, so load the Yank screen instead.
-		FRONTEND_scr_img_load_into_screenfull("DCtitlepage_us.tga", &screenfull_title);
-	}
-	else
-	{
-		FRONTEND_scr_img_load_into_screenfull("DCtitlepage_uk.tga", &screenfull_title);
-	}
-#endif
-
-
-#ifdef TARGET_DC
-	if ( screenfull_map == NULL )
-	{
-		// Shit - out of memory. Panic.
-		ASSERT ( FALSE );
-		screenfull_map = screenfull_back;
-	}
-	if ( screenfull_brief == NULL )
-	{
-		// Shit - out of memory. Panic.
-		ASSERT ( FALSE );
-		screenfull_brief = screenfull_map;
-	}
-#ifndef ONLY_USE_THREE_BACKGROUNDS_PLEASE_BOB
-	if ( screenfull_config == NULL )
-	{
-		// Shit - out of memory. Panic.
-		ASSERT ( FALSE );
-		screenfull_config = screenfull_back;
-	}
-#endif
-#ifdef WANT_A_TITLE_SCREEN
-	if ( screenfull_title == NULL )
-	{
-		// Shit - out of memory. Panic.
-		ASSERT ( FALSE );
-		screenfull_title = screenfull_back;
-	}
-#endif
-#endif
 
 	switch(last)
 	{
 		case 1: the_display.lp_DD_Background_use_instead = screenfull_back;   break;
 		case 2:	the_display.lp_DD_Background_use_instead = screenfull_map;	  break;
 		case 3:	the_display.lp_DD_Background_use_instead = screenfull_brief;  break;
-#ifdef ONLY_USE_THREE_BACKGROUNDS_PLEASE_BOB
-		// On DC, use the normal background, then draw an alpha poly over it.
-		// FIXME - not actually drawing the alpha poly yet.
-		case 4:	the_display.lp_DD_Background_use_instead = screenfull_back; break;
-#else
 		case 4:	the_display.lp_DD_Background_use_instead = screenfull_config; break;
-#endif
-#ifdef WANT_A_TITLE_SCREEN
-		case 5:	the_display.lp_DD_Background_use_instead = screenfull_title; break;
-#endif
 		default:
 			ASSERT ( FALSE );
 			break;
 	}
 
-
 	// And then restart the music.
 	MUSIC_mode(MUSIC_MODE_FRONTEND);
-
 }
-
 
 void FRONTEND_restore_screenfull_surfaces(void)
 {
@@ -1302,78 +705,6 @@ void FRONTEND_restore_screenfull_surfaces(void)
 		menu_brief_names [menu_theme],
 		menu_config_names[menu_theme]);
 }
-
-
-
-#ifdef TARGET_DC
-
-
-
-VMU_Screen *pvmuscreenAmmo = NULL;
-VMU_Screen *pvmuscreenMFLogo = NULL;
-VMU_Screen *pvmuscreenPressStart = NULL;
-VMU_Screen *pvmuscreenSaved = NULL;
-VMU_Screen *pvmuscreenUCLogo = NULL;
-VMU_Screen *pvmuscreenWait = NULL;
-
-
-
-// Shows the given screen.
-// If the screen is NULL, it shops the default screen.
-// It will only show the default screen every two seconds or so,
-// so a displayed screen will be replaced in two seconds by the default screen,
-// or immediately by a non-default screen.
-#define SEND_VMU_PICCIE_EVERY 3000
-void FRONTEND_show_VMU_screen ( VMU_Screen *screen )
-{
-	static DWORD dwLastTimeWeSentScreenToVMU = 0;
-	static int iLastDefaultScreen = 0;
-
-	if ( screen == NULL )
-	{
-		if ( ( timeGetTime() - dwLastTimeWeSentScreenToVMU ) < SEND_VMU_PICCIE_EVERY )
-		{
-			// Nope - don't do it yet.
-			return;
-		}
-
-		// Pick a default screen.
-		iLastDefaultScreen++;
-		if ( iLastDefaultScreen >= 2 )
-		{
-			iLastDefaultScreen = 0;
-		}
-
-		switch ( iLastDefaultScreen )
-		{
-		case 0:
-			screen = pvmuscreenMFLogo;
-			break;
-		case 1:
-			screen = pvmuscreenUCLogo;
-			break;
-		}
-	}
-
-	dwLastTimeWeSentScreenToVMU = timeGetTime();
-
-	WriteLCDScreenToCurrentController ( screen );
-}
-
-
-
-
-void FRONTEND_MakeQuickMessage ( char *pcText, int iMilliSecsToShowFor, bool bReplaceWithSegasMadMessage = FALSE )
-{
-	strncpy ( pcQuickInfo, pcText, QUICK_INFO_MAX_LEN );
-	pcQuickInfo[QUICK_INFO_MAX_LEN] = '\0';
-	dwQuickInfotimeGetTimeExpires = timeGetTime() + iMilliSecsToShowFor;
-	bQuickInfoReplaceWithSegasMadMessage = bReplaceWithSegasMadMessage;
-}
-
-#endif
-
-
 
 void	FRONTEND_ParseMissionData(CBYTE *text, CBYTE version, MissionData *mdata) {
 	UWORD a,n;
@@ -1423,7 +754,6 @@ void	FRONTEND_ParseMissionData(CBYTE *text, CBYTE version, MissionData *mdata) {
 	if (*text==13) *text=0;
 }
 
-#ifndef TARGET_DC
 CBYTE* FRONTEND_LoadString(MFFileHandle &file, CBYTE *txt) {
 	CBYTE *ptr=txt;
 
@@ -1446,18 +776,8 @@ void FRONTEND_SaveString(MFFileHandle &file, CBYTE *txt) {
 	FileWrite(file,txt,strlen(txt));
 	FileWrite(file,crlf,2);
 }
-#endif
-
-
 
 SLONG FRONTEND_AlterAlpha(SLONG rgb, SWORD add, SBYTE shift) {
-
-#ifdef TARGET_DC
-	// Instead of darker/lighter, we change size.
-	return rgb;
-
-#else
-
 	SLONG alpha=rgb>>24;
 	alpha<<=shift;
 	alpha+=add;
@@ -1465,9 +785,6 @@ SLONG FRONTEND_AlterAlpha(SLONG rgb, SWORD add, SBYTE shift) {
 	if (alpha<0) alpha=0;
 	rgb&=0xffffff;
 	return rgb|(alpha<<24);
-
-#endif
-
 }
 
 
@@ -1491,29 +808,12 @@ void FRONTEND_recenter_menu ( void )
 	menu_state.scroll = 0;
 }
 
-
-#ifdef TARGET_DC
 ULONG	FRONTEND_fix_rgb(ULONG rgb, BOOL sel)
 {
 	rgb=fade_rgb;
 	if (sel) rgb=FRONTEND_AlterAlpha(rgb,0,1);
 	return rgb;
 }
-#else
-ULONG	FRONTEND_fix_rgb(ULONG rgb, BOOL sel)
-{
-	if (ragepro_sucks) {	// but the Rage Pro sucks, even if you don't have one in your machine
-		rgb>>=24;
-		if (sel) rgb<<=1;
-		rgb|=(rgb<<8)|(rgb<<16);
-		rgb|=0xff000000;
-	} else {
-		rgb=fade_rgb;
-		if (sel) rgb=FRONTEND_AlterAlpha(rgb,0,1);
-	}
-	return rgb;
-}
-#endif
 
 //--- drawy stuff ---
 
@@ -1528,25 +828,6 @@ void	FRONTEND_draw_title(SLONG x, SLONG y, SLONG cutx, CBYTE *str, BOOL wibble, 
 	SLONG seed=*str;
 	SWORD xo=0, yo=0;
 
-
-#ifdef TARGET_DC
-	// Scan for the word "VMU".
-	// Mark the "U" as not to be drawn.
-	CBYTE *pDontDrawThisLetter = NULL;
-	if ( bWriteVMInsteadOfVMU )
-	{
-		pDontDrawThisLetter = strstr ( str, "VMU" );
-		if ( pDontDrawThisLetter != NULL )
-		{
-			// Point to the U
-			pDontDrawThisLetter += 2;
-		}
-	}
-#endif
-
-
-
-
 	for (;*str;str++) {
 		if (!wibble)
 		{
@@ -1560,20 +841,10 @@ void	FRONTEND_draw_title(SLONG x, SLONG y, SLONG cutx, CBYTE *str, BOOL wibble, 
 #endif
 		}
 
-#ifdef TARGET_DC
-		if ( pDontDrawThisLetter == str )
-		{
-			// Ignore this letter.
-			ASSERT ( *str == 'U' );
+		if (((r_to_l)&&(x>cutx))||((!r_to_l)&&(x<cutx))) {
+			MENUFONT_Draw(x+xo,y+yo,BIG_FONT_SCALE+(wibble<<5),str,rgb,0,1);
 		}
-		else
-#endif
-		{
-			if (((r_to_l)&&(x>cutx))||((!r_to_l)&&(x<cutx))) {
-				MENUFONT_Draw(x+xo,y+yo,BIG_FONT_SCALE+(wibble<<5),str,rgb,0,1);
-			}
-			x+=(MENUFONT_CharWidth(*str,BIG_FONT_SCALE))-2;
-		}
+		x+=(MENUFONT_CharWidth(*str,BIG_FONT_SCALE))-2;
 	}
 
 }
@@ -1595,24 +866,10 @@ void	FRONTEND_init_xition ( void ) {
 
 		//FRONTEND_scr_img(menu_map_names[menu_theme]);
 		break;
-#ifdef WANT_A_TITLE_SCREEN
-	case FE_TITLESCREEN:
-	case FE_LANGUAGESCREEN:
-		screenfull = screenfull_title;
-		break;
-#endif
 	case FE_LOADSCREEN:
 	case FE_SAVESCREEN:
 	case FE_CONFIG: 
-#ifdef TARGET_DC
-	case FE_VMU_SELECT:
-#endif
-
-#ifdef ONLY_USE_THREE_BACKGROUNDS_PLEASE_BOB
-		screenfull = screenfull_back;
-#else
 		screenfull = screenfull_config;
-#endif
 
 		//FRONTEND_scr_img(menu_config_names[menu_theme]);
 		break;
@@ -1625,22 +882,12 @@ void	FRONTEND_init_xition ( void ) {
 		}
 		else
 		{
-#ifdef ONLY_USE_THREE_BACKGROUNDS_PLEASE_BOB
-			screenfull = screenfull_back;
-#else
 			screenfull = screenfull_config;
-#endif
 		}
 	}
 }
 
-
-
-#if USE_COMPRESSED_BACKGROUNDS
-CompressedBackground lpFRONTEND_show_xition_LastBlit = NULL;
-#else //#if USE_COMPRESSED_BACKGROUNDS
 LPDIRECTDRAWSURFACE4 lpFRONTEND_show_xition_LastBlit = NULL;
-#endif //#else //#if USE_COMPRESSED_BACKGROUNDS
 
 void	FRONTEND_show_xition() {
 	RECT rc;
@@ -1658,113 +905,27 @@ void	FRONTEND_show_xition() {
 	}
 	else
 	{
-		// This is a great switch statement!
-		//switch (menu_state.mode) {
-		//case FE_LOADSCREEN:
-		//case FE_SAVESCREEN:
-		//case FE_MAPSCREEN:
-		//case FE_CONFIG:
-		//case FE_MAINMENU:
-		//default:
-			rc.top=0; rc.bottom=RealDisplayHeight;
-			rc.left=0; 
-			if (RealDisplayWidth==640)
-			{
-				rc.right=fade_state*10;
-			}
-			else
-			{
-				rc.right=fade_state*10*RealDisplayWidth/640;
-			}
-			if ( rc.right > 0 )
-			{
-				bDoBlit = TRUE;
-			}
-			//break;
-		//}
+		rc.top=0; rc.bottom=RealDisplayHeight;
+		rc.left=0; 
+		if (RealDisplayWidth==640)
+		{
+			rc.right=fade_state*10;
+		}
+		else
+		{
+			rc.right=fade_state*10*RealDisplayWidth/640;
+		}
+		if ( rc.right > 0 )
+		{
+			bDoBlit = TRUE;
+		}
 	}
 
 
 	if ( bDoBlit )
 	{
-#ifndef TARGET_DC
 		the_display.lp_DD_BackSurface->Blt(&rc,screenfull,&rc,DDBLT_WAIT,0);
-#else
-
-extern LPDIRECTDRAWSURFACE4 lpBackgroundCache2;
-
-		HRESULT result;
-
-		// Use a poly draw.
-
-		ASSERT ( lpBackgroundCache2 != NULL );
-
-#if USE_COMPRESSED_BACKGROUNDS
-		if ( lpFRONTEND_show_xition_LastBlit != screenfull )
-		{
-			lpFRONTEND_show_xition_LastBlit = screenfull;
-			if ( screenfull != NULL )
-			{
-				UnpackBackground ( (UCHAR*)screenfull, lpBackgroundCache2 );
-			}
-			else
-			{
-				// Bum - black screen time :-(
-				ASSERT ( FALSE );
-			}
-		}
-
-#else //#if USE_COMPRESSED_BACKGROUNDS
-		if ( lpFRONTEND_show_xition_LastBlit != screenfull )
-		{
-			// Get the texture handle.
-			lpFRONTEND_show_xition_LastBlit = screenfull;
-			// Copy the data to the texture cache thingie.
-			RECT rect;
-			rect.top = 0;
-			rect.left = 0;
-			rect.right = 640;
-			rect.bottom = 480;
-			if ( screenfull == NULL )
-			{
-				// Nadgers. Black screen time.
-				ASSERT ( FALSE );
-			}
-			else
-			{
-				HRESULT hres = lpBackgroundCache2->Blt ( &rect, screenfull, &rect, DDBLT_WAIT, NULL );
-				VERIFY(SUCCEEDED(hres));
-			}
-		}
-#endif //#else //#if USE_COMPRESSED_BACKGROUNDS
-
-		ASSERT ( lpFRONTEND_show_xition_LastBlit != NULL );
-
-		POLY_Point  pp[4];
-		POLY_Point *quad[4] = { &pp[0], &pp[1], &pp[2], &pp[3] };
-
-		pp[0].colour=0xffffffff; pp[0].specular=0;
-		pp[1].colour=0xffffffff; pp[1].specular=0;
-		pp[2].colour=0xffffffff; pp[2].specular=0;
-		pp[3].colour=0xffffffff; pp[3].specular=0;
-
-		pp[0].X=rc.left; pp[0].Y=rc.top; pp[0].Z=0.0002f;
-		pp[0].u=rc.left / 1024.0f; pp[0].v=rc.top / 512.0f;
-
-		pp[1].X=rc.left; pp[1].Y=rc.bottom; pp[1].Z=0.0002f;
-		pp[1].u=rc.left / 1024.0f; pp[1].v=rc.bottom / 512.0f;
-
-		pp[2].X=rc.right; pp[2].Y=rc.top; pp[2].Z=0.0002f;
-		pp[2].u=rc.right / 1024.0f; pp[2].v=rc.top / 512.0f;
-
-		pp[3].X=rc.right; pp[3].Y=rc.bottom; pp[3].Z=0.0002f;
-		pp[3].u=rc.right / 1024.0f; pp[3].v=rc.bottom / 512.0f;
-
-		POLY_add_quad ( quad, POLY_PAGE_BACKGROUND_IMAGE2, FALSE, TRUE );
-
-#endif
 	}
-
 }
 
 extern UBYTE* image_mem;
@@ -1779,12 +940,6 @@ void	FRONTEND_stop_xition()
 		case FE_MAINMENU:
 			UseBackSurface(screenfull_back);
 			break;
-#ifdef WANT_A_TITLE_SCREEN 
-		case FE_TITLESCREEN:
-		case FE_LANGUAGESCREEN:
-			UseBackSurface(screenfull_title);
-			break;
-#endif
 		case FE_CONFIG:
 		case FE_CONFIG_VIDEO:
 		case FE_CONFIG_AUDIO:
@@ -1794,14 +949,7 @@ void	FRONTEND_stop_xition()
 		case FE_CONFIG_INPUT_JP:
 		case FE_LOADSCREEN:
 		case FE_SAVESCREEN:
-#ifdef TARGET_DC
-		case FE_VMU_SELECT:
-#endif
-#ifdef ONLY_USE_THREE_BACKGROUNDS_PLEASE_BOB
-			UseBackSurface(screenfull_back);
-#else
 			UseBackSurface(screenfull_config);
-#endif
 			break;
 		case FE_MAPSCREEN:
 			UseBackSurface(screenfull_map);
@@ -1813,11 +961,7 @@ void	FRONTEND_stop_xition()
 			}
 			else
 			{
-#ifdef ONLY_USE_THREE_BACKGROUNDS_PLEASE_BOB
-				UseBackSurface(screenfull_back);
-#else
 				UseBackSurface(screenfull_config);
-#endif
 			}
 			break;
 	}
@@ -2063,11 +1207,7 @@ void	FRONTEND_DrawKey(MenuData *md) {
 		c0<<=16;
 	}
 	
-#ifdef TARGET_DC
-	strcpy ( str, "FixMePlease" );
-#else
 	GetKeyNameText(c0,str,25);
-#endif
 
 	if (IsEnglish)
 	{
@@ -2080,90 +1220,6 @@ void	FRONTEND_DrawKey(MenuData *md) {
 	}
 }
 
-#ifdef TARGET_DC
-
-void	FRONTEND_DrawPad(MenuData *md) {
-	SLONG x,y,dy,c0,rgb;
-	CBYTE str[20];
-	rgb=FRONTEND_fix_rgb(fade_rgb,(grabbing_pad&&((menu_data+menu_state.selected==md)&&((GetTickCount()&0x3ff)<0x1ff))));
-	dy=md->Y+menu_state.base-menu_state.scroll;
-	if (md->Data==31)
-	{
-		// Unused.
-		sprintf(str,"%s",XLAT_str(X_EMPTY));
-		MENUFONT_Dimensions(str,x,y,-1,BIG_FONT_SCALE);
-		MENUFONT_Draw(620-x,dy,BIG_FONT_SCALE,str,rgb,0);
-	}
-	else
-	{
-		// Draw the button icon
-		DWORD dwPage = -1;
-		switch ( md->Data )
-		{
-		case DI_DC_BUTTON_A			: dwPage = POLY_PAGE_JOYPAD_A;		break;
-		case DI_DC_BUTTON_B			: dwPage = POLY_PAGE_JOYPAD_B;		break;
-		case DI_DC_BUTTON_C			: dwPage = POLY_PAGE_JOYPAD_C;		break;
-		case DI_DC_BUTTON_X			: dwPage = POLY_PAGE_JOYPAD_X;		break;
-		case DI_DC_BUTTON_Y			: dwPage = POLY_PAGE_JOYPAD_Y;		break;
-		case DI_DC_BUTTON_Z			: dwPage = POLY_PAGE_JOYPAD_Z;		break;
-		case DI_DC_BUTTON_RTRIGGER	: dwPage = POLY_PAGE_JOYPAD_R;		break;
-		case DI_DC_BUTTON_LTRIGGER	: dwPage = POLY_PAGE_JOYPAD_L;		break;
-		case DI_DC_BUTTON_UP		: dwPage = POLY_PAGE_JOYPAD_PAD_U;	break;
-		case DI_DC_BUTTON_DOWN		: dwPage = POLY_PAGE_JOYPAD_PAD_D;	break;
-		case DI_DC_BUTTON_LEFT		: dwPage = POLY_PAGE_JOYPAD_PAD_L;	break;
-		case DI_DC_BUTTON_RIGHT		: dwPage = POLY_PAGE_JOYPAD_PAD_R;	break;
-		default:
-			// Might be Start - don't have graphics, and shouldn't need them!
-			ASSERT ( FALSE );
-			break;
-		}
-
-		if ( dwPage == -1 )
-		{
-			// Button that we don't have the graphics for.
-			sprintf(str,"%s %d",XLAT_str(X_BUTTON),md->Data);
-			MENUFONT_Dimensions(str,x,y,-1,BIG_FONT_SCALE);
-			MENUFONT_Draw(620-x,dy,BIG_FONT_SCALE,str,rgb,0);
-		}
-		else
-		{
-			DWORD dwRGB = 0xffe0e0e0;
-			if ( grabbing_pad && ( menu_data + menu_state.selected == md ) && ( (GetTickCount()&0x3ff)<0x1ff ) )
-			{
-				// Flash it.
-				dwRGB = 0xff505050;
-			}
-
-			POLY_Point  pp[4];
-			POLY_Point *quad[4] = { &pp[0], &pp[1], &pp[2], &pp[3] };
-
-			// The size of the button in pixels.
-			const float fSize = 48.0f * 0.5f;
-
-			pp[0].colour=dwRGB;
-			pp[0].specular=0;
-			pp[0].Z=0.7f;
-			pp[1]=pp[2]=pp[3]=pp[0];
-
-			pp[0].X=620 - fSize * 2.0f; pp[0].Y=dy - fSize; 
-			pp[0].u=0.0f; pp[0].v=0.0f;
-
-			pp[1].X=620 - fSize * 2.0f; pp[1].Y=dy + fSize; 
-			pp[1].u=0.0f; pp[1].v=1.0f;
-
-			pp[2].X=620; pp[2].Y=dy - fSize; 
-			pp[2].u=1.0f; pp[2].v=0.0f;
-
-			pp[3].X=620; pp[3].Y=dy + fSize; 
-			pp[3].u=1.0f; pp[3].v=1.0f;
-
-			POLY_add_quad(quad,dwPage,FALSE,TRUE);
-		}
-	}
-}
-
-#else
-
 void	FRONTEND_DrawPad(MenuData *md) {
 	SLONG x,y,dy,c0,rgb;
 	CBYTE str[20];
@@ -2173,8 +1229,6 @@ void	FRONTEND_DrawPad(MenuData *md) {
 	MENUFONT_Dimensions(str,x,y,-1,BIG_FONT_SCALE);
 	MENUFONT_Draw(620-x,dy,BIG_FONT_SCALE,str,rgb,0);
 }
-
-#endif
 
 
 //--- kibbly stuff ---
@@ -2255,34 +1309,10 @@ void	FRONTEND_kibble_init() {
 	densities[2] = 40;
 	densities[3] = 10;
 
-#ifdef TARGET_DC
-	// Allocate the kibble
-	if ( kibble == NULL )
-	{
-		kibble = (Kibble *)MemAlloc ( sizeof ( Kibble ) * 512 );
-		ASSERT ( kibble != NULL );
-	}
-	ZeroMemory(kibble,( sizeof ( Kibble ) * 512 ) );
-#else
 	ZeroMemory(kibble,sizeof(kibble));
-#endif
 
 	for (c0=0,k=kibble;c0<densities[menu_theme];c0++,k++) FRONTEND_kibble_init_one(k,menu_theme+1);
 }
-
-
-#ifdef TARGET_DC
-void	FRONTEND_kibble_destroy()
-{
-	// Bin the kibble.
-	if ( kibble != NULL )
-	{
-		MemFree ( kibble );
-		kibble = NULL;
-	}
-}
-#endif
-
 
 void	FRONTEND_kibble_flurry() {
 	UWORD n, c0, densities[4];
@@ -2470,7 +1500,6 @@ void FRONTEND_fetch_title_from_id(CBYTE *script, CBYTE *ttl, UBYTE id) {
 		*pEnd = '\0';
 		pEnd--;
 	}
-
 }
 
 UBYTE	best_found[50][4];
@@ -2478,10 +1507,6 @@ void	init_best_found(void)
 {
 	memset(&best_found[0][0],50*4,0);
 }
-
-
-#ifndef TARGET_DC
-
 
 bool FRONTEND_save_savegame(CBYTE *mission_name, UBYTE slot) {
 	CBYTE fn[_MAX_PATH];
@@ -2606,636 +1631,6 @@ void FRONTEND_find_savegames ( bool bGreyOutEmpties=FALSE, bool bCheckSaveSpace=
 	}
 }
 
-
-#else //#ifndef TARGET_DC
-
-
-
-#define MAX_SIZE_SAVEGAME_FILES 1024
-char m_pcSaveData[MAX_SIZE_SAVEGAME_FILES];
-
-
-bool m_bLoadedIconSavePic = FALSE;
-BYTE m_pcIconSavePicData[32*16];
-WORD m_pcIconSavePicPalette[16];
-
-
-// Set to 1 for utter madness.
-#define NEED_A_SAVING_LOADING_MESSAGE 1
-
-bool FRONTEND_save_savegame ( int iMissionID, UBYTE slot )
-{
-	CBYTE fn[_MAX_PATH];
-	UBYTE version=4;
-
-
-#if NEED_A_SAVING_LOADING_MESSAGE
-	// Display a QuickMessage.
-	FRONTEND_MakeQuickMessage ( XLAT_str ( X_GAME_SAVING ), 3000 );
-
-	// Then fake up a screen cycling so it gets displayed.
-	the_display.Flip ( NULL, DDFLIP_WAIT );
-	FRONTEND_display();
-	the_display.Flip ( NULL, DDFLIP_WAIT );
-	FRONTEND_display();
-
-	// Mark the time - wait for a second.
-	DWORD dwTimeout = timeGetTime() + 1000;
-#endif
-
-
-	if ( iMissionID == -1 )
-	{
-		iMissionID = 255;
-	}
-	ASSERT ( ( iMissionID <= 255 ) && ( iMissionID >= 0 ) );
-
-	//sprintf(fn,"URBAN_%02i.SAV",slot);
-	//MUST be this format, according to Sega.
-	sprintf(fn,"UR_CHAOS.%03i",slot);
-
-
-
-	char *pcCurPtr;
-	DWORD dwSize;
-
-#define DC_FILE_WRITE(data,size) memcpy ( (void*)pcCurPtr, (void *)(data), size ); pcCurPtr += (size); dwSize += (size)
-
-	pcCurPtr = m_pcSaveData;
-	dwSize = 0;
-
-
-	//file=FileCreate(fn,1);
-	DC_FILE_WRITE(&version,1);
-	DC_FILE_WRITE(&iMissionID,1);
-	DC_FILE_WRITE(&complete_point,1);
-	DC_FILE_WRITE(&the_game.DarciStrength,1);
-	DC_FILE_WRITE(&the_game.DarciConstitution,1);
-	DC_FILE_WRITE(&the_game.DarciSkill,1);
-	DC_FILE_WRITE(&the_game.DarciStamina,1);
-	DC_FILE_WRITE(&the_game.RoperStrength,1);
-	DC_FILE_WRITE(&the_game.RoperConstitution,1);
-	DC_FILE_WRITE(&the_game.RoperSkill,1);
-	DC_FILE_WRITE(&the_game.RoperStamina,1);
-	DC_FILE_WRITE(&the_game.DarciDeadCivWarnings,1);
-	// mark, if you add stuff again, please remember to inc. the version number
-	DC_FILE_WRITE(mission_hierarchy,60);
-
-	DC_FILE_WRITE(&best_found[0][0],50*4);
-
-	// Version 4+ stuff.
-	// Env save.
-	int iEnvSize = ENV_save ( pcCurPtr );
-	pcCurPtr += iEnvSize;
-	dwSize += iEnvSize;
-
-
-	ASSERT ( dwSize < MAX_SIZE_SAVEGAME_FILES );
-
-	// Save to the current VMU.
-	MapleVMU *pVMU = FindCurrentStorageVMU ( FALSE );
-	if ( pVMU != NULL )
-	{
-		// Use the mission name as a comment.
-		CBYTE ttl[_MAX_PATH];
-		ttl[0] = '\0';
-		FRONTEND_fetch_title_from_id(MISSION_SCRIPT,ttl,iMissionID);
-
-		if ( ttl[0] == '\0' )
-		{
-			// Oops. Use something sensible.
-			strcpy ( ttl, "Urban Chaos" );
-		}
-
-#if NEED_A_SAVING_LOADING_MESSAGE
-		// Lock out the reset-on-door-open thing.
-		ChangeDoorResetStatus ( FALSE );
-#endif
-
-
-		bool bRes = pVMU->Flash_WriteFile ( fn, "Urban Chaos", ttl, m_pcSaveData, dwSize, (char *)m_pcIconSavePicPalette, (char *)m_pcIconSavePicData );
-
-
-#if NEED_A_SAVING_LOADING_MESSAGE
-		// Now wait for a second
-		// so that the user has time to read the "saving" message that will be
-		// obsolete by the time they read it. Bloody standards.
-		while ( TRUE )
-		{
-			if ( ( ( dwTimeout - timeGetTime() ) & 0x80000000 ) != 0 )
-			{
-				break;
-			}
-			TRACE ( "w" );
-			Sleep(100);
-		}
-		TRACE ( "\n" );
-
-		// Lock out the reset-on-door-open thing.
-		ChangeDoorResetStatus ( TRUE );
-#endif
-
-
-
-
-		if ( bRes )
-		{
-			FRONTEND_show_VMU_screen ( pvmuscreenSaved );
-			FRONTEND_MakeQuickMessage ( XLAT_str ( X_GAME_SAVED ), 3000 );
-		}
-		else
-		{
-			FRONTEND_MakeQuickMessage ( XLAT_str ( X_GAME_SAVE_FAILED ), 3000 );
-		}
-		return bRes;
-	}
-	else
-	{
-		// Save failed - VMU not present, or VMU full or something.
-		FRONTEND_MakeQuickMessage ( XLAT_str ( X_GAME_SAVE_FAILED ), 3000 );
-		return FALSE;
-	}
-
-
-#ifdef DEBUG
-	ASSERT (FALSE);
-	// This is a debug rout to fill the VMU with junk, so we can test the "full VMU" action.
-	pVMU = FindFirstVMUOnCurrentController();
-	if ( pVMU != NULL )
-	{
-		CBYTE ttl[_MAX_PATH];
-		bool bRes = TRUE;
-		int iCount = 1;
-		while ( bRes )
-		{
-			sprintf ( fn, "junk%04i.xxx", iCount );
-			strcpy ( ttl, "Urban Chaos" );
-			bRes = pVMU->Flash_WriteFile ( fn, "Urban Chaos", ttl, m_pcSaveData, dwSize, NULL, NULL );
-			iCount++;
-		}
-	}
-
-#endif
-
-}
-
-
-bool FRONTEND_load_savegame(UBYTE slot)
-{
-	CBYTE fn[_MAX_PATH];
-	UBYTE version=0;
-	int iMissionID;
-
-
-
-#if NEED_A_SAVING_LOADING_MESSAGE
-	// Display a QuickMessage.
-	ChangeDoorResetStatus ( FALSE );
-
-	FRONTEND_MakeQuickMessage ( XLAT_str ( X_GAME_LOADING ), 3000 );
-
-	// Then fake up a few screen cycles so it gets displayed.
-	the_display.Flip ( NULL, DDFLIP_WAIT );
-	FRONTEND_display();
-	the_display.Flip ( NULL, DDFLIP_WAIT );
-	FRONTEND_display();
-
-	// Mark the time - wait for a second.
-	DWORD dwTimeout = timeGetTime() + 1000;
-
-#endif
-
-
-	//sprintf(fn,"URBAN_%02i.SAV",slot);
-	//MUST be this format, according to Sega.
-	sprintf(fn,"UR_CHAOS.%03i",slot);
-
-
-	MapleVMU *pVMU = FindCurrentStorageVMU ( FALSE );
-	if ( pVMU == NULL )
-	{
-		// No VMUs. Nadgers.
-		ASSERT ( FALSE );
-		FRONTEND_MakeQuickMessage ( XLAT_str ( X_GAME_LOAD_FAILED ), 3000 );
-		return FALSE;
-	}
-
-	bool bRes = pVMU->Flash_ReadFile ( fn, m_pcSaveData, MAX_SIZE_SAVEGAME_FILES );
-
-
-#if NEED_A_SAVING_LOADING_MESSAGE
-	// Now wait for a second
-	// so that the user has time to read the "saving" message that will be
-	// obsolete by the time they read it. Bloody standards.
-
-	// No, don't ask me why we need to ensure game _loads_ succeed before ... um ... resetting the machine.
-	// Just fucking do it.
-	while ( TRUE )
-	{
-		if ( ( ( dwTimeout - timeGetTime() ) & 0x80000000 ) != 0 )
-		{
-			break;
-		}
-		TRACE ( "w" );
-		Sleep(100);
-	}
-	TRACE ( "\n" );
-
-	ChangeDoorResetStatus ( TRUE );
-#endif
-
-
-	if ( !bRes )
-	{
-		// File doesn't exist, or VMU's been removed or something.
-		// Happens if the user slects an (EMPTY) file (though they shouldn't be able to).
-		ASSERT ( FALSE );
-		FRONTEND_MakeQuickMessage ( XLAT_str ( X_GAME_LOAD_FAILED ), 3000 );
-		return FALSE;
-	}
-
-	char *pcCurPtr;
-
-#define DC_FILE_READ(data,size) memcpy ( (void*)(data), (void *)(pcCurPtr), size ); pcCurPtr += (size)
-
-	pcCurPtr = m_pcSaveData;
-
-
-	DC_FILE_READ(&version,1);
-	// Only v3 and above should exist for DC!
-	ASSERT ( version >= 3 );
-
-	DC_FILE_READ(&iMissionID,1);
-	DC_FILE_READ(&complete_point,1);
-
-	if ( version >= 1 )
-	{
-		DC_FILE_READ(&the_game.DarciStrength,1);
-		DC_FILE_READ(&the_game.DarciConstitution,1);
-		DC_FILE_READ(&the_game.DarciSkill,1);
-		DC_FILE_READ(&the_game.DarciStamina,1);
-		DC_FILE_READ(&the_game.RoperStrength,1);
-		DC_FILE_READ(&the_game.RoperConstitution,1);
-		DC_FILE_READ(&the_game.RoperSkill,1);
-		DC_FILE_READ(&the_game.RoperStamina,1);		
-		DC_FILE_READ(&the_game.DarciDeadCivWarnings,1); 
-	}
-	if ( version >= 2 )
-	{
-		DC_FILE_READ(mission_hierarchy,60);
-	}
-	if ( version >= 3 )
-	{
-		DC_FILE_READ(&best_found[0][0],50*4);
-	}
-	if ( version >= 4 )
-	{
-		// Load the environment vars.
-		// But preserve the language setting!
-		BYTE bLanguage = ENV_get_value_number ( "lang_num", 0, "" );
-		pcCurPtr = ENV_load ( pcCurPtr );
-		ENV_set_value_number ( "lang_num", bLanguage, "" );
-	}
-
-	FRONTEND_MakeQuickMessage ( XLAT_str ( X_GAME_LOADED ), 3000 );
-	return TRUE;
-
-}
-
-
-#define SIZE_OF_VMU_SAVE_FILE_IN_BLOCKS 2
-
-void FRONTEND_find_savegames ( bool bGreyOutEmpties=FALSE, bool bCheckSaveSpace=FALSE )
-{
-	CBYTE dir[_MAX_PATH];
-	CBYTE ttl[_MAX_PATH];
-	WIN32_FIND_DATA data;
-	HANDLE handle;
-	BOOL   ok;
-	SLONG	c0;
-	MenuData *md=menu_data;
-	CBYTE *str=menu_buffer;
-	SLONG x,y,y2=0;
-	FILETIME time, high_time={0,0};
-	int iBestMissionIDSoFar = -2;
-	int iBestMissionIDSoFarPosition = -1;
-
-	menu_state.selected = 0;
-
-
-	int iBigFontScale = BIG_FONT_SCALE;
-	if ( !IsEnglish )
-	{
-		iBigFontScale = BIG_FONT_SCALE_FRENCH;
-	}
-
-
-
-	bool bSomethingChanged = TRUE;
-	while ( bSomethingChanged )
-	{
-		bSomethingChanged = RescanDevices();
-		if ( bSomethingChanged )
-		{
-			// Delete any removed devices.
-			DeleteInvalidDevice();
-		}
-	}
-
-	// Find the current VMU.
-	MapleVMU *pVMU = FindCurrentStorageVMU ( TRUE );
-	// And actually set whichever was found to be the current one.
-	SetCurrentStorageVMU ( pVMU );
-
-	bool bMarkEmptiesAsVMUFull = FALSE;
-	if ( bCheckSaveSpace && ( pVMU != NULL ) )
-	{
-		// Check how much space is on this VMU.
-		int iFreeBlocks = pVMU->Flash_GetFreeBlocks();
-		if ( iFreeBlocks < SIZE_OF_VMU_SAVE_FILE_IN_BLOCKS )
-		{
-			// No - not enough space - grey out the empty slots.
-			bMarkEmptiesAsVMUFull = TRUE;
-		}
-	}
-
-	int iFirstBlankSlot = -1;
-
-	// If pVMU is NULL, it will be dealt with below.
-	if ( pVMU == NULL )
-	{
-		md->Type=OT_BUTTON;
-		//md->Data=0;
-		md->Data=FE_SAVE_CONFIRM;
-		// Just one entry.
-		strcpy(str,XLAT_str(X_VMU_NOT_PRESENT));
-		// Grey this out.
-		md->Choices = (CBYTE*)1;
-		md->Label=str;
-		str+=strlen(str)+1;
-		MENUFONT_Dimensions(md->Label,x,y,-1,iBigFontScale);
-		md->X=320-(x>>1);
-		md->Y=y2;
-		y2+=50;
-
-		md++;
-		menu_state.items++;
-
-		// And select the item _after_ which will be "select VMU"
-		menu_state.selected=menu_state.items;
-	}
-	else
-	{
-		bool bSetSelected = FALSE;
-		for (c0=1;c0<11;c0++)
-		{
-			md->Type=OT_BUTTON;
-			//md->Data=0;
-			md->Data=FE_SAVE_CONFIRM;
-			// Not greyed.
-			md->Choices = (CBYTE*)0;
-			md->LabelID = 0;
-
-			//sprintf(dir,"URBAN_%02i.SAV",c0);
-			//MUST be this format, according to Sega.
-			sprintf(dir,"UR_CHAOS.%03i",c0);
-
-
-			// NOTE! -1 is a perfectly good value - it means all missions have been done.
-			BYTE bMissionID = -2;
-			if ( pVMU != NULL )
-			{
-				bool bRes = pVMU->Flash_ReadFile ( dir, m_pcSaveData, MAX_SIZE_SAVEGAME_FILES );
-				if ( bRes )
-				{
-					char *pcCurPtr;
-
-	//#define DC_FILE_READ(data,size) memcpy ( (void*)(data), (void *)(pcCurPtr), size ); pcCurPtr += (size); dwSize += (size)
-
-					pcCurPtr = m_pcSaveData;
-
-
-					BYTE version;
-					DC_FILE_READ(&version,1);
-					// Only v3 and above should exist for DC!
-					ASSERT ( version >= 3 );
-
-					DC_FILE_READ(&bMissionID,1);
-
-					// Don't need the rest...
-				}
-				if ( bMissionID == (BYTE)-2 )
-				{
-					// Failed for some reason.
-					strcpy(ttl,XLAT_str(X_EMPTY));
-
-					// Indicate that there is no existing game.
-					md->Data=FE_MAPSCREEN;
-
-					if ( bGreyOutEmpties || bMarkEmptiesAsVMUFull )
-					{
-						// Grey this out then.
-						md->Choices = (CBYTE*)1;
-						if ( bMarkEmptiesAsVMUFull )
-						{
-							// And change the words to VMU FULL
-							strcpy(ttl,XLAT_str(X_VMU_FULL));
-							md->LabelID = X_VMU_FULL;
-						}
-					}
-					else if ( iFirstBlankSlot == -1 )
-					{
-						iFirstBlankSlot = menu_state.items;
-					}
-				}
-				else
-				{
-					FRONTEND_fetch_title_from_id(MISSION_SCRIPT,ttl,bMissionID);
-					if ( ttl[0] == '\0' )
-					{
-						// Oops. Use something sensible.
-						strcpy ( ttl, "Urban Chaos" );
-					}
-				}
-			}
-
-			//sprintf(dir,"%d: %s",c0,ttl);
-			md->Label=str;
-			strcpy(str,ttl);
-			str+=strlen(str)+1;
-			MENUFONT_Dimensions(md->Label,x,y,-1,iBigFontScale);
-			md->X=320-(x>>1);
-			md->Y=y2;
-			y2+=50;
-	#if 0
-			if (CompareFileTime(&time,&high_time)>0)
-			{
-				high_time = time;
-				bSetSelected = TRUE;
-				menu_state.selected=menu_state.items;
-			}
-	#else
-			if ( bMissionID != (BYTE)-2 )
-			{
-				if ( bGreyOutEmpties )
-				{
-					// Loading, so pick the _highest_ mission number.
-					if ( ( bMissionID > iBestMissionIDSoFar ) || ( bMissionID == (BYTE)-1 ) )
-					{
-						iBestMissionIDSoFarPosition = menu_state.items;
-						iBestMissionIDSoFar = bMissionID;
-					}
-				}
-				else
-				{
-					// Saving, so pick the _lowest_ mission number.
-					if ( bMissionID < iBestMissionIDSoFar )
-					{
-						iBestMissionIDSoFarPosition = menu_state.items;
-						iBestMissionIDSoFar = bMissionID;
-					}
-				}
-				bSetSelected = TRUE;
-				menu_state.selected=menu_state.items;
-			}
-	#endif
-
-			md++;
-			menu_state.items++;
-		}
-		if ( !bSetSelected )
-		{
-			// Nothing valid - select the "select VMU" option at the bottom that
-			// hasn't been added yet, but will be.
-			menu_state.selected=menu_state.items;
-		}
-		else
-		{
-			if ( iBestMissionIDSoFarPosition != -1 )
-			{
-				menu_state.selected = iBestMissionIDSoFarPosition;
-			}
-		}
-
-		if ( iFirstBlankSlot != -1 )
-		{
-			// There was a valid first blank slot, and we can select it. So do so by default.
-			menu_state.selected = iFirstBlankSlot;
-		}
-	}
-}
-
-
-// Hack hack hackety hack.
-UBYTE m_ubVMUListCtrl[8];
-UBYTE m_ubVMUListSlot[8];
-
-
-// Build the menu of VMU slots.
-void FRONTEND_find_VMUs ( void )
-{
-	CBYTE ttl[_MAX_PATH];
-	WIN32_FIND_DATA data;
-	HANDLE handle;
-	BOOL   ok;
-	SLONG	c0;
-	MenuData *md=menu_data;
-	CBYTE *str=menu_buffer;
-	SLONG x,y,y2=0;
-	FILETIME time, high_time={0,0};
-
-	menu_state.selected = 0;
-
-	bool bSomethingChanged = TRUE;
-	while ( bSomethingChanged )
-	{
-		bSomethingChanged = RescanDevices();
-		if ( bSomethingChanged )
-		{
-			// Delete any removed devices.
-			DeleteInvalidDevice();
-		}
-	}
-
-	MapleVMU *pvmuCurrent = FindCurrentStorageVMU ( TRUE );
-
-
-	// Find the VMUs connected.
-	int iNumVMUsTotal = 0;
-	for ( int iCtrlNum = 0; iCtrlNum < 4; iCtrlNum++ )
-	{
-		for ( int iVMUNum = 0; iVMUNum < 2; iVMUNum++ )
-		{
-			// See if this VMU slot exists/is filled.
-extern MapleVMU *FindMemoryVMUAt ( int iCtrlNum, int iVMUNum );
-			MapleVMU *pVMU = FindMemoryVMUAt ( iCtrlNum, iVMUNum );
-
-			if ( pVMU != NULL )
-			{
-				iNumVMUsTotal++;
-
-				md->Type=OT_BUTTON;
-				md->Data=FE_MAINMENU;		// Special marker.
-				// Not greyed.
-				md->Choices = (CBYTE*)0;
-				md->Label=str;
-
-				strcpy(ttl,XLAT_str(X_VMU_CONTROLLER_SLOT));
-				sprintf ( str, ttl, "ABCD"[iCtrlNum], "12"[iVMUNum] );
-				str+=strlen(str)+1;
-				MENUFONT_Dimensions(md->Label,x,y,-1,BIG_FONT_SCALE);
-				md->X=320-(x>>1);
-				md->Y=y2;
-				y2+=50;
-
-				if ( pvmuCurrent == pVMU )
-				{
-					// Set the current one.
-					menu_state.selected=menu_state.items;
-				}
-
-				m_ubVMUListCtrl[menu_state.items] = iCtrlNum;
-				m_ubVMUListSlot[menu_state.items] = iVMUNum;
-
-				md++;
-				menu_state.items++;
-			}
-		}
-	}
-
-	if ( iNumVMUsTotal == 0 )
-	{
-		// Tell the user that there are no vmus around.
-		md->Type=OT_BUTTON;
-		md->Data=FE_BACK;
-		// Greyed out.
-		md->Choices = (CBYTE*)1;
-		md->Label=str;
-
-		strcpy(str,XLAT_str(X_VMU_NOT_PRESENT));
-		str+=strlen(str)+1;
-		MENUFONT_Dimensions(md->Label,x,y,-1,BIG_FONT_SCALE);
-		md->X=320-(x>>1);
-		md->Y=y2;
-		y2+=50;
-
-		md++;
-		menu_state.items++;
-
-		// Make the Cancel the default item.
-		menu_state.selected=menu_state.items;
-
-
-	}
-
-	FRONTEND_recenter_menu();
-}
-
-#endif //#else //#ifndef TARGET_DC
-
-
-
-
 CBYTE*	FRONTEND_MissionFilename(CBYTE *script, UBYTE i) {
 	MFFileHandle file;
 	CBYTE *text, *str=menu_buffer;
@@ -3289,7 +1684,6 @@ CBYTE*	FRONTEND_MissionFilename(CBYTE *script, UBYTE i) {
 	MFdelete(mdata);
 
 	return str;
-
 }
 
 void	FRONTEND_MissionHierarchy(CBYTE *script) {
@@ -3336,15 +1730,8 @@ void	FRONTEND_MissionHierarchy(CBYTE *script) {
 		case FE_CONFIG_INPUT_JP:
 		case FE_LOADSCREEN:
 		case FE_SAVESCREEN:
-#ifdef TARGET_DC
-		case FE_VMU_SELECT:
-#endif
 			//InitBackImage(menu_config_names[menu_theme]);
-#ifdef ONLY_USE_THREE_BACKGROUNDS_PLEASE_BOB
-			UseBackSurface(screenfull_back);
-#else
 			UseBackSurface(screenfull_config);
-#endif
 			break;
 		case FE_MAPSCREEN:
 			//InitBackImage(menu_map_names[menu_theme]);
@@ -3357,8 +1744,6 @@ void	FRONTEND_MissionHierarchy(CBYTE *script) {
 		FRONTEND_kibble_init();
 	}
 	
-	
-
 	text = (CBYTE*)MemAlloc(4096); 
 	memset(text,0,4096);
 
@@ -3436,14 +1821,6 @@ void	FRONTEND_MissionHierarchy(CBYTE *script) {
 			{
 				estateID=mdata->ObjID;
 			}
-
-#ifdef TARGET_DC
-			if (strstr(mdata->fn,"album1.ucm"))
-			{
-				// Breakout! - a secret mission.
-				secretIDbreakout = mdata->ObjID;
-			}
-#endif
 		}
 	}
 	FileCloseScript();
@@ -3458,9 +1835,6 @@ void	FRONTEND_MissionHierarchy(CBYTE *script) {
 	ASSERT(WITHIN(bonusID2	  , 0, 39));
 	ASSERT(WITHIN(bonusID3	  , 0, 39));
 	ASSERT(WITHIN(estateID	  , 0, 39));
-#ifdef TARGET_DC
-	ASSERT(WITHIN(secretIDbreakout, 0, 39));
-#endif
 
 #endif
 
@@ -3474,8 +1848,6 @@ void	FRONTEND_MissionHierarchy(CBYTE *script) {
 #ifdef TARGET_DC
 	iNextSuggestedMission = -1;
 #endif
-
-
 
 	FileOpenScript();
 	while (1) {
@@ -3512,8 +1884,6 @@ void	FRONTEND_MissionHierarchy(CBYTE *script) {
 				mission_hierarchy[secretIDbreakout] = 0;
 			}
 #endif
-
-
 
 #ifndef VERSION_DEMO
 			if (mission_hierarchy[mdata->ParentID]&2) 
@@ -3589,7 +1959,6 @@ void	FRONTEND_MissionHierarchy(CBYTE *script) {
 			}
 
 #endif
-
 
 			if (complete_point>=40) // bodge!
 				flag|=2;
@@ -3673,7 +2042,6 @@ void	FRONTEND_MissionHierarchy(CBYTE *script) {
 	}
 	FileCloseScript();
 
-
 #if 1
 	if ( !IsEnglish )
 	{
@@ -3697,7 +2065,6 @@ void	FRONTEND_MissionHierarchy(CBYTE *script) {
 	}
 
 #endif
-
 
 	MemFree(text);
 	MFdelete(mdata);
@@ -3804,8 +2171,6 @@ void	FRONTEND_MissionBrief(CBYTE *script, UBYTE i) {
 		CBYTE path[_MAX_PATH];
 		//MFX_QUICK_wait();
 		strcpy(path,GetSpeechPath());
-
-
 
 #ifdef TARGET_DC
 		strcat(path,pcSpeechLanguageDir);
@@ -3958,7 +2323,6 @@ void	FRONTEND_CacheMissionList(CBYTE *script) {
 
 }
 
-
 void	FRONTEND_districts(CBYTE *script) {
 	MFFileHandle file;
 	CBYTE *text, *str=menu_buffer;
@@ -4023,7 +2387,6 @@ void	FRONTEND_districts(CBYTE *script) {
 
 }
 
-
 CBYTE*	FRONTEND_gettitle(UBYTE mode, UBYTE selection) {
 	RawMenuData *pt=raw_menu_data;
 	while (pt->Menu!=mode) pt++;
@@ -4050,9 +2413,7 @@ void	FRONTEND_easy(UBYTE mode) {
 			iBigFontScale = BIG_FONT_SCALE_FRENCH;
 		}
 	}
-
-
-
+	
 	while (pt->Menu!=mode) pt++;
 	while ((pt->Menu==mode)||!pt->Menu) {
 		md->Type=pt->Type;
@@ -4078,16 +2439,6 @@ void	FRONTEND_easy(UBYTE mode) {
 				md->Choices=menu_choice_scanner;
 				md->Data|=(2<<8);
 			}
-#ifdef TARGET_DC
-			else if (pt->Choices==MC_ANALOGUE_MODE) {
-				md->Choices=menu_choice_analogue_mode;
-				md->Data|=(2<<8);
-			}
-			else if (pt->Choices==MC_JOYPAD_MODE) {
-				md->Choices=menu_choice_joypad_mode;
-				md->Data|=((NUM_OF_JOYPAD_MODES+1)<<8);
-			}
-#endif
 			break;
 		default:
 			md->X=30;
@@ -4434,19 +2785,6 @@ void	FRONTEND_do_gamma() {
 
 void	FRONTEND_mode(SBYTE mode, bool bDoTransition=TRUE) {
 
-
-#ifdef TARGET_DC
-	if ( mode == FE_MAINMENU )
-	{
-		// OK, we finally got to the main menu, so disable the immediate soft reset behaviour.
-		// From here on, it gets handled explicitely by some code elsewhere in frontend.cpp,
-		// rather than the code in interfac.cpp.
-extern bool g_bDreamcastABXYStartShouldGoToBootRomImmediately;
-		g_bDreamcastABXYStartShouldGoToBootRomImmediately = FALSE;
-	}
-#endif
-
-
 	if (menu_state.mode >= 100 && mode < 100)
 	{
 		//
@@ -4465,8 +2803,6 @@ extern bool g_bDreamcastABXYStartShouldGoToBootRomImmediately;
 
 	// Reset this now.
 	dwAutoPlayFMVTimeout = timeGetTime() + AUTOPLAY_FMV_DELAY;
-
-
 
 	SBYTE last=menu_state.mode;
 	fade_mode=1;
@@ -4506,10 +2842,6 @@ extern bool g_bDreamcastABXYStartShouldGoToBootRomImmediately;
 	case FE_MAPSCREEN:
 		menu_state.title=XLAT_str_ptr(X_START);
 		break;
-#ifdef WANT_A_TITLE_SCREEN
-	case FE_TITLESCREEN:
-	case FE_LANGUAGESCREEN:
-#endif
 	case FE_MAINMENU:
 		// No title.
 		menu_state.title=NULL;
@@ -4520,13 +2852,6 @@ extern bool g_bDreamcastABXYStartShouldGoToBootRomImmediately;
 	case FE_SAVESCREEN:
 		menu_state.title=XLAT_str_ptr(X_SAVE_GAME);
 		break;
-
-	#ifdef TARGET_DC
-	case FE_VMU_SELECT:
-		menu_state.title=XLAT_str_ptr(X_VMU_SELECT);
-		break;
-	#endif
-
 	default:
 		if ( menu_state.stackpos && ( mode < 100 ) )
 		{
@@ -4571,48 +2896,12 @@ extern bool g_bDreamcastABXYStartShouldGoToBootRomImmediately;
 		MUSIC_mode(MUSIC_MODE_FRONTEND);
 		if (AllowSave) menu_data[2].Choices=NULL;
 		break;
-#ifdef WANT_A_TITLE_SCREEN
-	case FE_TITLESCREEN:
-		FRONTEND_init_xition();
-
-		FRONTEND_easy(mode);
-
-		// Always reset the stack in the title screen.
-		menu_state.stackpos = 0;
-
-		MUSIC_mode(MUSIC_MODE_FRONTEND);
-
-		// "Reset" the controller so that "Press Start Button" is displayed.
-		ClearPrimaryDevice();
-		break;
-
-	case FE_LANGUAGESCREEN:
-		//UseBackSurface(screenfull_title);
-
-		FRONTEND_init_xition();
-
-		FRONTEND_easy(mode);
-
-		// Always reset the stack in the title screen.
-		menu_state.stackpos = 0;
-
-		MUSIC_mode(MUSIC_MODE_FRONTEND);
-
-		// Set the default selection to the current setting.
-		menu_state.selected = ENV_get_value_number ( "lang_num", 0, "" );
-
-		break;
-#endif
 	case FE_SAVESCREEN:
 		AllowSave=1;
 		if (!menu_state.stackpos) 
 		{
 			//InitBackImage(menu_config_names[menu_theme]);
-#ifdef ONLY_USE_THREE_BACKGROUNDS_PLEASE_BOB
-			UseBackSurface(screenfull_back);
-#else
 			UseBackSurface(screenfull_config);
-#endif
 		}
 		if ( bDoTransition )
 		{
@@ -4630,16 +2919,6 @@ extern bool g_bDreamcastABXYStartShouldGoToBootRomImmediately;
 		}
 		FRONTEND_easy(mode);
 		break;
-#ifdef TARGET_DC
-	case FE_VMU_SELECT:
-		FRONTEND_find_VMUs();
-		if ( bDoTransition )
-		{
-			FRONTEND_init_xition();
-		}
-		FRONTEND_easy(mode);
-		break;
-#endif
 	case FE_CONFIG:
 		FRONTEND_init_xition();
 		FRONTEND_easy(mode);
@@ -4685,17 +2964,6 @@ extern bool g_bDreamcastABXYStartShouldGoToBootRomImmediately;
 		menu_data[0].Data=fx<<1;
 		menu_data[1].Data=amb<<1;
 		menu_data[2].Data=mus<<1;
-#ifdef TARGET_DC
-		// Load this from the BOOT rom.
-		if ( FirmwareGetSoundMode() == SOUND_MODE_STEREO )
-		{
-			menu_data[3].Data = 1 | (2<<8);
-		}
-		else
-		{
-			menu_data[3].Data = 0 | (2<<8);
-		}
-#endif
 		}
 		break;
 #ifdef WANT_A_KEYBOARD_ITEM
@@ -4730,7 +2998,6 @@ extern bool g_bDreamcastABXYStartShouldGoToBootRomImmediately;
 			FRONTEND_init_xition();
 		}
 		FRONTEND_easy(mode);
-#ifndef TARGET_DC
 		menu_data[0].Data = ENV_get_value_number("joypad_kick",		4, "Joypad");
 		menu_data[1].Data = ENV_get_value_number("joypad_punch",	3, "Joypad");
 		menu_data[2].Data = ENV_get_value_number("joypad_jump",		0, "Joypad");
@@ -4743,27 +3010,6 @@ extern bool g_bDreamcastABXYStartShouldGoToBootRomImmediately;
 		menu_data[9].Data = ENV_get_value_number("joypad_cam_left",	9, "Joypad");
 		menu_data[10].Data = ENV_get_value_number("joypad_cam_right",10, "Joypad");
 		menu_data[11].Data =ENV_get_value_number("joypad_1stperson",5, "Joypad");
-#else
-		// Set up the buttons from the environment.
-		{
-			int iMode = ENV_get_value_number("joypad_mode",		0, "Joypad");
-			INTERFAC_SetUpJoyPadButtons ( iMode );
-			// And set up the menu to match.
-			menu_data[0].Data = iMode | ((NUM_OF_JOYPAD_MODES+1)<<8);
-			// Gap for label.
-			menu_data[2].Data  = joypad_button_use[JOYPAD_BUTTON_PUNCH];
-			menu_data[3].Data  = joypad_button_use[JOYPAD_BUTTON_KICK];
-			menu_data[4].Data  = joypad_button_use[JOYPAD_BUTTON_JUMP];
-			menu_data[5].Data  = joypad_button_use[JOYPAD_BUTTON_ACTION];
-			menu_data[6].Data  = joypad_button_use[JOYPAD_BUTTON_MOVE];
-			menu_data[7].Data  = joypad_button_use[JOYPAD_BUTTON_SELECT];
-			// Gap for label.
-			menu_data[9].Data = joypad_button_use[JOYPAD_BUTTON_CAMERA];
-			menu_data[10].Data = joypad_button_use[JOYPAD_BUTTON_CAM_LEFT];
-			menu_data[11].Data = joypad_button_use[JOYPAD_BUTTON_CAM_RIGHT];
-			menu_data[12].Data = joypad_button_use[JOYPAD_BUTTON_1STPERSON];
-		}
-#endif
 		break;
 	case FE_CONFIG_OPTIONS:
 		if ( bDoTransition )
@@ -4793,9 +3039,6 @@ extern bool g_bDreamcastABXYStartShouldGoToBootRomImmediately;
 
 	FRONTEND_recenter_menu();
 }
-
-
-
 
 void	FRONTEND_draw_districts() {
 	UBYTE i,j,id;
@@ -4843,12 +3086,6 @@ void	FRONTEND_draw_districts() {
 			iYpos = 454;
 		}
 		FONT2D_DrawStringCentred(str2,320+2,iYpos+2,0x000000,SMALL_FONT_SCALE,POLY_PAGE_FONT2D,          fade);
-#ifdef TARGET_DC
-		// A bit darker please.
-		FONT2D_DrawStringCentred(str2,320+2,iYpos-2,0x000000,SMALL_FONT_SCALE,POLY_PAGE_FONT2D,          fade);
-		FONT2D_DrawStringCentred(str2,320-2,iYpos-2,0x000000,SMALL_FONT_SCALE,POLY_PAGE_FONT2D,          fade);
-		FONT2D_DrawStringCentred(str2,320-2,iYpos+2,0x000000,SMALL_FONT_SCALE,POLY_PAGE_FONT2D,          fade);
-#endif
 		FONT2D_DrawStringCentred(str2,320  ,iYpos  ,0xffffff,SMALL_FONT_SCALE,POLY_PAGE_FONT2D,          fade);
 	}
 
@@ -4907,7 +3144,6 @@ void	FRONTEND_draw_districts() {
 
 			  */
 
-
 				fade = (64 - fade_state) << 2;
 
 				if (fade > 255) fade = 255;
@@ -4917,12 +3153,6 @@ void	FRONTEND_draw_districts() {
 					if (x>320)
 					{
 						FONT2D_DrawStringRightJustify(str,x+18+2,y+2,0x000000,SMALL_FONT_SCALE,POLY_PAGE_FONT2D, fade);
-#ifdef TARGET_DC
-						// A bit darker please.
-						FONT2D_DrawStringRightJustify(str,x+18-2,y+2,0x000000,SMALL_FONT_SCALE,POLY_PAGE_FONT2D, fade);
-						FONT2D_DrawStringRightJustify(str,x+18-2,y-2,0x000000,SMALL_FONT_SCALE,POLY_PAGE_FONT2D, fade);
-						FONT2D_DrawStringRightJustify(str,x+18+2,y-2,0x000000,SMALL_FONT_SCALE,POLY_PAGE_FONT2D, fade);
-#endif
 						FONT2D_DrawStringRightJustify(str,x+18,y,rgb,SMALL_FONT_SCALE,POLY_PAGE_FONT2D,          fade);
 
 						//
@@ -4944,34 +3174,6 @@ void	FRONTEND_draw_districts() {
 								POLY_PAGE_FONT2D,
 								fade, FALSE);
 
-#ifdef TARGET_DC
-							// Darker.
-							FONT2D_DrawStrikethrough(
-								FONT2D_leftmost_x - 2 - STRIKETHROUGH_HANGOVER_L,
-								x                 - 2 + STRIKETHROUGH_HANGOVER_R,
-								y                 + 2,
-								0x000000,
-								256,
-								POLY_PAGE_FONT2D,
-								fade, TRUE);
-							FONT2D_DrawStrikethrough(
-								FONT2D_leftmost_x - 2 - STRIKETHROUGH_HANGOVER_L,
-								x                 - 2 + STRIKETHROUGH_HANGOVER_R,
-								y                 - 2,
-								0x000000,
-								256,
-								POLY_PAGE_FONT2D,
-								fade, TRUE);
-							FONT2D_DrawStrikethrough(
-								FONT2D_leftmost_x + 2 - STRIKETHROUGH_HANGOVER_L,
-								x                 + 2 + STRIKETHROUGH_HANGOVER_R,
-								y                 - 2,
-								0x000000,
-								256,
-								POLY_PAGE_FONT2D,
-								fade, TRUE);
-#endif
-
 							FONT2D_DrawStrikethrough(
 								FONT2D_leftmost_x + 0 - STRIKETHROUGH_HANGOVER_L,
 								x				  + 0 + STRIKETHROUGH_HANGOVER_R,
@@ -4985,12 +3187,6 @@ void	FRONTEND_draw_districts() {
 					else
 					{
 						FONT2D_DrawString(str,x+32+2,y+2,0x000000,SMALL_FONT_SCALE,POLY_PAGE_FONT2D, fade);
-#ifdef TARGET_DC
-						// A bit darker please.
-						FONT2D_DrawString(str,x+32-2,y+2,0x000000,SMALL_FONT_SCALE,POLY_PAGE_FONT2D, fade);
-						FONT2D_DrawString(str,x+32-2,y-2,0x000000,SMALL_FONT_SCALE,POLY_PAGE_FONT2D, fade);
-						FONT2D_DrawString(str,x+32+2,y-2,0x000000,SMALL_FONT_SCALE,POLY_PAGE_FONT2D, fade);
-#endif
 						FONT2D_DrawString(str,x+32,y,rgb,SMALL_FONT_SCALE,POLY_PAGE_FONT2D,          fade);
 
 						//
@@ -5013,33 +3209,6 @@ void	FRONTEND_draw_districts() {
 								256,
 								POLY_PAGE_FONT2D,
 								fade, FALSE);
-#ifdef TARGET_DC
-						// A bit darker please.
-							FONT2D_DrawStrikethrough(
-								x                  - 2 - STRIKETHROUGH_HANGOVER_L,
-								FONT2D_rightmost_x - 2 + STRIKETHROUGH_HANGOVER_R,
-								y                  + 2,
-								0x000000,
-								256,
-								POLY_PAGE_FONT2D,
-								fade, TRUE);
-							FONT2D_DrawStrikethrough(
-								x                  - 2 - STRIKETHROUGH_HANGOVER_L,
-								FONT2D_rightmost_x - 2 + STRIKETHROUGH_HANGOVER_R,
-								y                  - 2,
-								0x000000,
-								256,
-								POLY_PAGE_FONT2D,
-								fade, TRUE);
-							FONT2D_DrawStrikethrough(
-								x                  + 2 - STRIKETHROUGH_HANGOVER_L,
-								FONT2D_rightmost_x + 2 + STRIKETHROUGH_HANGOVER_R,
-								y                  - 2,
-								0x000000,
-								256,
-								POLY_PAGE_FONT2D,
-								fade, TRUE);
-#endif
 
 							FONT2D_DrawStrikethrough(
 								x				   - STRIKETHROUGH_HANGOVER_L,
@@ -5140,32 +3309,14 @@ void	FRONTEND_display()
 
 
 	the_display.lp_D3D_Viewport->Clear(1, &the_display.ViewportRect, D3DCLEAR_ZBUFFER | D3DCLEAR_TARGET);
-//#ifdef TARGET_DC
-	// Must do these inside a frame on DC!
-	//POLY_frame_init(FALSE, FALSE);
-//#endif
+
 	ShowBackImage();
 	if ((fade_mode&3)==1) FRONTEND_show_xition();
 #ifndef TARGET_DC
 	POLY_frame_init(FALSE, FALSE);
 #endif
-#ifdef WANT_A_TITLE_SCREEN
-	if ( ( menu_state.mode == FE_TITLESCREEN ) || ( menu_state.mode == FE_LANGUAGESCREEN ) )
-	{
-#if 0
-		// Title screen - draw misc copyright notices on screen.
-		FRONTEND_shadowed_text ( XLAT_str_ptr(X_COPYRIGHT_1), 32, 32+00, 0xffd0d0d0 );
-		FRONTEND_shadowed_text ( XLAT_str_ptr(X_COPYRIGHT_2), 32, 32+20, 0xffd0d0d0 );
-		FRONTEND_shadowed_text ( XLAT_str_ptr(X_COPYRIGHT_3), 32+20, 32+38, 0xffd0d0d0 );
-		FRONTEND_shadowed_text ( XLAT_str_ptr(X_COPYRIGHT_4), 32, 32+60, 0xffd0d0d0 );
-#endif
-	}
-	else
-#endif
-	{
-		FRONTEND_kibble_draw();
-		//POLY_frame_draw(FALSE, FALSE);
-	}
+	FRONTEND_kibble_draw();
+	//POLY_frame_draw(FALSE, FALSE);
 
 
 	int iBigFontScale = BIG_FONT_SCALE;
@@ -5179,31 +3330,6 @@ void	FRONTEND_display()
 			iBigFontScale = BIG_FONT_SCALE_FRENCH;
 		}
 	}
-
-
-#ifdef TARGET_DC
-	// And a special kludge for the vibro pack options.
-	static bool bVibrationPackPresent = TRUE;
-	if ( menu_state.mode == FE_CONFIG_OPTIONS )
-	{
-		static int iVibroScanCountdown = 0;
-		if ( ( ( iVibroScanCountdown++ ) & 0xf ) == 0 )
-		{
-			// Flush the VMU device "cache".
-			RescanDevices();
-			// and rescan primary for a vibro pack.
-			if ( FindFirstVibratorOnCurrentController() == NULL )
-			{
-				bVibrationPackPresent = FALSE;
-			}
-			else
-			{
-				bVibrationPackPresent = TRUE;
-			}
-		}
-	}
-#endif
-
 
 	//POLY_frame_init(FALSE, FALSE);
 	for (i=0;i<menu_state.items;i++,md++) {
@@ -5219,35 +3345,8 @@ void	FRONTEND_display()
 				rgb|=rgbtemp;
 			}
 
-#ifdef TARGET_DC
-			if ( !bVibrationPackPresent &&
-				 ( ( md->LabelID == X_VIBRATION ) ||
-				   ( md->LabelID == X_VIBRATION_ENG ) ) )
-			{
-				// Grey this option out - no vibro pack.
-				SLONG rgbtemp=rgb&0xff000000;
-				//rgb>>=25; //rgb<<=1;
-				rgb=(rgb&0xff)>>1;
-				rgb|=(rgb<<8)|(rgb<<16);
-				rgb|=rgbtemp;
-			}
 
-			// Detect the (VMU full) message and alternate between that
-			// and (2 blocks required).
-			char *pString = md->Label;
-			int iXPos = md->X;
-			if ( ( md->LabelID == X_VMU_FULL ) && ( ( timeGetTime() & 2048 ) == 0 ) )
-			{
-				// Change it to the other one.
-				pString = XLAT_str ( X_VMU_X_BLOCKS_REQUIRED );
-				SLONG iX, iY;
-				MENUFONT_Dimensions(pString,iX,iY,-1,iBigFontScale);
-				iXPos=320-(iX>>1);
-			}
-			MENUFONT_Draw(iXPos,y,iBigFontScale,pString,rgb,0);
-#else
 			MENUFONT_Draw(md->X,y,iBigFontScale,md->Label,rgb,0);
-#endif
 
 #ifdef TARGET_DC
 			if ( i==menu_state.selected )
@@ -5325,12 +3424,6 @@ void	FRONTEND_display()
 		x=SIN(fade_state<<3)>>10;
 		FRONTEND_draw_button(642-(x*10),8,whichmap[menu_theme]);
 		FONT2D_DrawStringWrapTo(menu_buffer,20+2,100+2,0x000000,SMALL_FONT_SCALE,POLY_PAGE_FONT2D,255-(fade_state<<2),402);
-#ifdef TARGET_DC
-		// Darker Egor - MUCH darker!
-		FONT2D_DrawStringWrapTo(menu_buffer,20-2,100-2,0x000000,SMALL_FONT_SCALE,POLY_PAGE_FONT2D,255-(fade_state<<2),398);
-		FONT2D_DrawStringWrapTo(menu_buffer,20-2,100+2,0x000000,SMALL_FONT_SCALE,POLY_PAGE_FONT2D,255-(fade_state<<2),398);
-		FONT2D_DrawStringWrapTo(menu_buffer,20+2,100-2,0x000000,SMALL_FONT_SCALE,POLY_PAGE_FONT2D,255-(fade_state<<2),402);
-#endif
 		FONT2D_DrawStringWrapTo(menu_buffer,20,100,fade_rgb,SMALL_FONT_SCALE,POLY_PAGE_FONT2D,255-(fade_state<<2),400);
 	}
 
@@ -5358,180 +3451,6 @@ extern void PANEL_draw_quad( float left,float top,float right,float bottom,SLONG
 			1.0F);
 	}
 
-
-#ifdef TARGET_DC
-	// Draw a "quick info" text screen.
-	if ( pcQuickInfo[0] != '\0' )
-	{
-
-#if 1
-// This blows goats. But there you go.
-		if ( bQuickInfoReplaceWithSegasMadMessage )
-		{
-			// The big essay.
-			// Centre it on all sides.
-			SLONG iXSize[3], iYSize = 0;
-			char *pcString[3];
-			if ( !IsEnglish )
-			{
-				pcString[0] = "Une manette vient d'etre"; 		// NOTE! The E in etre should be Í, but the font doesn't have it, and it's all in caps anyway.
-				if ( bWriteVMInsteadOfVMU )
-				{
-					pcString[1] = "retirÈe ou une VM est";
-				}
-				else
-				{
-					pcString[1] = "retirÈe ou une VMU est";
-				}
-				pcString[2] = "en cours de dÈtection";
-			}
-			else
-			{
-				pcString[0] = "The controller has been";
-				if ( bWriteVMInsteadOfVMU )
-				{
-					pcString[1] = "removed or a VM";
-				}
-				else
-				{
-					pcString[1] = "removed or a VMU";
-				}
-				pcString[2] = "is being recognised";
-			}
-
-			for ( int i = 0; i < 3; i++ )
-			{
-				SLONG iYTemp;
-				MENUFONT_Dimensions ( pcString[i], iXSize[i], iYTemp, 640, BIG_FONT_SCALE );
-				iYSize += iYTemp;
-			}
-
-			// Darken the whole damn screen.
-			PANEL_draw_quad(
-				0.0f,
-				0.0f,
-				640.0f,
-				480.0f,
-				POLY_PAGE_ALPHA,
-				0xc0000000,
-				0.0f,
-				0.0f,
-				0.0f,
-				0.0f);
-
-			MENUFONT_Draw ( (640-iXSize[0] ) >> 1, (480-iYSize ) >> 1, BIG_FONT_SCALE, pcString[0], 0xffffffff, 0 );
-			MENUFONT_Draw ( (640-iXSize[1] ) >> 1, (480-0      ) >> 1, BIG_FONT_SCALE, pcString[1], 0xffffffff, 0 );
-			MENUFONT_Draw ( (640-iXSize[2] ) >> 1, (480+iYSize ) >> 1, BIG_FONT_SCALE, pcString[2], 0xffffffff, 0 );
-
-		}
-		else
-#endif
-		{
-			// Put at almost bottom centre - got to avoid the outer 16 pixels.
-			// Also avoid the ConStaStrRef stuff as well.
-			SLONG iXSize, iYSize;
-			MENUFONT_Dimensions ( pcQuickInfo, iXSize, iYSize, 640, BIG_FONT_SCALE );
-
-			// If on the title screen, move it to the top.
-			int iYpos;
-			if ( ( menu_state.mode == FE_TITLESCREEN ) || ( menu_state.mode == FE_LANGUAGESCREEN ) )
-			{
-				iYpos = 32+16;
-			}
-			else
-			{
-				iYpos = 480-32-16;
-			}
-			MENUFONT_Draw_Selection_Box	( (640-iXSize ) >> 1, iYpos, BIG_FONT_SCALE, pcQuickInfo, 0xffffffff, 0 );
-			MENUFONT_Draw				( (640-iXSize ) >> 1, iYpos, BIG_FONT_SCALE, pcQuickInfo, 0xffffffff, 0 );
-		}
-
-		if ( (signed)( timeGetTime() - dwQuickInfotimeGetTimeExpires ) > 0 )
-		{
-			pcQuickInfo[0] = '\0';
-			bQuickInfoReplaceWithSegasMadMessage = FALSE;
-		}
-	}
-#endif
-
-
-
-
-
-
-#ifdef TARGET_DC
-	// Just for non-final builds.
-	static CBYTE version_number[64] = "";
-
-	if ( version_number[0] == '\0' )
-	{
-		CBYTE ts[40] = __DATE__;
-		float vn;
-
-		CBYTE *month[12] =
-		{
-			"Jan",
-			"Feb",
-			"Mar",
-			"Apr",
-			"May",
-			"Jun",
-			"Jul",
-			"Aug",
-			"Sep",
-			"Oct",
-			"Nov",
-			"Dec"
-		};
-
-		SLONG i;
-
-		vn = 0.0F;
-
-		for (i = 0; i < 12; i++)
-		{
-			if (toupper(ts[0]) == toupper(month[i][0]) &&
-				toupper(ts[1]) == toupper(month[i][1]) &&
-				toupper(ts[2]) == toupper(month[i][2]))
-			{
-				vn = i - 8.0F;
-			}
-		}
-
-		SLONG day = atoi(ts + 4);
-
-		vn += day * 0.03F;
-
-		SLONG year = atoi(ts + 7);
-
-		vn += (year - 1999) * 12;
-
-		sprintf(version_number, "Version %.2f", vn );
-	}
-
-
-	static bool bShowVersionNumInFrontEnd = FALSE;
-extern int g_iCheatNumber;
-	if ( g_iCheatNumber == 0x1a1a0002 )
-	{
-		bShowVersionNumInFrontEnd = TRUE;
-		g_iCheatNumber = 0;
-	}
-
-	if ( bShowVersionNumInFrontEnd )
-	{
-		FONT2D_DrawString(
-			version_number,
-			20,
-			20,
-			0xffffffff);
-	}
-
-#endif
-
-
-
-
 #ifndef TARGET_DC
 	POLY_frame_draw(FALSE, FALSE);
 #endif
@@ -5551,24 +3470,6 @@ void	FRONTEND_storedata() {
 //		MFX_free_wave_list();
 
 		MFX_set_volumes(menu_data[0].Data>>1,menu_data[1].Data>>1,menu_data[2].Data>>1);
-#ifdef TARGET_DC
-		if ( ( menu_data[3].Data & 0xff ) == 0 )
-		{
-			// Mono.
-			SetFirmwareValues ( DWORD_DONT_CHANGE, BYTE_DONT_CHANGE, BYTE_DONT_CHANGE, SOUND_MODE_MONO, BYTE_DONT_CHANGE );
-		}
-		else
-		{
-			// Stereo
-			SetFirmwareValues ( DWORD_DONT_CHANGE, BYTE_DONT_CHANGE, BYTE_DONT_CHANGE, SOUND_MODE_STEREO, BYTE_DONT_CHANGE );
-		}
-#endif
-
-#ifdef ALLOW_DANGEROUS_OPTIONS
-		Set3DProvider(menu_data[3].Data&0xff);
-#endif
-
-
 		break;
 
 #ifdef WANT_A_KEYBOARD_ITEM
@@ -5593,25 +3494,6 @@ void	FRONTEND_storedata() {
 #endif
 
 	case FE_CONFIG_INPUT_JP:
-#ifdef TARGET_DC
-		// Save the preset mode.
-		ENV_set_value_number("joypad_mode", (menu_data[0].Data & 0xff) , "Joypad");
-		if ( ( menu_data[0].Data & 0xff ) == 0 )
-		{
-			// Custom mode. Save the custom buttons too.
-			ENV_set_value_number("joypad_punch",		menu_data[2].Data, "Joypad");
-			ENV_set_value_number("joypad_kick",			menu_data[3].Data, "Joypad");
-			ENV_set_value_number("joypad_jump",			menu_data[4].Data, "Joypad");
-			ENV_set_value_number("joypad_action",		menu_data[5].Data, "Joypad");
-			ENV_set_value_number("joypad_move",			menu_data[6].Data, "Joypad");
-			ENV_set_value_number("joypad_select",		menu_data[7].Data, "Joypad");
-			// gap for label
-			ENV_set_value_number("joypad_camera",		menu_data[9].Data, "Joypad");
-			ENV_set_value_number("joypad_cam_left",		menu_data[10].Data, "Joypad");
-			ENV_set_value_number("joypad_cam_right",	menu_data[11].Data , "Joypad");
-			ENV_set_value_number("joypad_1stperson",	menu_data[12].Data, "Joypad");
-		}
-#else
 		ENV_set_value_number("joypad_kick",			menu_data[0].Data, "Joypad");
 		ENV_set_value_number("joypad_punch",		menu_data[1].Data, "Joypad");
 		ENV_set_value_number("joypad_jump",			menu_data[2].Data, "Joypad");
@@ -5624,7 +3506,6 @@ void	FRONTEND_storedata() {
 		ENV_set_value_number("joypad_cam_left",		menu_data[9].Data, "Joypad");
 		ENV_set_value_number("joypad_cam_right",	menu_data[10].Data , "Joypad");
 		ENV_set_value_number("joypad_1stperson",	menu_data[11].Data, "Joypad");
-#endif
 		break;
 
 	case FE_CONFIG_OPTIONS:
@@ -5654,214 +3535,20 @@ BOOL	FRONTEND_ValidMission(SWORD sel) {
 	return (BOOL)(mission_hierarchy[id]&4);
 }
 
-
-
-
 UBYTE	FRONTEND_input() {
 	UBYTE scan, any_button=0;
-#ifndef TARGET_DC
-	// DC input system does this for us.
 	static SLONG last_input=0;
-#endif
 	static UBYTE last_button=0;
 	static UBYTE first_pad=1;
 
 	SLONG input=0;
 
-
-#ifdef TARGET_DC
-	if ( ( menu_state.mode == FE_SAVESCREEN ) || ( menu_state.mode == FE_LOADSCREEN ) || ( menu_state.mode == FE_VMU_SELECT ) )
-	{
-		// While these are shown, we much watch the VMUs and controllers.
-		// If any change state, the correct screen needs refreshing.
-		bool bSomethingChanged = RescanDevices();
-		if ( bSomethingChanged )
-		{
-			// Delete any removed devices.
-			DeleteInvalidDevice();
-
-			fade_mode=1;
-			// Re-enter this screen.
-			FRONTEND_mode ( menu_state.mode, FALSE );
-			// Pop the stack.
-			menu_state.stackpos--;
-#if 0
-			switch ( menu_state.mode )
-			{
-			case FE_SAVESCREEN:
-				menu_state.title=XLAT_str_ptr(X_SAVE_GAME);
-				break;
-			case FE_LOADSCREEN:
-				menu_state.title=XLAT_str_ptr(X_LOAD_GAME);
-				break;
-			case FE_VMU_SELECT:
-				menu_state.title=XLAT_str_ptr(X_VMU_SELECT);
-				break;
-			default:
-				ASSERT ( FALSE );
-				break;
-			}
-#endif
-			FRONTEND_kibble_flurry();
-			return ( 0 );
-		}
-	}
-#endif
-
-#ifdef TARGET_DC
-extern DIDeviceInfo *primary_device;
-extern BOOL AreAnyDevicesConnected ( void );
-
-	if ( primary_device == NULL )
-	{
-		if ( AreAnyDevicesConnected() )
-		{
-			// No current controller, but there is one connected. Tell them to press start.
-			FRONTEND_MakeQuickMessage ( XLAT_str ( X_CONTROLLER_REMOVED ), 100 );
-		}
-		else
-		{
-			// No controllers at all.
-			// Display Sega's mad message.
-			FRONTEND_MakeQuickMessage ( XLAT_str ( X_NO_CONTROLLER_CONNECTED ), 100, TRUE );
-		}
-	}
-#endif
-
-
-#ifdef TARGET_DC
-	if ( m_bMovingPanel )
-	{
-		// While the action button is held down, the analog stick or D-pad
-		// move the panel display around the screen.
-		// Wait until a new button goes down (not the one that just selected this option).
-		// Also need to remap so that we ignore the normal mappings, otherwise buttons that
-		// don't have any current mapping don't trigger anything!
-		DWORD dwInput = get_hardware_input ( INPUT_TYPE_JOY | INPUT_TYPE_REMAP_DPAD | INPUT_TYPE_REMAP_BUTTONS | INPUT_TYPE_REMAP_START_BUTTON );
-
-		if ( ( dwInput & INPUT_MASK_DOMENU ) == 0 )
-		{
-			// They stopped pressing the "do" button. Stop doing this.
-			m_bMovingPanel = FALSE;
-		}
-		else
-		{
-			// OK, still moving the panel.
-			// REMEMBER THAT THESE NUMBERS ARE DIVIDED BY 4!
-			int iXPos = ENV_get_value_number ( "panel_x", 32 / 4, "" );
-			int iYPos = ENV_get_value_number ( "panel_y", (480 - 32) / 4, "" );
-
-			// Move the panel
-#define PANEL_MOVE_SHIFT 3
-
-			if ( dwInput & INPUT_MASK_LEFT )
-			{
-				int iHowMuch = 0x20 - ( ( dwInput >> 18 ) & 0x7f );
-				iHowMuch >>= PANEL_MOVE_SHIFT;
-				// Small possibility that it can be -ve (if digital stick is used, but analog centres slighty to right)
-				if ( iHowMuch < 0 )
-				{
-					iHowMuch = 0;
-				}
-				// Always at least 1 (also allows the digital stick to do slides).
-				iHowMuch++;
-				iXPos -= iHowMuch;
-				if ( iXPos < 0 )
-				{
-					iXPos = 0;
-				}
-			}
-
-			if ( dwInput & INPUT_MASK_RIGHT )
-			{
-				int iHowMuch = ( ( dwInput >> 18 ) & 0x7f ) - 0x5f;
-				iHowMuch >>= PANEL_MOVE_SHIFT;
-				// Small possibility that it can be -ve (if digital stick is used, but analog centres slighty to right)
-				if ( iHowMuch < 0 )
-				{
-					iHowMuch = 0;
-				}
-				// Always at least 1 (also allows the digital stick to do slides).
-				iHowMuch++;
-				iXPos += iHowMuch;
-				if ( iXPos > ( ( 640 - 212 ) / 4 ) )
-				{
-					iXPos = ( 640 - 212 ) / 4;
-				}
-			}
-
-			if ( dwInput & INPUT_MASK_FORWARDS )
-			{
-				int iHowMuch = 0x20 - ( ( dwInput >> 25 ) & 0x7f );
-				iHowMuch >>= PANEL_MOVE_SHIFT;
-				// Small possibility that it can be -ve
-				if ( iHowMuch < 0 )
-				{
-					iHowMuch = 0;
-				}
-				// Always at least 1 (also allows the digital stick to do slides).
-				iHowMuch++;
-				iYPos -= iHowMuch;
-				if ( iYPos < ( 165 / 4 ) )
-				{
-					iYPos = 165 / 4;
-				}
-			}
-
-			if ( dwInput & INPUT_MASK_BACKWARDS )
-			{
-				int iHowMuch = ( ( dwInput >> 25 ) & 0x7f ) - 0x5f;
-				iHowMuch >>= PANEL_MOVE_SHIFT;
-				// Small possibility that it can be -ve
-				if ( iHowMuch < 0 )
-				{
-					iHowMuch = 0;
-				}
-				// Always at least 1 (also allows the digital stick to do slides).
-				iHowMuch++;
-				iYPos += iHowMuch;
-				if ( iYPos > ( 480 / 4 ) )
-				{
-					iYPos = 480 / 4;
-				}
-			}
-
-			// Store the values back.
-			ASSERT ( ( iXPos >= 0 ) && ( iXPos < 256 ) );
-			ASSERT ( ( iYPos >= 0 ) && ( iYPos < 256 ) );
-			ENV_set_value_number ( "panel_x", iXPos, "" );
-			ENV_set_value_number ( "panel_y", iYPos, "" );
-		}
-	}
-	else
-#endif
-
-#ifdef TARGET_DC
-	if (grabbing_pad)
-#else
 	if (grabbing_pad&&!last_input)
-#endif
 	{
 		UBYTE i,j;
 		MenuData *item=menu_data+menu_state.selected;
-#ifndef TARGET_DC
 		ReadInputDevice();
-#else
-		// Wait until a new button goes down (not the one that just selected this option).
-		// Also need to remap so that we ignore the normal mappings, otherwise buttons that
-		// don't have any current mapping don't trigger anything!
-		input = get_hardware_input ( INPUT_TYPE_JOY | INPUT_TYPE_REMAP_DPAD | INPUT_TYPE_REMAP_BUTTONS | INPUT_TYPE_GONEDOWN | INPUT_TYPE_REMAP_START_BUTTON );
-		if ( input == 0 )
-		{
-			return 0;
-		}
-#endif
-#ifndef TARGET_DC
 		if (Keys[KB_ESC]||(input&INPUT_MASK_CANCEL))
-#else
-		// On DC, use "start" as the cancel button, since we're not allowed to map anything onto it anyway.
-		if ( input & INPUT_MASK_START )
-#endif
 		{
 			Keys[KB_ESC]=0;
 #if 0
@@ -5884,11 +3571,7 @@ extern BOOL AreAnyDevicesConnected ( void );
 						}
 					}
 					item->Data=i;
-	#ifndef TARGET_DC
 					last_button=1;
-	#else
-					last_button=0;
-	#endif
 					grabbing_pad=0;
 					break;
 				}
@@ -5908,35 +3591,8 @@ extern BOOL AreAnyDevicesConnected ( void );
 #define	AXIS_MIN			(AXIS_CENTRE-NOISE_TOLERANCE)
 #define	AXIS_MAX			(AXIS_CENTRE+NOISE_TOLERANCE)
 
-//extern ULONG	get_hardware_input(UWORD type);
-#ifdef TARGET_DC
-		input = get_hardware_input ( INPUT_TYPE_JOY | INPUT_TYPE_REMAP_DPAD | INPUT_TYPE_REMAP_BUTTONS | INPUT_TYPE_GONEDOWN | INPUT_TYPE_REMAP_START_BUTTON );
-#else
 		input = get_hardware_input(INPUT_TYPE_JOY);
-#endif
 
-
-#ifdef TARGET_DC
-		// On the title screen, if there is a primary device,
-		// then we want to get onto the next screen immediately.
-		// So fake up a button A press. What a kludge!
-		if ( menu_state.mode == FE_TITLESCREEN )
-		{
-			if ( primary_device != NULL )
-			{
-				// The is a primary, so you must have pressed "Start",
-				// since the title screen resets the current device.
-				input = INPUT_MASK_DOMENU;
-			}
-		}
-#endif
-
-
-
-// On the DC, the standard input is just fine.
-#ifndef TARGET_DC
-
-//		TRACE("raw input: %d -- ",input);
 		input&=~(INPUT_MASK_LEFT|INPUT_MASK_RIGHT|INPUT_MASK_FORWARDS|INPUT_MASK_BACKWARDS);
 		if(the_state.lX>AXIS_MAX)
 		{
@@ -5959,20 +3615,14 @@ extern BOOL AreAnyDevicesConnected ( void );
 			input&=~(INPUT_MASK_LEFT|INPUT_MASK_RIGHT);
 			input|=INPUT_MASK_FORWARDS;
 		}
-#endif //#ifndef TARGET_DC
 
-#ifndef TARGET_DC
 		if (input==last_input) {
 			input=0;
 			any_button=0;
 		}
 		else
-#endif
 		{
-#ifndef TARGET_DC
 			last_input=input;
-#endif
-#ifndef TARGET_DC
 			for (scan=0;scan<8;scan++) 
 				any_button |= the_state.rgbButtons[scan];
 			// Supress very first movement - PC joysticks have a
@@ -5987,10 +3637,6 @@ extern BOOL AreAnyDevicesConnected ( void );
 					input=0;
 				}
 			}
-#else
-			// On DC, this has already been done - appropriate buttons are mapped to punch.
-			any_button = ( ( input & INPUT_MASK_DOMENU ) != 0 ) ? 1 : 0;
-#endif
 			if (last_button)
 			{
 				if (!any_button)
@@ -6004,41 +3650,6 @@ extern BOOL AreAnyDevicesConnected ( void );
 #endif
 
 	}
-
-
-#ifdef TARGET_DC
-	// Sense ABXYStart
-	if ( g_bDreamcastABXYStartComboPressed )
-	{
-		g_bDreamcastABXYStartComboPressed = FALSE;
-#ifdef WANT_A_TITLE_SCREEN
-		// Go to the title screen instead of the menu screen.
-		if ( menu_state.mode != FE_TITLESCREEN )
-		{
-			// Go to the main menu.
-			menu_mode_queued=FE_TITLESCREEN;
-			fade_mode=2|4;
-			//FRONTEND_kibble_flurry();
-			return FE_TITLESCREEN;
-		}
-#else
-		if ( menu_state.mode != FE_MAINMENU )
-		{
-			// Go to the main menu.
-			menu_mode_queued=FE_MAINMENU;
-			fade_mode=2|4;
-			FRONTEND_kibble_flurry();
-			return FE_MAINMENU;
-		}
-#endif
-		else
-		{
-			// Already at main menu - bin everything and quit to BIOS boot screen.
-			ASSERT ( FALSE );
-			ResetToFirmware();
-		}
-	}
-#endif
 
 	if (grabbing_key&&LastKey) {
 		MenuData *item=menu_data+menu_state.selected;
@@ -6084,7 +3695,6 @@ extern BOOL AreAnyDevicesConnected ( void );
 		}
 	}
 
-#ifndef TARGET_DC
 	if (Keys[KB_END])
 	{
 		Keys[KB_END]=0;
@@ -6103,7 +3713,6 @@ extern BOOL AreAnyDevicesConnected ( void );
 		while (((menu_data+menu_state.selected)->Type==OT_LABEL)||(((menu_data+menu_state.selected)->Type==OT_BUTTON)&&((menu_data+menu_state.selected)->Choices==(CBYTE*)1))) 
 			menu_state.selected++;
 	}
-#endif
 	if (Keys[KB_UP]||(input&INPUT_MASK_FORWARDS)) {
 		Keys[KB_UP]=0;
 		MFX_play_stereo(1,S_MENU_CLICK_START,MFX_REPLACE);
@@ -6140,12 +3749,8 @@ extern BOOL AreAnyDevicesConnected ( void );
 
 		if (fade_mode!=2) MFX_play_stereo(0,S_MENU_CLICK_END,MFX_REPLACE);
 		FRONTEND_stop_xition();
-#ifdef TARGET_DC
-		// Only go here if we are overwriting a file.
-		if ((menu_state.mode==FE_SAVESCREEN)&&(item->Data==FE_SAVE_CONFIRM))
-#else
+
 		if ((menu_state.mode==FE_SAVESCREEN)&&(item->Data!=FE_BACK))
-#endif
 		{
 			save_slot=menu_state.selected+1;
 //			item->LabelID=X_SAVE_GAME;
@@ -6154,57 +3759,15 @@ extern BOOL AreAnyDevicesConnected ( void );
 			FRONTEND_kibble_flurry();
 			return 0;*/
 		}
-#ifdef TARGET_DC
-		if ((menu_state.mode==FE_VMU_SELECT)&&(item->Data==FE_MAINMENU))
-		{
-			// Set this VMU to be the current one.
-			MapleVMU *pVMU = FindMemoryVMUAt ( m_ubVMUListCtrl[menu_state.selected], m_ubVMUListSlot[menu_state.selected] );
-			SetCurrentStorageVMU ( pVMU );
-			item->Data = FE_BACK;
-		}
 
-		if ((menu_state.mode==FE_CONFIG_OPTIONS)&&(item->LabelID==X_VIBRATION))
-		{
-			// Remember, this is the state it is currently, so we are turning it on.
-			if ( ( item->Data & 0x1 ) == 0 )
-			{
-				// Set off a vibration.
-				SetVibrationEnable ( TRUE );
-				Vibrate ( 10.0f, 1.0f, 0.5f );
-			}
-			else
-			{
-				//Turn the Engine Vibration off as well.
-				item[1].Data &= ~1;
-			}
-		}
-		if ((menu_state.mode==FE_CONFIG_OPTIONS)&&(item->LabelID==X_VIBRATION_ENG))
-		{
-			// Remember, this is the state it is currently, so we are turning it on.
-			if ( ( item->Data & 0x1 ) == 0 )
-			{
-				//Turn all vibrations on as well.
-				item[-1].Data |= 1;
-				// Set off a vibration.
-				SetVibrationEnable ( TRUE );
-				Vibrate ( 10.0f, 1.0f, 0.5f );
-			}
-		}
-
-#endif
 		if ((menu_state.mode==FE_SAVESCREEN)&&(item->Data==FE_MAPSCREEN))
 		{
 			menu_mode_queued=FE_MAPSCREEN;
 			menu_state.stackpos=0;
 			menu_thrash=FE_MAINMENU;
 		}
-#ifdef TARGET_DC
-		// If not overwriting a file, we come straight here without a confirm.
-		if ( ( (menu_state.mode==FE_SAVESCREEN)&&(item->Data==FE_MAPSCREEN) )
-		   ||( (menu_state.mode==FE_SAVE_CONFIRM)&&(item->Data==FE_MAPSCREEN) ) )
-#else
+
 		if ((menu_state.mode==FE_SAVE_CONFIRM)&&(item->Data==FE_MAPSCREEN)) 
-#endif
 		{
 			if ( item->LabelID == X_CANCEL )
 			{
@@ -6217,21 +3780,10 @@ extern BOOL AreAnyDevicesConnected ( void );
 				return 0;
 			}
 
-#ifdef TARGET_DC
-			if ( menu_state.mode==FE_SAVESCREEN )
-			{
-				// Which slot was it?
-				save_slot=menu_state.selected+1;
-			}
-
-			// Find the next "recommended" mission.
-			FRONTEND_MissionHierarchy(MISSION_SCRIPT);
-			bool bSuccess = FRONTEND_save_savegame(iNextSuggestedMission,save_slot);
-#else
 			CBYTE ttl[_MAX_PATH];
 			FRONTEND_fetch_title_from_id(MISSION_SCRIPT,ttl,mission_launch);
 			bool bSuccess = FRONTEND_save_savegame(ttl,save_slot);
-#endif
+
 			if ( bSuccess )
 			{
 				menu_mode_queued=FE_MAPSCREEN;
@@ -6312,9 +3864,7 @@ extern BOOL AreAnyDevicesConnected ( void );
 			{
 				grabbing_pad=1;
 				//LastKey=0;
-#ifndef TARGET_DC
 				last_input = 0;
-#endif
 			}
 			else
 			{
@@ -6330,31 +3880,6 @@ extern BOOL AreAnyDevicesConnected ( void );
 		case OT_BUTTON:
 		case OT_BUTTON_L:
 			if (menu_state.mode==FE_START) return FE_LOADSCREEN;
-#ifdef WANT_A_TITLE_SCREEN 
-
-#if 0
-			if (menu_state.mode==FE_TITLESCREEN)
-			{
-			}
-#endif
-			if (menu_state.mode==FE_LANGUAGESCREEN)
-			{
-				// Select the language based on button press, and go to the main menu.
-				switch ( item->LabelID )
-				{
-				case X_ENGLISH:
-					ENV_set_value_number ( "lang_num", 0, "" );
-					break;
-				case X_FRENCH:
-					ENV_set_value_number ( "lang_num", 1, "" );
-					break;
-				default:
-					break;
-				}
-				mission_launch = 0;
-				return FE_CHANGE_LANGUAGE;
-			}
-#endif
 #ifdef WANT_AN_EXIT_MENU_ITEM
 			//if (item->Data==-1) return -1;
 			if (item->Data==FE_NO_REALLY_QUIT) return -1;
@@ -6366,25 +3891,6 @@ extern BOOL AreAnyDevicesConnected ( void );
 			//if (item->Data==FE_MAPSCREEN) return FE_START;
 			if (item->Data==FE_EDITOR) return FE_EDITOR;
 			if (item->Data==FE_CREDITS) return FE_CREDITS;
-#ifdef TARGET_DC
-			if (item->Data==FE_CHANGE_JOYPAD)
-			{
-				// Wait until the button goes back up, or this joypad
-				// will immediately be selected again!
-				while ( 0 != ( INPUT_MASK_ALL_BUTTONS & get_hardware_input ( INPUT_TYPE_JOY | INPUT_TYPE_REMAP_DPAD | INPUT_TYPE_REMAP_BUTTONS | INPUT_TYPE_REMAP_START_BUTTON ) ) )
-				{
-				}
-
-				// Change the active joypad.
-				ClearPrimaryDevice();
-				// And pretend it did an "FE_BACK".
-				menu_mode_queued=FE_BACK;
-				FRONTEND_storedata();
-				fade_mode=2|4;
-				FRONTEND_kibble_flurry();
-				return 0;
-			}
-#endif
 			
 			FRONTEND_kibble_flurry();
 
@@ -6454,36 +3960,11 @@ extern BOOL AreAnyDevicesConnected ( void );
 		MenuData *item=menu_data+menu_state.selected;
 		if ((item->Type==OT_SLIDER)&&(item->Data>0))
 		{
-#ifdef TARGET_DC
-			// Analogue slidyness!
-			// The analog stuff has been masked out for GONEDOWN, so get it again.
-			DWORD dwInput = get_last_input ( 0 );
-			int iHowMuch = 0x20 - ( ( dwInput >> 18 ) & 0x7f );
-			iHowMuch >>= 3;
-			// Small possibility that it can be -ve (if digital stick is used, but analog centres slighty to right)
-			if ( iHowMuch < 0 )
-			{
-				iHowMuch = 0;
-			}
-			// Always at least 1 (also allows the digital stick to do slides).
-			iHowMuch++;
-			if ( item->Data > iHowMuch )
-			{
-				item->Data -= iHowMuch;
-			}
-			else
-			{
-				item->Data = 0;
-			}
-			// And allow this to autorepeat.
-			allow_input_autorepeat();
-#else
 			item->Data--;
 			if (item->Data>0)
 			{
 				item->Data--;
 			}
-#endif
 		}
 
 
@@ -6498,26 +3979,10 @@ extern BOOL AreAnyDevicesConnected ( void );
 			}
 		}
 
-
-// No normal options can be changed by left/right - too easy to do on DC joypads.
-#ifndef TARGET_DC
-
-#ifdef TARGET_DC
-		if ((menu_state.mode==FE_CONFIG_OPTIONS)&&(item->LabelID==X_VIBRATION))
-		{
-			// Remember, this is the state it is currently, so we are turning it off.
-			if ( ( item->Data & 0x1 ) == 1 )
-			{
-				// Turn the Engine Vibration off as well.
-				item[1].Data &= ~1;
-			}
-		}
-#endif
 		if ((item->Type==OT_MULTI)&&((item->Data&0xff)>0)) {
 			item->Data--;
 			MFX_play_stereo(1,S_MENU_CLICK_START,MFX_REPLACE);
 		}
-#endif
 
 		if (menu_state.mode==FE_CONFIG_VIDEO) FRONTEND_gamma_update();
 		if ((menu_state.mode==FE_CONFIG_AUDIO)&&!menu_state.selected) {
@@ -6531,36 +3996,11 @@ extern BOOL AreAnyDevicesConnected ( void );
 		MenuData *item=menu_data+menu_state.selected;
 		if ((item->Type==OT_SLIDER)&&(item->Data<255))
 		{
-#ifdef TARGET_DC
-			// Analogue slidyness!
-			// The analog stuff has been masked out for GONEDOWN, so get it again.
-			DWORD dwInput = get_last_input ( 0 );
-			int iHowMuch = ( ( dwInput >> 18 ) & 0x7f ) - 0x5f;
-			iHowMuch >>= 3;
-			// Small possibility that it can be -ve (if digital stick is used, but analog centres slighty to right)
-			if ( iHowMuch < 0 )
-			{
-				iHowMuch = 0;
-			}
-			// Always at least 1 (also allows the digital stick to do slides).
-			iHowMuch++;
-			if ( item->Data < ( 256 - iHowMuch ) )
-			{
-				item->Data += iHowMuch;
-			}
-			else
-			{
-				item->Data = 255;
-			}
-			// And allow this to autorepeat.
-			allow_input_autorepeat();
-#else
 			item->Data++;
 			if (item->Data<255)
 			{
 				item->Data++;
 			}
-#endif
 		}
 
 
@@ -6575,37 +4015,10 @@ extern BOOL AreAnyDevicesConnected ( void );
 			}
 		}
 
-
-// No normal options can be changed by left/right - too easy to do on DC joypads.
-#ifndef TARGET_DC
-
-
-#ifdef TARGET_DC
-		if ((menu_state.mode==FE_CONFIG_OPTIONS)&&(item->LabelID==X_VIBRATION))
-		{
-			// Remember, this is the state it is currently, so we are turning it on.
-			if ( ( item->Data & 0x1 ) == 0 )
-			{
-				// Set off a vibration.
-				SetVibrationEnable ( TRUE );
-				Vibrate ( 10.0f, 1.0f, 0.5f );
-			}
-		}
-		if ((menu_state.mode==FE_CONFIG_OPTIONS)&&(item->LabelID==X_VIBRATION_ENG))
-		{
-			// Remember, this is the state it is currently, so we are turning it on.
-			if ( ( item->Data & 0x1 ) == 0 )
-			{
-				// Turn on general vibrations as well.
-				item[-1].Data |= 0x1;
-			}
-		}
-#endif
 		if ((item->Type==OT_MULTI)&&((item->Data&0xff)<(item->Data>>8)-1)) {
 			item->Data++;
 			MFX_play_stereo(1,S_MENU_CLICK_START,MFX_REPLACE);
 		}
-#endif
 
 		if (menu_state.mode==FE_CONFIG_VIDEO) FRONTEND_gamma_update();
 		if ((menu_state.mode==FE_CONFIG_AUDIO)&&!menu_state.selected) {
@@ -6663,55 +4076,6 @@ extern BOOL AreAnyDevicesConnected ( void );
 		FRONTEND_kibble_flurry();
 	}
 
-#ifdef TARGET_DC
-	// Fudge for the joypad stuff.
-	if ( menu_state.mode == FE_CONFIG_INPUT_JP )
-	{
-		MenuData *item=menu_data+menu_state.selected;
-		if ( item->Type == OT_MULTI )
-		{
-			// There is only one MULTI on this screen - the "Mode" one.
-
-			if ( ( item->Data & 0xff ) == 0 )
-			{
-				// The custom mode - they can edit joypad settings.
-				bCanChangeJoypadButtons = TRUE;
-			}
-			else
-			{
-				// A predefined mode - they can't edit joypad settings.
-				bCanChangeJoypadButtons = FALSE;
-			}
-
-
-			// See if the mode has changed.
-			static int iLastMode = -1;
-
-			if ( iLastMode != ( item->Data & 0xff ) )
-			{
-				iLastMode = ( item->Data & 0xff );
-
-				// Update the shown joypad settings with the selected mode.
-				INTERFAC_SetUpJoyPadButtons ( iLastMode );
-				// Gap for label.
-				menu_data[2].Data  = joypad_button_use[JOYPAD_BUTTON_PUNCH];
-				menu_data[3].Data  = joypad_button_use[JOYPAD_BUTTON_KICK];
-				menu_data[4].Data  = joypad_button_use[JOYPAD_BUTTON_JUMP];
-				menu_data[5].Data  = joypad_button_use[JOYPAD_BUTTON_ACTION];
-				menu_data[6].Data  = joypad_button_use[JOYPAD_BUTTON_MOVE];
-				menu_data[7].Data  = joypad_button_use[JOYPAD_BUTTON_SELECT];
-				// Gap for label.
-				menu_data[9].Data = joypad_button_use[JOYPAD_BUTTON_CAMERA];
-				menu_data[10].Data = joypad_button_use[JOYPAD_BUTTON_CAM_LEFT];
-				menu_data[11].Data = joypad_button_use[JOYPAD_BUTTON_CAM_RIGHT];
-				menu_data[12].Data = joypad_button_use[JOYPAD_BUTTON_1STPERSON];
-			}
-		}
-	}
-
-#endif
-
-
 	return 0;
 }
 
@@ -6759,143 +4123,6 @@ extern SLONG EWAY_cam_active;
 	// Reset the transition buffer's contents.
 	lpFRONTEND_show_xition_LastBlit = NULL;
 
-
-	#ifdef TARGET_DC
-
-
-	// Load the icon pic data if it hasn't already been done.
-	// Yes, this isn't the _best_ place to put it... :-)
-	if ( !m_bLoadedIconSavePic )
-	{
-		TGA_Pixel pPixelData[32*32];
-
-		// Load the savegame icon from disk.
-extern TGA_Info TGA_load_from_file(const CBYTE *file, SLONG max_width, SLONG max_height, TGA_Pixel* data, BOOL bCanShrink);
-		TGA_Info tga_info = TGA_load_from_file ( "server\\textures\\extras\\dc\\saved_data_icon2.tga", 32, 32, pPixelData, FALSE );
-		if ( tga_info.valid )
-		{
-			// Convert to 16 colours. There MUST only be 16 colours!
-			int iNumColours = 0;
-
-			TGA_Pixel *pcSrc = pPixelData;
-			BYTE *pcDest = m_pcIconSavePicData;
-			for ( int y = 0; y < 32; y++ )
-			{
-				// Convert a line into bytes first.
-				BYTE pcLine[32];
-				BYTE *pcDest1 = pcLine;
-				for ( int x = 0; x < 32; x++ )
-				{
-					// Find the 4444 colour (set alpha to full).
-					WORD wColour = 0xf000;
-					// Read the colours.
-					wColour |= ( ( pcSrc->red   ) & 0xf0 ) << 4;
-					wColour |= ( ( pcSrc->green ) & 0xf0 );
-					wColour |= ( ( pcSrc->blue  ) & 0xf0 ) >> 4;
-					pcSrc++;
-
-					// Search for it.
-					for ( int i = 0; i < iNumColours; i++ )
-					{
-						if ( wColour == m_pcIconSavePicPalette[i] )
-						{
-							break;
-						}
-					}
-					if ( i == iNumColours )
-					{
-						// Didn't find it - add it.
-						ASSERT ( iNumColours < 16 );
-						m_pcIconSavePicPalette[iNumColours] = wColour;
-						iNumColours++;
-					}
-
-					*pcDest1++ = i;
-				}
-
-				// Now pack into 4bpp.
-				pcDest1 = pcLine;
-				for ( x = 0; x < 16; x++ )
-				{
-					*pcDest = (*pcDest1++) << 4;
-					*pcDest++ |= (*pcDest1++);
-				}
-			}
-
-			m_bLoadedIconSavePic = TRUE;
-		}
-	}
-
-	#endif
-
-	
-#ifdef TARGET_DC
-	// Need to reinit the frontend stuff.
-	FRONTEND_scr_new_theme(
-		menu_back_names  [menu_theme],
-		menu_map_names   [menu_theme],
-		menu_brief_names [menu_theme],
-		menu_config_names[menu_theme]);
-
-#ifdef ONLY_USE_THREE_BACKGROUNDS_PLEASE_BOB
-	UseBackSurface(screenfull_back);
-	screenfull = screenfull_back;
-#else
-	UseBackSurface(screenfull_config);
-	screenfull = screenfull_config;
-#endif
-#endif
-
-
-
-
-
-
-#ifdef SAVE_MY_BACKGROUNDS_PLEASE_BOB
-	// Convert _all_ the screens used, to make sure we don't miss any.
-	// The act of loading them also converts them.
-	InitBackImage("e3load.tga");
-	InitBackImage("deadcivs.tga");
-	InitBackImage("DCtitlepage_uk.tga");
-	InitBackImage("DCtitlepage_us.tga");
-
-	InitBackImage("briefing blood darci.tga");
-	InitBackImage("map blood darci.tga");
-	InitBackImage("config blood.tga");
-	InitBackImage("title blood1.tga");
-
-	InitBackImage("briefing leaves darci.tga");
-	InitBackImage("map leaves darci.tga");
-	InitBackImage("config leaves.tga");
-	InitBackImage("title leaves1.tga");
-
-	InitBackImage("briefing rain darci.tga");
-	InitBackImage("map rain darci.tga");
-	InitBackImage("config rain.tga");
-	InitBackImage("title rain1.tga");
-
-	InitBackImage("briefing snow darci.tga");
-	InitBackImage("map snow darci.tga");
-	InitBackImage("config snow.tga");
-	InitBackImage("title snow1.tga");
-#endif
-
-
-
-#if 0
-#ifndef FORCE_STUFF_PLEASE_BOB
-	//
-	// Turn off every even kibble.
-	//
-
-	for (SLONG kib = 0; kib < 512; kib += 2)
-	{
-		kibble_off[kib] = TRUE;
-	}
-#endif
-#endif
-
-
 	CBYTE *str, *lang=ENV_get_value_string("language");
 
 #ifdef VERSION_FRENCH
@@ -6929,11 +4156,7 @@ extern TGA_Info TGA_load_from_file(const CBYTE *file, SLONG max_width, SLONG max
 
 	CacheScriptInMemory(MISSION_SCRIPT);
 
-#ifdef TARGET_DC
-	MENUFONT_Load("olyfont2dc.tga",POLY_PAGE_NEWFONT_INVERSE,frontend_fonttable);
-#else
 	MENUFONT_Load("olyfont2.tga",POLY_PAGE_NEWFONT_INVERSE,frontend_fonttable);
-#endif
 
 void MENUFONT_MergeLower(void);	
 	MENUFONT_MergeLower();
@@ -6943,10 +4166,8 @@ void MENUFONT_MergeLower(void);
 	//InitBackImage(menu_back_names[menu_theme]);
 	UseBackSurface(screenfull_back);
 
-#ifndef TARGET_DC
 	// Er... we call FRONTEND_kibble_init just below. Whatever....
 	ZeroMemory(kibble,sizeof(kibble));
-#endif
 	ZeroMemory(&menu_state,sizeof(menu_state));
 	if (!complete_point) ZeroMemory(mission_hierarchy,60);
 	menu_state.mode=-1;
@@ -6955,36 +4176,10 @@ void MENUFONT_MergeLower(void);
 
 	the_display.lp_D3D_Viewport->Clear(1, &the_display.ViewportRect, D3DCLEAR_ZBUFFER);
 
-	ragepro_sucks=!the_display.GetDeviceInfo()->ModulateAlphaSupported();
-
 	ZeroMemory(menu_choice_scanner,255);
 	XLAT_str(X_CAMERA,menu_choice_scanner);
 	lang=menu_choice_scanner+strlen(menu_choice_scanner)+1;
 	XLAT_str(X_CHARACTER,lang);
-
-#ifdef TARGET_DC
-	// Joypad mode looks like "Custom A B C D" etc.
-	ZeroMemory(menu_choice_joypad_mode,50);
-	XLAT_str(X_PAD_CUSTOM,menu_choice_joypad_mode);
-	char *pchar = menu_choice_joypad_mode + strlen ( menu_choice_joypad_mode ) + 1;
-	for ( int iCount = 0; iCount < NUM_OF_JOYPAD_MODES; iCount++ )
-	{
-		*pchar++ = 'A' + iCount;
-		*pchar++ = '\0';
-	}
-
-	ZeroMemory(menu_choice_analogue_mode,50);
-	XLAT_str(X_TURN,menu_choice_analogue_mode);
-	lang=menu_choice_analogue_mode+strlen(menu_choice_analogue_mode)+1;
-	XLAT_str(X_MOVE,lang);
-
-#ifdef WANT_A_TITLE_SCREEN
-	ZeroMemory(menu_choice_language,50);
-	XLAT_str(X_ENGLISH,menu_choice_language);
-	lang=menu_choice_language+strlen(menu_choice_language)+1;
-	XLAT_str(X_FRENCH,lang);
-#endif
-#endif
 
 	MUSIC_mode(MUSIC_MODE_FRONTEND);
 
@@ -7010,20 +4205,6 @@ void MENUFONT_MergeLower(void);
 
 //extern bool g_bGoToCreditsPleaseGameHasFinished;
 
-
-#ifdef WANT_A_TITLE_SCREEN
-	if ( bGoToTitleScreen )
-	{
-		// Start off in the title screen instead.
-		FRONTEND_mode(FE_TITLESCREEN);
-	}
-	else if ( bFirstTime )
-	{
-		// Start off in the language screen instead.
-		FRONTEND_mode(FE_LANGUAGESCREEN);
-	}
-	else
-#endif
 	if ( m_bGoIntoSaveScreen )
 	{
 		// Just won a mission - going into save game.
@@ -7035,8 +4216,6 @@ void MENUFONT_MergeLower(void);
 		// Frontend menu.
 		FRONTEND_mode(FE_MAINMENU);
 	}
-
-
 
 	// Stop all the music - about to start it again, properly.
 	stop_all_fx_and_music();
@@ -7059,11 +4238,7 @@ void MENUFONT_MergeLower(void);
 		// Start playing the music!
 		//
 
-		#ifdef TARGET_DC
-		MFX_QUICK_play("data\\sfx\\1622DC\\GeneralMusic\\FrontLoop.wav",0,0,0);
-		#else
-		MFX_QUICK_play("data\\sfx\\1622\\GeneralMusic\\FrontLoop.wav",0,0,0);
-		#endif
+		MFX_QUICK_play("data\\sfx\\1622\\GeneralMusic\\FrontLoop.wav", 0, 0, 0);
 	}
 
 	bFirstTime = FALSE;
@@ -7088,8 +4263,6 @@ void	FRONTEND_level_won()
 
 	// update hierarchy data.
 	mission_hierarchy[mission_launch]|=2; // complete
-
-
 
 extern bool g_bPunishMePleaseICheatedOnThisLevel;
 	if ( !g_bPunishMePleaseICheatedOnThisLevel )
@@ -7273,12 +4446,6 @@ SBYTE	FRONTEND_loop() {
 	millisecs = now - last;
 	last      = now;
 
-
-#ifdef TARGET_DC
-	// Display the default VMU screen.
-	FRONTEND_show_VMU_screen ( NULL );
-#endif
-
 	//
 	// How fast should the fade state fade?
 	//
@@ -7326,66 +4493,8 @@ SBYTE	FRONTEND_loop() {
 			}
 			break;
 	}
-#ifdef TARGET_DC
-	// We don't fade, we change size.
-	fade_rgb=0xFFFFFFFF;
-#else
 	fade_rgb=(((SLONG)fade_state*2)<<24)|0xFFFFFF;
-#endif
 
-
-
-
-
-#ifdef TARGET_DC
-	if ( menu_state.mode == FE_TITLESCREEN )
-	{
-		// Handle the auto-playing of the FMV.
-		// Also disable the screensaver by prodding it
-		// every time.
-
-		if ( ( ( dwAutoPlayFMVTimeout - timeGetTime() ) & 0x80000000 ) != 0 )
-		{
-			// Timed out.
-			stop_all_fx_and_music();
-			the_display.RunCutscene( 0, ENV_get_value_number("lang_num", 0, "" ) );
-
-			// Clear the controler again (in case they pressed a button).
-
-
-			// Start the music again.
-			MFX_QUICK_play("data\\sfx\\1622DC\\GeneralMusic\\FrontLoop.wav",0,0,0);
-
-			// Start the music again.
-			// Doesn't seem to work.
-			//MUSIC_mode(MUSIC_MODE_FRONTEND);
-
-			// "Reset" the controller so that "Press Start Button" is displayed.
-			ClearPrimaryDevice();
-			
-			// Two minutes wait on the title screen.
-			dwAutoPlayFMVTimeout = timeGetTime() + AUTOPLAY_FMV_DELAY;
-		}
-
-		// Pretend the screensaver got an input to disable it.
-extern DWORD g_dwLastInputChangeTime;
-		g_dwLastInputChangeTime = timeGetTime();
-	}
-#endif
-
-
-
-
-
-#ifdef WANT_A_TITLE_SCREEN
-	// No kibble on the title screen.
-	if ( ( menu_state.mode == FE_TITLESCREEN ) || ( menu_state.mode == FE_LANGUAGESCREEN ) )
-	{
-		// Remove any existing kibble.
-		FRONTEND_kibble_init();
-	}
-	else
-#endif
 	{
 		FRONTEND_kibble_process();
 	}
@@ -7461,21 +4570,13 @@ extern int g_iCheatNumber;
 #endif
 
 
-
-
 #ifdef WANT_AN_EXIT_MENU_ITEM
 	if (res==FE_NO_REALLY_QUIT) return STARTS_EXIT;
 #endif
 	if (res==FE_EDITOR)			return STARTS_EDITOR;
 	if (res==FE_LOADSCREEN)		return STARTS_START;
-#ifdef WANT_A_TITLE_SCREEN 
-	if (res==FE_CHANGE_LANGUAGE) return STARTS_LANGUAGE_CHANGE;
-#endif
-#ifndef TARGET_DC
-	if (res==FE_START || build_dc)
-#else
+
 	if (res==FE_START)
-#endif
 	{
 		//
 		// Start playing!!!
@@ -7535,54 +4636,26 @@ extern int g_iCheatNumber;
 
 		SLONG index_into_the_whattoload_array;
 
-#ifndef TARGET_DC
-		if (build_dc)
+		previous_mission_launch=mission_launch;
+		strcpy(STARTSCR_mission,"levels\\");
+		strcat(STARTSCR_mission,FRONTEND_MissionFilename(MISSION_SCRIPT,menu_state.mode-100));
+//		strcpy(STARTSCR_mission,"c:\\master~1\\italian\\bankbomb1.ucm");
+
+		index_into_the_whattoload_array = -1;
+
+		SLONG i;
+
+		for (i = 0; whattoload[i].mission[0] != '!'; i++)
 		{
-		//
-			// This bit of code saves out DAD files for all the missions...
-			//
-
-			if (suggest_order[build_dc_mission][0] == '!')
+			if (strcmp(FRONTEND_MissionFilename(MISSION_SCRIPT,menu_state.mode-100), whattoload[i].mission) == 0)
 			{
-				//
-				// All done!
-				//
+				ASSERT(index_into_the_whattoload_array == -1);
 
-				exit(0);
+				index_into_the_whattoload_array = i;
 			}
-
-			strcpy(STARTSCR_mission,"levels\\");
-			strcat(STARTSCR_mission,suggest_order[build_dc_mission]);
-
-			index_into_the_whattoload_array = build_dc_mission;
-
-			build_dc_mission += 1;
 		}
-		else
-#endif
-		{
 
-			previous_mission_launch=mission_launch;
-			strcpy(STARTSCR_mission,"levels\\");
-			strcat(STARTSCR_mission,FRONTEND_MissionFilename(MISSION_SCRIPT,menu_state.mode-100));
-	//		strcpy(STARTSCR_mission,"c:\\master~1\\italian\\bankbomb1.ucm");
-
-			index_into_the_whattoload_array = -1;
-
-			SLONG i;
-
-			for (i = 0; whattoload[i].mission[0] != '!'; i++)
-			{
-				if (strcmp(FRONTEND_MissionFilename(MISSION_SCRIPT,menu_state.mode-100), whattoload[i].mission) == 0)
-				{
-					ASSERT(index_into_the_whattoload_array == -1);
-
-					index_into_the_whattoload_array = i;
-				}
-			}
-
-			ASSERT(index_into_the_whattoload_array != -1);
-		}
+		ASSERT(index_into_the_whattoload_array != -1);
 
 		//
 		// What should we or shouldn't we load?
@@ -7605,7 +4678,7 @@ extern int g_iCheatNumber;
 		DONT_load = 0;
 
 		// If doing all levels, don't use DONT_load. The two don't mix.
-		ASSERT ( !DONT_load || !build_dc );
+		ASSERT ( !DONT_load );
 		
 		//
 		// Does this level have violence?
@@ -7654,19 +4727,8 @@ extern int g_iCheatNumber;
 	if (res == FE_CREDITS)
 	{
 		{
-
-#ifdef TARGET_DC
-
-			DreamCastCredits();
-
-#else
-#if 0
 			extern void OS_hack(void);
-
 			OS_hack();
-#endif
-#endif
-
 			MUSIC_mode(MUSIC_MODE_FRONTEND);
 			FRONTEND_kibble_init();
 		}
@@ -7674,23 +4736,6 @@ extern int g_iCheatNumber;
 
 	return 0;
 }
-
-
-
-
-
-#ifdef TARGET_DC
-// Unload frontend gubbins to save memory.
-// Can be safely called multiple times.
-void FRONTEND_unload ( void )
-{
-	FRONTEND_scr_unload_theme();
-	FRONTEND_kibble_destroy();
-}
-#endif
-
-
-
 
 #endif
 
