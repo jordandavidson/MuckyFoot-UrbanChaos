@@ -2933,7 +2933,6 @@ static void do_car_input(Thing *p_thing);
 
 void VEH_driving(Thing *p_thing)
 {
-	WaveParams	car;
 	DrawMesh	*dm		= p_thing->Draw.Mesh;
 	Vehicle		*veh	= p_thing->Genus.Vehicle;
 	SLONG		dx,dy,dz;
@@ -3377,17 +3376,6 @@ void VEH_driving(Thing *p_thing)
 			p_thing->WorldPos.Z                                                         >> 8,
 			p_thing->Genus.Vehicle->Angle);
 	}		
-
-	//	Do the engine noise.
-
-	car.Priority				=	0;
-	car.Flags					=	WAVE_CARTESIAN|WAVE_LOOP|WAVE_SET_LOOP_POINTS;
-	car.LoopStart				=	282624/2;
-	car.LoopEnd					=	408574/2;
-	car.Mode.Cartesian.Scale	=	(128<<8);
-	car.Mode.Cartesian.X		=	p_thing->WorldPos.X;
-	car.Mode.Cartesian.Y		=	p_thing->WorldPos.Y;
-	car.Mode.Cartesian.Z		=	p_thing->WorldPos.Z;
 
 	if (p_thing->Velocity > 500)
 	{

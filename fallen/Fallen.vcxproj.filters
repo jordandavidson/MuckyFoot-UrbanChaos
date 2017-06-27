@@ -564,9 +564,6 @@
     <ClCompile Include="DDLibrary\Source\Drive.cpp">
       <Filter>DDLibrary\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DDLibrary\Source\DSManager.cpp">
-      <Filter>DDLibrary\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DDLibrary\Source\FFManager.cpp">
       <Filter>DDLibrary\Source Files</Filter>
     </ClCompile>
@@ -595,9 +592,6 @@
       <Filter>DDLibrary\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DDLibrary\Source\net.cpp">
-      <Filter>DDLibrary\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DDLibrary\Source\SampleManager.cpp">
       <Filter>DDLibrary\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DDLibrary\Source\Tga.cpp">
@@ -1325,9 +1319,6 @@
     <ClInclude Include="DDLibrary\Headers\Drive.h">
       <Filter>DDLibrary\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DDLibrary\Headers\DSManager.h">
-      <Filter>DDLibrary\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DDLibrary\Headers\FFManager.h">
       <Filter>DDLibrary\Header Files</Filter>
     </ClInclude>
@@ -1350,9 +1341,6 @@
       <Filter>DDLibrary\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DDLibrary\Headers\resource.h">
-      <Filter>DDLibrary\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DDLibrary\Headers\SampleManager.h">
       <Filter>DDLibrary\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DDLibrary\Headers\Tga.h">

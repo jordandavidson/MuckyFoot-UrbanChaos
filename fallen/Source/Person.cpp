@@ -2253,9 +2253,6 @@ void set_person_dead(
 		SLONG  height)
 {
 	DrawTween  *draw_info;
-#ifndef PSX
-	WaveParams  die;
-#endif
 	SLONG		anim;
 	SLONG       substate;
 	SLONG       quick  = FALSE;
@@ -6194,16 +6191,10 @@ SLONG shoot_get_ammo_sound_anim_time(Thing *p_person,SLONG *sound,SLONG *anim,SL
 
 void	actually_fire_gun(Thing *p_person)
 {
-	WaveParams	shot;
 	SLONG	rico_id;
 	//	Set up the wave params.
 
-	shot.Priority				=	0;
-	shot.Flags					=	WAVE_CARTESIAN;
-	shot.Mode.Cartesian.Scale	=	(128<<8);
-	shot.Mode.Cartesian.X		=	p_person->WorldPos.X;
-	shot.Mode.Cartesian.Y		=	p_person->WorldPos.Y;
-	shot.Mode.Cartesian.Z		=	p_person->WorldPos.Z;
+	GameCoord shotPosition = p_person->WorldPos;
 
 	PCOM_oscillate_tympanum(
 		PCOM_SOUND_GUNSHOT,
@@ -6491,12 +6482,12 @@ extern void DIRT_create_brass(SLONG x,SLONG y,SLONG z,SLONG angle);
 			// Miss!
 			//
 
-			shot.Mode.Cartesian.X -= (SIN(p_person->Draw.Tweened->Angle)*1024)>>8;
-			shot.Mode.Cartesian.Z -= (COS(p_person->Draw.Tweened->Angle)*1024)>>8;
+			shotPosition.X -= (SIN(p_person->Draw.Tweened->Angle)*1024)>>8;
+			shotPosition.Z -= (COS(p_person->Draw.Tweened->Angle)*1024)>>8;
 
 			rico_id	= ((Random()*(S_RICOCHET_END-S_RICOCHET_START))>>16)+S_RICOCHET_START;
 
-			MFX_play_xyz(0,rico_id,0,shot.Mode.Cartesian.X,shot.Mode.Cartesian.Y,shot.Mode.Cartesian.Z);
+			MFX_play_xyz(0,rico_id,0, shotPosition.X, shotPosition.Y, shotPosition.Z);
 
 			//
 			// Where did the bullet hit if it didn't hit the target?
@@ -6548,22 +6539,22 @@ extern void DIRT_create_brass(SLONG x,SLONG y,SLONG z,SLONG angle);
 
 		if (DIRT_shoot(p_person))
 		{
-			shot.Mode.Cartesian.X	-=	(SIN(p_person->Draw.Tweened->Angle)*1024)>>8;
-			shot.Mode.Cartesian.Z	-=	(COS(p_person->Draw.Tweened->Angle)*1024)>>8;
+			shotPosition.X	-=	(SIN(p_person->Draw.Tweened->Angle)*1024)>>8;
+			shotPosition.Z	-=	(COS(p_person->Draw.Tweened->Angle)*1024)>>8;
 
 //				PlayWave(THING_NUMBER(p_person),S_PISTOL_SHOT,WAVE_PLAY_QUEUE,&shot);
 //				play_quick_wave_old(&shot,S_PISTOL_SHOT,0,0);
-			MFX_play_xyz(0,S_PISTOL_SHOT,0,shot.Mode.Cartesian.X,shot.Mode.Cartesian.Y,shot.Mode.Cartesian.Z);
+			MFX_play_xyz(0,S_PISTOL_SHOT,0, shotPosition.X, shotPosition.Y, shotPosition.Z);
 
 		}
 		else
 		{
-			shot.Mode.Cartesian.X	-=	(SIN(p_person->Draw.Tweened->Angle)*1024)>>8;
-			shot.Mode.Cartesian.Z	-=	(COS(p_person->Draw.Tweened->Angle)*1024)>>8;
+			shotPosition.X	-=	(SIN(p_person->Draw.Tweened->Angle)*1024)>>8;
+			shotPosition.Z	-=	(COS(p_person->Draw.Tweened->Angle)*1024)>>8;
 
 			rico_id	=	((Random()*(S_RICOCHET_END-S_RICOCHET_START))>>16)+S_RICOCHET_START;
 //				PlayWave(THING_NUMBER(p_person),rico_id,WAVE_PLAY_QUEUE,&shot);
-			MFX_play_xyz(0,rico_id,0,shot.Mode.Cartesian.X,shot.Mode.Cartesian.Y,shot.Mode.Cartesian.Z);
+			MFX_play_xyz(0,rico_id,0, shotPosition.X, shotPosition.Y, shotPosition.Z);
 //				play_quick_wave_old(&shot,rico_id,0,0);
 
 			//
@@ -13966,7 +13957,6 @@ void	fn_person_laddering(Thing	*p_person)
 	UBYTE		last_frame;
 	SLONG		end=0,hit,
 				foot_step_wave;
-	WaveParams	foot_step;
 	ULONG       on_ladder,on_ladder_left,on_ladder_right;
 
 	switch(p_person->SubState)
@@ -15165,9 +15155,6 @@ void	set_person_running_stop(Thing *p_person,SLONG leg)
 	p_person->SubState=SUB_STATE_STOPPING;
 }
 
-WaveParams	foot_step;
-
-
 SLONG should_person_automatically_land_on_fence(Thing *p_person, SLONG facet)
 {
 	SLONG dx;
@@ -15878,13 +15865,6 @@ extern	UBYTE	cheat;
 							p_person->WorldPos.Y >> 8,
 							p_person->WorldPos.Z >> 8);
 
-						foot_step.Flags					=	WAVE_CARTESIAN;
-						foot_step.Priority				=	0;
-						foot_step.Mode.Cartesian.Scale	=	(128<<8);
-						foot_step.Mode.Cartesian.X		=	p_person->WorldPos.X;
-						foot_step.Mode.Cartesian.Y		=	p_person->WorldPos.Y;
-						foot_step.Mode.Cartesian.Z		=	p_person->WorldPos.Z;
-
 						/*
 						if(GAME_FLAGS&GF_SEWERS && p_person->Draw.Tweened->FrameIndex!=last_frame)
 						{
@@ -15987,13 +15967,6 @@ extern	UBYTE	cheat;
 							p_person->WorldPos.Y >> 8,
 							p_person->WorldPos.Z >> 8);
 */
-
-						foot_step.Flags					=	WAVE_CARTESIAN;
-						foot_step.Priority				=	0;
-						foot_step.Mode.Cartesian.Scale	=	(128<<8);
-						foot_step.Mode.Cartesian.X		=	p_person->WorldPos.X;
-						foot_step.Mode.Cartesian.Y		=	p_person->WorldPos.Y;
-						foot_step.Mode.Cartesian.Z		=	p_person->WorldPos.Z;
 
 						MFX_play_thing(THING_NUMBER(p_person),foot_step_wave,MFX_REPLACE,p_person);
 

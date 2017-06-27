@@ -41,7 +41,6 @@
 #endif
 #include	<dinput.h>
 #include	<dplay.h>
-#include	<dsound.h>
 #include	<d3d.h>
 
 #ifdef TARGET_DC
@@ -185,83 +184,6 @@ void			DebugText(CBYTE *error, ...);
 BOOL	GetInputDevice(UBYTE type,UBYTE sub_type);
 BOOL	ReadInputDevice(void);
 #endif
-
-//---------------------------------------------------------------
-// Sound.
-
-#define	SAMPLE_VOL_MIN		DSBVOLUME_MIN
-#define	SAMPLE_VOL_MAX		DSBVOLUME_MAX
-
-#define	SAMPLE_PAN_LEFT		DSBPAN_LEFT
-#define	SAMPLE_PAN_RIGHT	DSBPAN_RIGHT
-#define	SAMPLE_PAN_CENTER	DSBPAN_CENTER
-
-#define	SAMPLE_FREQ_MIN		DSBFREQUENCY_MIN
-#define	SAMPLE_FREQ_MAX		DSBFREQUENCY_MAX
-#define	SAMPLE_FREQ_ORIG	DSBFREQUENCY_ORIGINAL
-
-
-void	LoadSampleList(CBYTE *sample_file);
-void	PlaySample(SLONG ref,SWORD sample_no,SLONG vol,SLONG pan,SLONG freq,SLONG pri);
-
-//---------------------------------------------------------------
-//	New Sound
-
-
-#define	WAVE_STEREO				(1<<0)
-#define	WAVE_POLAR				(1<<1)
-#define	WAVE_CARTESIAN			(1<<2)
-#define	WAVE_PAN_RATE			(1<<3)
-#define	WAVE_DISTANCE_MAPPING	(1<<4)
-#define	WAVE_LOOP				(1<<5)
-#define	WAVE_SET_LOOP_POINTS	(1<<6)
-
-#define	WAVE_TYPE_MASK		(WAVE_STEREO|WAVE_POLAR|WAVE_CARTESIAN)
-
-#define	WAVE_PLAY_INTERUPT		0
-#define	WAVE_PLAY_NO_INTERUPT	1
-#define	WAVE_PLAY_OVERLAP		2
-#define	WAVE_PLAY_QUEUE			3
-
-struct WaveParams
-{
-	ULONG		Flags,
-				LoopStart,
-				LoopEnd,
-				Priority;
-	union
-	{
-		//	Stereo.
-		struct
-		{
-			SLONG	Pan,
-					Volume;
-		}Stereo;
-
-		//	Polar.
-		struct
-		{
-			SLONG	Azimuth,
-					Elevation,
-					Range;
-		}Polar;
-
-		//	Cartesian.
-		struct
-		{
-			SLONG	Scale,
-					X,
-					Y,
-					Z;
-		}Cartesian;
-	}Mode;
-};
-void	LoadWaveList(CBYTE *path,CBYTE *file);
-void	FreeWaveList(void);
-void	PlayWave(SLONG ref,SLONG wave_id,SLONG play_type,WaveParams *the_params);
-void	StopWave(SLONG ref,SLONG wave_id);
-void	SetListenerPosition(SLONG x,SLONG y,SLONG z,SLONG scale);
-
 
 //---------------------------------------------------------------
 // Standard macros.

@@ -97,7 +97,7 @@
       <SubSystem>Windows</SubSystem>
       <OutputFile>.\Release\Fallen.exe</OutputFile>
       <AdditionalLibraryDirectories>c:\fallen\bink;c:\miles;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>dplayx.lib;odbc32.lib;odbccp32.lib;comctl32.lib;amstrmid.lib;quartz.lib;strmbase.lib;ddraw.lib;dinput.lib;dxguid.lib;SDL2.lib;imm32.lib;Version.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dplayx.lib;odbc32.lib;odbccp32.lib;comctl32.lib;amstrmid.lib;quartz.lib;strmbase.lib;ddraw.lib;dinput.lib;dxguid.lib;SDL2.lib;imm32.lib;Version.lib;OpenAL32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PostBuildEvent>
@@ -145,7 +145,7 @@
       <SubSystem>Windows</SubSystem>
       <OutputFile>.\Debug\Fallen.exe</OutputFile>
       <AdditionalLibraryDirectories>c:\fallen\bink;c:\miles;c:\fallen\miles;c:\mflib1\libs;C:\qsound\QM411SDK\qmdx;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>dplayx.lib;odbc32.lib;odbccp32.lib;comctl32.lib;amstrmid.lib;quartz.lib;strmbase.lib;ddraw.lib;dinput.lib;dxguid.lib;SDL2.lib;imm32.lib;Version.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dplayx.lib;odbc32.lib;odbccp32.lib;comctl32.lib;amstrmid.lib;quartz.lib;strmbase.lib;ddraw.lib;dinput.lib;dxguid.lib;SDL2.lib;imm32.lib;Version.lib;OpenAL32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PostBuildEvent>
@@ -215,7 +215,6 @@
     <ClCompile Include="DDLibrary\Source\DDManager.cpp" />
     <ClCompile Include="DDLibrary\Source\DIManager.cpp" />
     <ClCompile Include="DDLibrary\Source\Drive.cpp" />
-    <ClCompile Include="DDLibrary\Source\DSManager.cpp" />
     <ClCompile Include="DDLibrary\Source\FFManager.cpp" />
     <ClCompile Include="DDLibrary\Source\FileClump.cpp" />
     <ClCompile Include="DDLibrary\Source\GDebug.cpp" />
@@ -226,7 +225,6 @@
     <ClCompile Include="DDLibrary\Source\GWorkScreen.cpp" />
     <ClCompile Include="DDLibrary\Source\MFX.cpp" />
     <ClCompile Include="DDLibrary\Source\net.cpp" />
-    <ClCompile Include="DDLibrary\Source\SampleManager.cpp" />
     <ClCompile Include="DDLibrary\Source\Tga.cpp" />
     <ClCompile Include="DDLibrary\Source\WindProcs.cpp" />
     <ClCompile Include="Editor\Source\outline.cpp" />
@@ -776,7 +774,6 @@
     <ClInclude Include="DDLibrary\Headers\Debug.h" />
     <ClInclude Include="DDLibrary\Headers\DIManager.h" />
     <ClInclude Include="DDLibrary\Headers\Drive.h" />
-    <ClInclude Include="DDLibrary\Headers\DSManager.h" />
     <ClInclude Include="DDLibrary\Headers\FFManager.h" />
     <ClInclude Include="DDLibrary\Headers\FileClump.h" />
     <ClInclude Include="DDLibrary\Headers\GDisplay.h" />
@@ -785,7 +782,6 @@
     <ClInclude Include="DDLibrary\Headers\net.h" />
     <ClInclude Include="DDLibrary\Headers\QSManager.h" />
     <ClInclude Include="DDLibrary\Headers\resource.h" />
-    <ClInclude Include="DDLibrary\Headers\SampleManager.h" />
     <ClInclude Include="DDLibrary\Headers\Tga.h" />
     <ClInclude Include="DDLibrary\Headers\WindProcs.h" />
     <ClInclude Include="Editor\Headers\Alert.hpp" />
