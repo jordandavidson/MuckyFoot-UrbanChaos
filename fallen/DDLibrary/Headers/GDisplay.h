@@ -47,8 +47,6 @@ SLONG			ClearDisplay(UBYTE r,UBYTE g,UBYTE b);
 void			ShellPaused(void);
 void			ShellPauseOn(void);
 void			ShellPauseOff(void);
-void			DumpBackToTGA(CBYTE *tga_name);
-void			DumpBackToRaw(void);	// To shot\
 
 //---------------------------------------------------------------
 

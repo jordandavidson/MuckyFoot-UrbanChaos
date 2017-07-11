@@ -17,14 +17,6 @@
 #include "panel.h"
 #include	"..\headers\game.h"
 
-#ifdef TARGET_DC
-#include "target.h"
-#include "platutil.h"
-#include "DCLowLevel.h"
-#include "sg_mww.h"
-#endif
-
-
 //
 // From mfx_miles.h...
 //
@@ -44,16 +36,6 @@ bool				VideoTrueColour = false;	// true = 24-bit, false = 16-bit
 int					VideoRes = -1;				// 0 = 320x240, 1 = 512x384, 2= 640x480, 3 = 800x600, 4 = 1024x768, -1 = unknown
 
 enumDisplayType eDisplayType;
-
-
-
-#ifdef TARGET_DC
-// Texture to hold the background, coz blits don't seem to work.
-LPDIRECTDRAWSURFACE4 lpBackgroundCache = NULL;
-LPDIRECTDRAWSURFACE4 lpBackgroundCache2 = NULL;
-//static LPDIRECT3DTEXTURE2 lpBackgroundCacheTexture = NULL;
-#endif
-
 
 //---------------------------------------------------------------
  UBYTE			*image_mem	=	NULL,*image		=	NULL;
@@ -81,10 +63,6 @@ HRESULT WINAPI EnumSurfacesCallbackFunc(
 
 #endif
 
-
-
-
-
 // ========================================================
 //
 // MOVIE STUFF!
@@ -97,8 +75,6 @@ HRESULT WINAPI EnumSurfacesCallbackFunc(
 #include "ddstream.h"	// DirectDraw multimedia stream interfaces
 
 //extern ULONG get_hardware_input(UWORD type);
-
-#ifndef TARGET_DC
 
 void RenderStreamToSurface(IDirectDrawSurface *pSurface, IMultiMediaStream *pMMStream, IDirectDrawSurface *back_surface)
 {
@@ -114,40 +90,9 @@ void RenderStreamToSurface(IDirectDrawSurface *pSurface, IMultiMediaStream *pMMS
  	pPrimaryVidStream->QueryInterface(IID_IDirectDrawMediaStream, (void **)&pDDStream);
 	ASSERT ( pDDStream != NULL );
 
-	/*
-
-	InitStruct(ddsd);
-
-	pSurface->GetSurfaceDesc(&ddsd);
-
-	if (pDDStream->SetFormat(&ddsd, NULL) == S_OK)
-	{
-	}
-	else
-	{
-		return;
-	}
-
-	*/
-
 	InitStruct(ddsd);
 
 	pDDStream->GetFormat(&ddsd, NULL, NULL, NULL);
-
-	/*
-
-	ddsd.dwWidth  = 640;
-	ddsd.dwHeight = 480;
-
-	if (pDDStream->SetFormat(&ddsd, NULL) == S_OK)
-	{
-	}
-	else
-	{
-		return;
-	}
-
-	*/
 
  	midrect.top    = 420 - (ddsd.dwWidth  >> 1);
 	midrect.left   = 240 - (ddsd.dwHeight >> 1);
@@ -159,7 +104,6 @@ void RenderStreamToSurface(IDirectDrawSurface *pSurface, IMultiMediaStream *pMMS
 	rect.bottom = ddsd.dwHeight;
  	rect.right  = ddsd.dwWidth;
 
-// 	pDDStream->CreateSample(pSurface, NULL, 0, &pSample);
  	pDDStream->CreateSample(back_surface, &rect, 0, &pSample);
 	ASSERT ( pSample != NULL );
 	pMMStream->SetState(STREAMSTATE_RUN);
@@ -217,221 +161,6 @@ void RenderStreamToSurface(IDirectDrawSurface *pSurface, IMultiMediaStream *pMMS
 	ASSERT ( i == 0 );
 }
 
-#else //#ifndef TARGET_DC
-
-void RenderStreamToSurface(IDirectDrawSurface *pSurface, IMultiMediaStream *pMMStream, IDirectDrawSurface *back_surface, IDirectDrawSurface *pddsTexture=NULL )
-{
-	IMediaStream            *pPrimaryVidStream;
-	IDirectDrawMediaStream  *pDDStream;
- 	IDirectDrawStreamSample *pSample;
-	RECT                     rect;
-	RECT                     scrrect;
-	RECT                     texrect;
-	DDSURFACEDESC            ddsd;
-
- 	HRESULT hres;
-
-	hres = pMMStream->GetMediaStream(MSPID_PrimaryVideo, &pPrimaryVidStream);
- 	hres = pPrimaryVidStream->QueryInterface(IID_IDirectDrawMediaStream, (void **)&pDDStream);
-
-	/*
-
-	InitStruct(ddsd);
-
-	pSurface->GetSurfaceDesc(&ddsd);
-
-	if (pDDStream->SetFormat(&ddsd, NULL) == S_OK)
-	{
-	}
-	else
-	{
-		return;
-	}
-
-	*/
-
-	InitStruct(ddsd);
-
-	hres = pDDStream->GetFormat(&ddsd, NULL, NULL, NULL);
-
- 	scrrect.top    = ( 480 - 640 * ddsd.dwHeight / ddsd.dwWidth ) >> 1;
-	scrrect.left   = 0;
-	scrrect.bottom = 480 - scrrect.top;
- 	scrrect.right  = 640;
-
-	texrect.left	= 0;
-	texrect.right	= 1024;
-	texrect.top		= 0;
-	texrect.bottom	= 512;
-
- 	rect.top    = 0;
-	rect.left   = 0;
-	rect.bottom = ddsd.dwHeight;
- 	rect.right  = ddsd.dwWidth;
-
-	if ( pddsTexture != NULL )
-	{
-		// We stream to a texture and draw that on the screen each frame.
-		// This does the dithering for us, which looks a lot prettier.
-
-		D3DTLVERTEX tlvVertex[4];
-		tlvVertex[0].dvSX			= (float)(scrrect.left);
-		tlvVertex[0].dvSY			= (float)(scrrect.top);
-		tlvVertex[0].dvTU			= (float)(rect.left) / (float)(texrect.right);
-		tlvVertex[0].dvTV			= (float)(rect.top) / (float)(texrect.bottom);
-		tlvVertex[0].dvSZ			= 0.5f;
-		tlvVertex[0].dvRHW			= 0.5f;
-		tlvVertex[0].dcColor		= 0xffffffff;
-		tlvVertex[0].dcSpecular		= 0x00000000;
-
-		tlvVertex[1].dvSX			= (float)(scrrect.right);
-		tlvVertex[1].dvSY			= (float)(scrrect.top);
-		tlvVertex[1].dvTU			= (float)(rect.right) / (float)(texrect.right);
-		tlvVertex[1].dvTV			= (float)(rect.top) / (float)(texrect.bottom);
-		tlvVertex[1].dvSZ			= 0.5f;
-		tlvVertex[1].dvRHW			= 0.5f;
-		tlvVertex[1].dcColor		= 0xffffffff;
-		tlvVertex[1].dcSpecular		= 0x00000000;
-
-		tlvVertex[2].dvSX			= (float)(scrrect.right);
-		tlvVertex[2].dvSY			= (float)(scrrect.bottom);
-		tlvVertex[2].dvTU			= (float)(rect.right) / (float)(texrect.right);
-		tlvVertex[2].dvTV			= (float)(rect.bottom) / (float)(texrect.bottom);
-		tlvVertex[2].dvSZ			= 0.5f;
-		tlvVertex[2].dvRHW			= 0.5f;
-		tlvVertex[2].dcColor		= 0xffffffff;
-		tlvVertex[2].dcSpecular		= 0x00000000;
-
-		tlvVertex[3].dvSX			= (float)(scrrect.left);
-		tlvVertex[3].dvSY			= (float)(scrrect.bottom);
-		tlvVertex[3].dvTU			= (float)(rect.left) / (float)(texrect.right);
-		tlvVertex[3].dvTV			= (float)(rect.bottom) / (float)(texrect.bottom);
-		tlvVertex[3].dvSZ			= 0.5f;
-		tlvVertex[3].dvRHW			= 0.5f;
-		tlvVertex[3].dcColor		= 0xffffffff;
-		tlvVertex[3].dcSpecular		= 0x00000000;
-
-
-		IDirect3DTexture2 *pd3dtTexture = NULL;
-
-		hres = pddsTexture->QueryInterface ( IID_IDirect3DTexture2, (void **)&pd3dtTexture );
-		ASSERT ( SUCCEEDED ( hres ) );
-
-		// Set up the D3D engine.
-		the_display.lp_D3D_Device->SetTexture ( 0, pd3dtTexture );
-		//the_display.lp_D3D_Device->SetTexture ( 0, NULL );
-		the_display.lp_D3D_Device->SetTextureStageState ( 0, D3DTSS_COLORARG1,	D3DTA_TEXTURE );
-		the_display.lp_D3D_Device->SetTextureStageState ( 0, D3DTSS_COLORARG2,	D3DTA_DIFFUSE );
-		the_display.lp_D3D_Device->SetTextureStageState ( 0, D3DTSS_COLOROP,	D3DTOP_MODULATE );
-		//the_display.lp_D3D_Device->SetTextureStageState ( 0, D3DTSS_COLOROP,	D3DTOP_SELECTARG2 );
-		the_display.lp_D3D_Device->SetTextureStageState ( 0, D3DTSS_ALPHAARG1,	D3DTA_TEXTURE );
-		the_display.lp_D3D_Device->SetTextureStageState ( 0, D3DTSS_ALPHAARG2,	D3DTA_DIFFUSE );
-		the_display.lp_D3D_Device->SetTextureStageState ( 0, D3DTSS_ALPHAOP,	D3DTOP_MODULATE );
-		//the_display.lp_D3D_Device->SetTextureStageState ( 0, D3DTSS_ALPHAOP,	D3DTOP_SELECTARG2 );
-		the_display.lp_D3D_Device->SetTextureStageState ( 0, D3DTSS_TEXCOORDINDEX, 0 );
-		the_display.lp_D3D_Device->SetTextureStageState ( 0, D3DTSS_MAGFILTER,	D3DTFG_LINEAR );
-		the_display.lp_D3D_Device->SetTextureStageState ( 0, D3DTSS_MINFILTER,	D3DTFN_LINEAR );
-		the_display.lp_D3D_Device->SetTextureStageState ( 0, D3DTSS_MIPFILTER,	D3DTFP_NONE );
-
-		the_display.lp_D3D_Device->SetTextureStageState ( 1, D3DTSS_COLOROP,	D3DTOP_DISABLE );
-		the_display.lp_D3D_Device->SetTextureStageState ( 1, D3DTSS_ALPHAOP,	D3DTOP_DISABLE );
-
-		the_display.lp_D3D_Device->SetRenderState ( D3DRENDERSTATE_ALPHABLENDENABLE, FALSE );
-		the_display.lp_D3D_Device->SetRenderState ( D3DRENDERSTATE_ALPHATESTENABLE, FALSE );
-		the_display.lp_D3D_Device->SetRenderState ( D3DRENDERSTATE_FOGENABLE, FALSE );
-		the_display.lp_D3D_Device->SetRenderState ( D3DRENDERSTATE_CULLMODE, D3DCULL_NONE );
-
-		// End any previous scene (coz it's picky).
-		hres = the_display.lp_D3D_Device->EndScene();
-		ASSERT ( SUCCEEDED ( hres ) );
-
- 		hres = pDDStream->CreateSample(pddsTexture, &rect, DDSFF_PROGRESSIVERENDER, &pSample);
-		hres = pMMStream->SetState(STREAMSTATE_RUN);
-
-		while ((hres = pSample->Update(0, NULL, NULL, NULL)) == S_OK)
-		{
-
-			// Draw the texture.
-
-			hres = the_display.lp_D3D_Device->BeginScene();
-			ASSERT ( SUCCEEDED ( hres ) );
-
-			hres = the_display.lp_D3D_Viewport->Clear ( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER );
-			ASSERT ( SUCCEEDED ( hres ) );
-
-			hres = the_display.lp_D3D_Device->DrawPrimitive ( D3DPT_TRIANGLEFAN,
-															  D3DVT_TLVERTEX,
-															  tlvVertex,
-															  4,
-															  D3DDP_DONOTCLIP | D3DDP_DONOTUPDATEEXTENTS );
-			ASSERT ( SUCCEEDED ( hres ) );
-
-			hres = the_display.lp_D3D_Device->EndScene();
-			ASSERT ( SUCCEEDED ( hres ) );
-
-			hres = pSurface->Flip ( NULL, 0 );
-
-			ULONG input = get_hardware_input ( INPUT_TYPE_JOY | INPUT_TYPE_REMAP_DPAD | INPUT_TYPE_REMAP_BUTTONS | INPUT_TYPE_REMAP_START_BUTTON | INPUT_TYPE_GONEDOWN );
-			if (input & (INPUT_MASK_JUMP|INPUT_MASK_START|INPUT_MASK_SELECT|INPUT_MASK_KICK|INPUT_MASK_PUNCH|INPUT_MASK_ACTION))
-			{
-				break;
-			}
-		}
-
-		// Let the texture go.
-		the_display.lp_D3D_Device->SetTexture ( 0, NULL );
-		int i = pd3dtTexture->Release();
-
-		// And start a new scene, or you'll confuse the rest of the game.
-		hres = the_display.lp_D3D_Device->BeginScene();
-
-	}
-	else
-	{
-
- 		hres = pDDStream->CreateSample(back_surface, &rect, 0, &pSample);
-		hres = pMMStream->SetState(STREAMSTATE_RUN);
-
-		while (pSample->Update(0, NULL, NULL, NULL) == S_OK)
-		{
-
-	#if 0
-			if (FAILED(pSurface->Blt(
-					NULL,
-					back_surface,
-				   &rect,
-					DDBLT_WAIT,
-					NULL)))
-			{
-				hres = pSurface->Blt(
-				   &midrect,
-					back_surface,
-				   &rect,
-					DDBLT_WAIT,
-					NULL);
-			}
-	#else
-			hres = pSurface->Flip ( NULL, 0 );
-	#endif
-
-			ULONG input = get_hardware_input ( INPUT_TYPE_JOY | INPUT_TYPE_REMAP_DPAD | INPUT_TYPE_REMAP_BUTTONS | INPUT_TYPE_REMAP_START_BUTTON | INPUT_TYPE_GONEDOWN );
-			if (input & (INPUT_MASK_JUMP|INPUT_MASK_START|INPUT_MASK_SELECT|INPUT_MASK_KICK|INPUT_MASK_PUNCH|INPUT_MASK_ACTION))
-			{
-				break;
-			}
-		}
-	}
-
-	hres = pMMStream->SetState(STREAMSTATE_STOP);
-	hres = pSample->Release();    
-	hres = pDDStream->Release();
-	hres = pPrimaryVidStream->Release();
-
-}
-
-#endif //#else //#ifndef TARGET_DC
-
-
 #include "ddraw.h"      // DirectDraw interfaces
 #include "mmstream.h"   // Multimedia stream interfaces
 #include "amstream.h"   // DirectShow multimedia stream interfaces
@@ -443,46 +172,15 @@ void RenderFileToMMStream(const char * szFileName, IMultiMediaStream **ppMMStrea
 	IAMMultiMediaStream *pAMStream = NULL;
 
 	HRESULT hres;
-#ifdef TARGET_DC
- 	hres = CoCreateInstance(
-		CLSID_AMMultiMediaStream,
-		NULL,
-		CLSCTX_INPROC_SERVER,
-		IID_IAMMultiMediaStream,
-		(void **)&pAMStream);
-	if ( FAILED ( hres ) )
-	{
-		switch ( hres )
-		{
-		case REGDB_E_CLASSNOTREG:
-			hres++;
-			break;
-		case CLASS_E_NOAGGREGATION:
-			hres++;
-			break;
-		}
 
-		ASSERT ( FALSE );
-		// Not good.
-		return;
-	}
-#else
  	CoCreateInstance(
 		CLSID_AMMultiMediaStream,
 		NULL,
 		CLSCTX_INPROC_SERVER,
 		IID_IAMMultiMediaStream,
 		(void **)&pAMStream);
-#endif
 
 	WCHAR wPath[MAX_PATH];		// Wide (32-bit) string name
-
-
-#ifdef DEBUG
-	// HACK. We don't have any movies apart from this one at the moment.
-	//szFileName = "\\CD-ROM\\fallen\\dshow\\pcintro_withsound.avi";
-#endif
-
 
 	MultiByteToWideChar(
 		CP_ACP,
@@ -492,7 +190,6 @@ void RenderFileToMMStream(const char * szFileName, IMultiMediaStream **ppMMStrea
 		wPath,
 		sizeof(wPath) / sizeof(wPath[0]));
 
- 	//hres = pAMStream->Initialize(STREAMTYPE_READ, AMMSF_NOGRAPHTHREAD, NULL);
 	hres = pAMStream->Initialize(STREAMTYPE_READ, 0, NULL);
 	if ( FAILED ( hres ) )
 	{
@@ -522,183 +219,9 @@ void RenderFileToMMStream(const char * szFileName, IMultiMediaStream **ppMMStrea
 	*ppMMStream = pAMStream;
 }
 
-
-
-#ifdef TARGET_DC
-
-
-
-#if 0
-// Never used - always use PlayQuickMovie
-int _CRTAPI1 do_intro(void)
-{
-
-#if 0
-	DDSURFACEDESC       ddsd;
- 	IDirectDraw        *pDD;
-	IDirectDrawSurface *pSurface;
- 	IMultiMediaStream  *pMMStream;
-
-	IDirectDrawSurface *back_surface;
-
-	HRESULT hres = CoInitializeEx(NULL,COINIT_MULTITHREADED);
-
-	if (SUCCEEDED(the_display.lp_DD_FrontSurface->QueryInterface(IID_IDirectDrawSurface, (void**)&pSurface)) &&
-		SUCCEEDED(the_display.lp_DD_BackSurface->QueryInterface(IID_IDirectDrawSurface, (void**)&back_surface)))
-	{
-
-
-#if 1
-		// Do it forever for the moment.
-		while ( TRUE )
-		{
-			RenderFileToMMStream("\\CD-ROM\\fallen\\PCcutscene_300.avi", &pMMStream, the_display.lp_DD);
-			RenderStreamToSurface(pSurface, pMMStream, back_surface);
-			pMMStream->Release();
-
-			ULONG input = get_hardware_input ( INPUT_TYPE_JOY | INPUT_TYPE_REMAP_DPAD | INPUT_TYPE_REMAP_BUTTONS | INPUT_TYPE_REMAP_START_BUTTON );
-			if (input & (INPUT_MASK_JUMP|INPUT_MASK_START|INPUT_MASK_SELECT|INPUT_MASK_KICK|INPUT_MASK_PUNCH|INPUT_MASK_ACTION))
-			{
-				break;
-			}
-		}
-#else
-		RenderFileToMMStream("data\\eidos.avi", &pMMStream, the_display.lp_DD);
-		RenderStreamToSurface(pSurface, pMMStream, back_surface);
-		pMMStream->Release();
-
-		RenderFileToMMStream("data\\urban_final.mpeg", &pMMStream, the_display.lp_DD);
-		RenderStreamToSurface(pSurface, pMMStream, back_surface);
-		pMMStream->Release();
-#endif
-
-		pSurface->Release();
-	}
-
-	CoUninitialize();
-
-	// On DC, we need to free DLLs explicitely.
-	CoFreeUnusedLibraries();
-#endif
-
-	return 0;
-}
-#endif
-
-
-#else
-
-int do_intro(void)
-{
-#if 0
-	DDSURFACEDESC       ddsd;
- 	IDirectDraw        *pDD;
-	IDirectDrawSurface *pSurface;
- 	IMultiMediaStream  *pMMStream;
-
-	IDirectDrawSurface *back_surface;
-
-#ifdef TARGET_DC
-					CoInitializeEx(NULL,COINIT_MULTITHREADED);	
-#else
-                	CoInitialize(NULL);	
-#endif
-
-	/*
-
- 	DirectDrawCreate(NULL, &pDD, NULL);
- 	pDD->SetCooperativeLevel(GetDesktopWindow(), DDSCL_NORMAL);
-	InitStruct(ddsd);
-	ddsd.dwFlags        = DDSD_CAPS;
- 	ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
- 	pDD->CreateSurface(&ddsd, &pPrimarySurface, NULL);
-
-	*/
-
-
- 	//RenderStreamToSurface(pPrimarySurface, pMMStream);
-
-	// get a IDirectDrawSurface from the IDirectDrawSurface4 since M$ don't seem to have
-	// bothered updating the DX Media SDK ...
-
-	if (SUCCEEDED(the_display.lp_DD_FrontSurface->QueryInterface(IID_IDirectDrawSurface, (void**)&pSurface)) &&
-		SUCCEEDED(the_display.lp_DD_BackSurface->QueryInterface(IID_IDirectDrawSurface, (void**)&back_surface)))
-	{
-		RenderFileToMMStream("data\\eidos.avi", &pMMStream, the_display.lp_DD);
-		RenderStreamToSurface(pSurface, pMMStream, back_surface);
-		pMMStream->Release();
-
-		RenderFileToMMStream("data\\urban_final.mpeg", &pMMStream, the_display.lp_DD);
-		RenderStreamToSurface(pSurface, pMMStream, back_surface);
-		pMMStream->Release();
-
-		pSurface->Release();
-	}
-
-	/*
-
-	pPrimarySurface->Release();
-	pDD->Release();
-
-	*/
-
-	CoUninitialize();
-
-	return 0;
-#else
-	return 0;
-#endif
-}
-
-
-#endif
-
-
-
-#ifndef TARGET_DC
-// Use PlayQuickMovie instead please.
-int do_only_game_intro(void)
-{
-#if 0
-	DDSURFACEDESC       ddsd;
- 	IDirectDraw        *pDD;
-	IDirectDrawSurface *pSurface;
- 	IMultiMediaStream  *pMMStream;
-
-	IDirectDrawSurface *back_surface;
-
-#ifdef TARGET_DC
-	CoInitializeEx(NULL,COINIT_MULTITHREADED);	
-#else
-	CoInitialize(NULL);	
-#endif
-
-	// get a IDirectDrawSurface from the IDirectDrawSurface4 since M$ don't seem to have
-	// bothered updating the DX Media SDK ...
-
-	if (SUCCEEDED(the_display.lp_DD_FrontSurface->QueryInterface(IID_IDirectDrawSurface, (void**)&pSurface)) &&
-		SUCCEEDED(the_display.lp_DD_BackSurface->QueryInterface(IID_IDirectDrawSurface, (void**)&back_surface)))
-	{
-		RenderFileToMMStream("data\\urban_final.mpeg", &pMMStream, the_display.lp_DD);
-		RenderStreamToSurface(pSurface, pMMStream, back_surface);
-		pMMStream->Release();
-
-		pSurface->Release();
-	}
-
-	CoUninitialize();
-
-	return 0;
-#else
-	return 0;
-#endif
-}
-#endif
-
-
 extern	CBYTE	DATA_DIR[];
 
-void	InitBackImage(CBYTE *name)
+void InitBackImage(CBYTE *name)
 {
 	MFFileHandle	image_file;
 	SLONG	height;
@@ -726,16 +249,6 @@ void	InitBackImage(CBYTE *name)
 		}
 		the_display.create_background_surface(image_mem);
 	}
-
-
-
-
-	// Save out the DC .BGS version by cheating horribly.
-	LPDIRECTDRAWSURFACE4 lpJunk = NULL;
-extern void FRONTEND_scr_img_load_into_screenfull(CBYTE *name, LPDIRECTDRAWSURFACE4 *screen);
-	FRONTEND_scr_img_load_into_screenfull ( name, &lpJunk );
-
-	lpJunk->Release();
 }
 
 void UseBackSurface(LPDIRECTDRAWSURFACE4 use)
@@ -745,39 +258,22 @@ void UseBackSurface(LPDIRECTDRAWSURFACE4 use)
 
 LPDIRECTDRAWSURFACE4 m_lpLastBackground = NULL;
 
-void	ResetBackImage(void)
+void ResetBackImage(void)
 {
 	the_display.destroy_background_surface();
-#ifdef TARGET_DC
-	ASSERT ( image_mem == NULL );
-#endif
 	if(image_mem)
 	{
 		MemFree(image_mem);
 		image_mem=0;
 	}
-
-#ifdef TARGET_DC
-	// And flush the background cache(s).
-	the_display.lp_DD_Background_use_instead = NULL;
-	m_lpLastBackground = NULL;
-#endif
-
 }
 
-
-void	ShowBackImage(bool b3DInFrame)
+void ShowBackImage(bool b3DInFrame)
 {
     the_display.blit_background_surface(b3DInFrame);
 }
 
-
-
-
-
-//---------------------------------------------------------------
-
-SLONG	OpenDisplay(ULONG width, ULONG height, ULONG depth, ULONG flags)
+SLONG OpenDisplay(ULONG width, ULONG height, ULONG depth, ULONG flags)
 {
 	HRESULT			result;
 
@@ -809,33 +305,17 @@ extern int	VideoRes;
 	if(flags&FLAGS_USE_3D)
 		the_display.Use3DOn();
 
-#ifndef TARGET_DC
 	if(flags&FLAGS_USE_WORKSCREEN)
 		the_display.UseWorkOn();
-#endif
 
 	the_display.FullScreenOff();
 
 	result = SetDisplay(width,height,depth);
 
-// The DC picks specific times to show movies.
-#ifndef TARGET_DC
-	if (SUCCEEDED(result))
-	{
-		//
-		// Show a movie!
-		//
-
-		do_intro();
-	}
-#endif
-
 	return result;
 }
 
-//---------------------------------------------------------------
-
-SLONG	CloseDisplay(void)
+SLONG CloseDisplay(void)
 {
 	the_display.Fini();
 	the_manager.Fini();
@@ -843,9 +323,7 @@ SLONG	CloseDisplay(void)
 	return	1;
 }
 
-//---------------------------------------------------------------
-
-SLONG	SetDisplay(ULONG width,ULONG height,ULONG depth)
+SLONG SetDisplay(ULONG width,ULONG height,ULONG depth)
 {
 	HRESULT		result;
 
@@ -870,9 +348,7 @@ SLONG	SetDisplay(ULONG width,ULONG height,ULONG depth)
 	return	0;
 }
 
-//---------------------------------------------------------------
-
-SLONG			ClearDisplay(UBYTE r,UBYTE g,UBYTE b)
+SLONG ClearDisplay(UBYTE r,UBYTE g,UBYTE b)
 {
 	DDBLTFX		dd_bltfx; 
  
@@ -899,7 +375,7 @@ struct RGB_555
 };
 
 
-void	LoadBackImage(UBYTE *image_data)
+void LoadBackImage(UBYTE *image_data)
 {
 	ASSERT(0);
 
@@ -913,8 +389,6 @@ void	LoadBackImage(UBYTE *image_data)
 	HRESULT			result;
 	RGB_565			rgb;
 
-
-//	if(the_display.lp_DD_BackSurface)
 	{
 		InitStruct(dd_sd);
 		try_count		=	0;
@@ -965,151 +439,6 @@ do_the_unlock:
 	}
 }
 
-//---------------------------------------------------------------
-
-UBYTE	tga_header[]	=	{
-								0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00,
-								0x00, 0x00, 0x00, 0x00, 0x80, 0x02, 0xe0, 0x01,
-								0x10, 0x01
-
-							};
-void	DumpBackToTGA(CBYTE *tga_name)
-{
-	UWORD			*rgb_fudge,
-					*surface_mem;
-	SLONG			height,
-					pitch,
-					width;
-	DDSURFACEDESC2	dd_sd;
-	HRESULT			result;
-	MFFileHandle	tga_handle;
-	RGB_565			rgb565;
-	RGB_555			rgb555[640];
-
-
-	if(the_display.lp_DD_BackSurface)
-	{
-		InitStruct(dd_sd);
-		result	=	the_display.lp_DD_BackSurface->Lock(NULL,&dd_sd,DDLOCK_WAIT|DDLOCK_NOSYSLOCK,NULL);
-		switch(result)
-		{
-			case	DD_OK:
-				pitch		=	dd_sd.lPitch>>1;
-				surface_mem	=	(UWORD*)dd_sd.lpSurface+(479*pitch);
-				tga_handle	=	FileCreate(tga_name,TRUE);
-				if(tga_handle)
-				{
-					rgb_fudge	=	(UWORD*)&rgb565;
-					FileWrite(tga_handle,&tga_header,sizeof(tga_header));
-					for(height=0;height<480;height++,surface_mem-=pitch)
-					{
-						for(width=0;width<640;width++)
-						{
-							*rgb_fudge		=	*(surface_mem+width);
-							rgb555[width].R	=	rgb565.R;
-							rgb555[width].G	=	rgb565.G>>1;
-							rgb555[width].B	=	rgb565.B;
-						}
-						FileWrite(tga_handle,&rgb555,sizeof(rgb555));
-					}
-					FileClose(tga_handle);
-				}
-				result	=	the_display.lp_DD_BackSurface->Unlock(NULL);
-				break;
-			case	DDERR_SURFACELOST:
-				the_display.Restore();
-				break;
-		}
-	}
-}
-
-void DumpBackToRaw()
-{
-	SLONG i;
-	SLONG x;
-	SLONG y;
-
-	UBYTE red;
-	UBYTE green;
-	UBYTE blue;
-
-	CBYTE fname[32];
-
-	FILE *handle;
-
-
-	//
-	// Find the first available file.
-	// 
-	
-	for (i = 0; i < 100; i++)
-	{
-		sprintf(fname, "c:\\tmp\\shot%03d.raw", i);
-
-		handle = MF_Fopen(fname, "rb");
-
-		if (handle)
-		{
-			//
-			// This file already exists...
-			//
-
-			MF_Fclose(handle);
-		}
-		else
-		{
-			handle = MF_Fopen(fname, "wb");
-	
-			if (handle)
-			{
-				goto found_file;
-			}
-			else
-			{
-				return;
-			}
-		}
-	}
-
-	//
-	// All thousand filenames are used up!
-	//
-
-	return;
-
-  found_file:;
-
-	//
-	// Save out the raw.
-	//
-
-	for (y = 0; y < the_display.screen_height; y++)
-	{
-		for (x = 0; x < the_display.screen_width; x++)
-		{
-			the_display.GetPixel(
-				x,
-				y,
-			   &red,
-			   &green,
-			   &blue);
-
-			fputc(red,   handle);
-			fputc(green, handle);
-			fputc(blue,  handle);
-		}
-	}
-
-	//
-	// Close the file.
-	//
-
-	MF_Fclose(handle);
-}
-
-
-//---------------------------------------------------------------
-
 Display::Display()
 {
 	DisplayFlags	=	0;
@@ -1118,16 +447,11 @@ Display::Display()
 	CurrMode		=	NULL;
 
 	CreateZBufferOn();
-#if defined(NDEBUG) || defined (TARGET_DC)
-	FullScreenOn();
-#endif
 
 	lp_DD_Clipper		=	NULL;
 	lp_DD_FrontSurface	=	NULL;
 	lp_DD_BackSurface	=	NULL;
-#ifndef TARGET_DC
 	lp_DD_WorkSurface	=	NULL;
-#endif
 	lp_DD_ZBuffer		=	NULL;
 	lp_CurrPalette		=	NULL;
 	lp_SysPalette		=	NULL;
@@ -1141,14 +465,10 @@ Display::Display()
 	TextureList		=	NULL;
 }
 
-//---------------------------------------------------------------
-
 Display::~Display()
 {
 	Fini();
 }
-
-//---------------------------------------------------------------
 
 HRESULT	Display::Init(void)
 {
@@ -1163,16 +483,6 @@ HRESULT	Display::Init(void)
 			// Output error.
 			return	result;
 		}
-#define	HIDE_MOUSE	1
-#ifdef	HIDE_MOUSE
-#ifndef TARGET_DC
-		if (IsFullScreen())
-		{
-			// hide the cursor
-			ShowCursor(FALSE);
-		}
-#endif
-#endif
 
 		// Create DD/D3D Interface objects.
 		result	=	InitInterfaces();
@@ -1209,16 +519,12 @@ HRESULT	Display::Init(void)
 
 		InitOn();
 
-#ifndef TARGET_DC
-#ifndef VERSION_DEMO
 		// run the FMV
 		if (!run_fmv)
 		{
 			RunFMV();
 			run_fmv = true;
 		}
-#endif
-#endif
 
 		return	DD_OK;
 
@@ -1251,8 +557,6 @@ HRESULT	Display::Fini(void)
 	InitOff();
 	return	DD_OK;
 }
-
-//---------------------------------------------------------------
 
 HRESULT	Display::GenerateDefaults(void)
 {
@@ -1320,8 +624,6 @@ HRESULT	Display::GenerateDefaults(void)
 	return	DD_OK;
 }
 
-//---------------------------------------------------------------
-
 HRESULT	Display::InitInterfaces(void)
 {
     GUID			*the_guid;
@@ -1361,12 +663,8 @@ HRESULT	Display::InitInterfaces(void)
         // Error
 		// Output error.
 
-#ifdef TARGET_DC
-		ASSERT(FALSE);
-#else
 		// Inform User that they Need DX 6.0 installed
         MessageBox(hDDLibWindow,TEXT("Need DirectX 6.0 or greater to run"), TEXT("Error"),MB_OK);
-#endif
         goto	cleanup;
     }
 
@@ -1424,8 +722,6 @@ HRESULT	Display::FiniInterfaces(void)
 	return DD_OK;
 }
 
-//---------------------------------------------------------------
-
 HRESULT	Display::InitWindow(void)
 {
 	HRESULT		result;
@@ -1441,10 +737,6 @@ HRESULT	Display::InitWindow(void)
 		return	result;
 	}
 
-#ifdef TARGET_DC
-	// Must be this on DC.
-	flags = DDSCL_EXCLUSIVE | DDSCL_FULLSCREEN;
-#else //#ifdef TARGET_DC
     // Get Cooperative Flags
 	if(IsFullScreen())
 	{
@@ -1454,7 +746,6 @@ HRESULT	Display::InitWindow(void)
 	{
 		flags	=	DDSCL_NORMAL | DDSCL_FPUSETUP;
 	}
-#endif //#else //#ifdef TARGET_DC
 
     // Set Cooperative Level
     result	=	lp_DD4->SetCooperativeLevel(hDDLibWindow,flags);
@@ -1473,15 +764,12 @@ HRESULT	Display::InitWindow(void)
 	return	DD_OK;
 }
 
-//---------------------------------------------------------------
-
 HRESULT	Display::FiniWindow(void)
 {
 	HRESULT		result;
 
 	VB_Term();
 
-#ifndef TARGET_DC
 	if(lp_DD4)
 	{
 		result	=	lp_DD4->SetCooperativeLevel(hDDLibWindow,DDSCL_NORMAL|DDSCL_FPUSETUP);
@@ -1492,167 +780,15 @@ HRESULT	Display::FiniWindow(void)
 			return	result;
 		}
 	}
-#endif
 
 	// Success
 	return DD_OK;
 }
 
-//---------------------------------------------------------------
-
-
-
 #define	FMV1a	"eidos"
 #define	FMV1b	"logo24"
 #define	FMV2	"pcintro_withsound"
 #define FMV3	"new_pccutscene%d_300"
-
-
-#ifndef TARGET_DC
-// this function returns true to continue or false to end the movie
-
-static LPDIRECTDRAWSURFACE4		fmv_primary;
-static LPDIRECTDRAWSURFACE4		fmv_secondary;
-
-static bool bink_flipper()
-{
-	fmv_primary->Blt(NULL, fmv_secondary, NULL, DDBLT_WAIT, NULL);
-
-	ULONG input = get_hardware_input(INPUT_TYPE_JOY) | get_hardware_input(INPUT_TYPE_KEY);		
-
-	if (input & (INPUT_MASK_JUMP|INPUT_MASK_START|INPUT_MASK_SELECT|INPUT_MASK_KICK|INPUT_MASK_PUNCH|INPUT_MASK_ACTION))
-	{
-		return false;
-	}
-
-	return true;
-}
-
-
-
-static void PlayMovie(int type)
-{
-	LPDIRECTDRAW	lpDD;
-	LPDIRECTDRAW4	lpDD4;
-	HRESULT			res;
-
-	// init DirectDraw
-    if (FAILED(DirectDrawCreate(NULL, &lpDD, NULL)))	return;
-	if (FAILED(lpDD->QueryInterface((REFIID)IID_IDirectDraw4, (void**)&lpDD4)))
-	{
-		lpDD->Release();
-		return;
-	}
-
-	if (FAILED(lpDD4->SetCooperativeLevel(hDDLibWindow, DDSCL_EXCLUSIVE | DDSCL_FULLSCREEN | DDSCL_FPUSETUP)))
-	{
-		lpDD4->Release();
-		lpDD->Release();
-		return;
-	}
-
-	// clear the current screen
-	DDSURFACEDESC2		dd_sd;
-	InitStruct(dd_sd);
-
-	dd_sd.dwFlags			=	DDSD_CAPS;
-	dd_sd.ddsCaps.dwCaps	=	DDSCAPS_PRIMARYSURFACE;
-
-	if (SUCCEEDED(lpDD4->CreateSurface(&dd_sd, &fmv_primary, NULL)))
-	{
-		DDBLTFX bfx;
-		InitStruct(bfx);
-
-		bfx.dwFillColor = 0;
-
-		fmv_primary->Blt(NULL, NULL, NULL, DDBLT_COLORFILL, &bfx);
-
-		fmv_primary->Release();
-	}
-
-	// go to 640x480xlots of colours
-	TRACE("Trying 640x480x24\n");
-	if (FAILED(lpDD4->SetDisplayMode(640,480,24,0,0)))
-	{
-		TRACE("Trying 640x480x32\n");
-		if (FAILED(lpDD4->SetDisplayMode(640,480,32,0,0)))
-		{
-			TRACE("Trying 640x480x16\n");
-			if (FAILED(lpDD4->SetDisplayMode(640,480,16,0,0)))
-			{
-				goto error;
-			}
-		}
-	}
-
-#ifndef NDEBUG
-	ShowCursor(FALSE);
-#endif
-
-	// create a primary surface
-	InitStruct(dd_sd);
-
-	dd_sd.dwFlags			=	DDSD_CAPS;
-	dd_sd.ddsCaps.dwCaps	=	DDSCAPS_PRIMARYSURFACE;
-
-	if (SUCCEEDED(lpDD4->CreateSurface(&dd_sd, &fmv_primary, NULL)))
-	{
-		DDBLTFX bfx;
-		InitStruct(bfx);
-
-		bfx.dwFillColor = 0;
-
-		fmv_primary->Blt(NULL, NULL, NULL, DDBLT_COLORFILL, &bfx);
-
-		// create a back buffer
-		InitStruct(dd_sd);
-		fmv_primary->GetSurfaceDesc(&dd_sd);
-		dd_sd.ddsCaps.dwCaps	=	0;
-
-		if (SUCCEEDED(lpDD4->CreateSurface(&dd_sd, &fmv_secondary, NULL)))
-		{
-			DDBLTFX bfx;
-			InitStruct(bfx);
-
-			bfx.dwFillColor = 0;
-
-			fmv_secondary->Blt(NULL, NULL, NULL, DDBLT_COLORFILL, &bfx);
-
-			IDirectDrawSurface*	lpdds;
-
-			if (SUCCEEDED(fmv_secondary->QueryInterface(IID_IDirectDrawSurface, (void**)&lpdds)))
-			{
-				if (!type)
-				{
-					BinkPlay("bink\\" FMV1a ".bik", lpdds, bink_flipper);
-					BinkPlay("bink\\" FMV1b ".bik", lpdds, bink_flipper);
-					BinkPlay("bink\\" FMV2  ".bik", lpdds, bink_flipper);
-				}
-				else
-				{
-					char	filename[MAX_PATH];
-					sprintf(filename, "bink\\" FMV3, type);
-					TRACE("Playing %s\n", filename);
-					BinkPlay(filename, lpdds, bink_flipper);
-				}
-				lpdds->Release();
-			}
-
-			fmv_secondary->Release();
-		}
-
-		fmv_primary->Release();
-	}
-
-#ifndef NDEBUG
-	ShowCursor(TRUE);
-#endif
-
-error:
-	lpDD4->Release();
-	lpDD->Release();
-}
-
 
 LPDIRECTDRAWSURFACE4 mirror;
 
@@ -1663,643 +799,8 @@ static bool quick_flipper()
 	return true;
 }
 
-#endif //#ifndef TARGET_DC
 
-
-
-#ifdef TARGET_DC
-
-
-#if 0
-// DirectArseShow version.
-
-void PlayQuickMovie(SLONG type, SLONG language)
-{
-
-//#ifdef DEBUG
-	// Not just now thanks.
-	//return;
-//#endif
-
-	// Use DirectShow on DC.
-	DDSURFACEDESC       ddsd;
- 	IDirectDraw        *pDD;
-	IDirectDrawSurface *pSurface;
- 	IMultiMediaStream  *pMMStream;
-
-	IDirectDrawSurface *back_surface;
-
-	HRESULT hres = CoInitializeEx(NULL,COINIT_MULTITHREADED);
-
-	if (SUCCEEDED(the_display.lp_DD_FrontSurface->QueryInterface(IID_IDirectDrawSurface, (void**)&pSurface)) &&
-		SUCCEEDED(the_display.lp_DD_BackSurface->QueryInterface(IID_IDirectDrawSurface, (void**)&back_surface)))
-	{
-
-		pSurface->AddRef();
-		int i = pSurface->Release();
-		ASSERT ( i == 1 );
-		back_surface->AddRef();
-		i = back_surface->Release();
-		ASSERT ( i == 1 );
-
-
-#if 0
-		// Create a texture to render to.
-		DDSURFACEDESC ddsd;
-		InitStruct(ddsd);
-		ddsd.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT;
-		ddsd.dwWidth = 1024;
-		ddsd.dwHeight = 512;
-		//ddsd.dwWidth  = 512;
-		//ddsd.dwHeight = 256;
-
-		ddsd.ddsCaps.dwCaps	 = DDSCAPS_TEXTURE | DDSCAPS_VIDEOMEMORY;
-		//ddsd.ddsCaps.dwCaps2 = 0;
-		InitStruct(ddsd.ddpfPixelFormat);
-		ddsd.ddpfPixelFormat.dwFourCC = 0;
-#if 0
-		// Can't get 32bpp to work
-		ddsd.ddpfPixelFormat.dwFlags = DDPF_ALPHAPIXELS | DDPF_RGB;
-		ddsd.ddpfPixelFormat.dwRGBBitCount = 32;
-		ddsd.ddpfPixelFormat.dwRBitMask			= 0x00ff0000;
-		ddsd.ddpfPixelFormat.dwGBitMask			= 0x0000ff00;
-		ddsd.ddpfPixelFormat.dwBBitMask			= 0x000000ff;
-		ddsd.ddpfPixelFormat.dwRGBAlphaBitMask	= 0xff000000;
-#else
-		// Can't get 32bpp to work
-		ddsd.ddpfPixelFormat.dwFlags = DDPF_RGB;
-		ddsd.ddpfPixelFormat.dwRGBBitCount = 16;
-		ddsd.ddpfPixelFormat.dwRBitMask			= 0xf800;
-		ddsd.ddpfPixelFormat.dwGBitMask			= 0x07e0;
-		ddsd.ddpfPixelFormat.dwBBitMask			= 0x001f;
-		ddsd.ddpfPixelFormat.dwRGBAlphaBitMask	= 0x0000;
-#endif
-
-
-		IDirectDrawSurface *pddsTexture;
-		hres = the_display.lp_DD->CreateSurface(&ddsd, &pddsTexture, NULL);
-		ASSERT ( SUCCEEDED ( hres ) );
-#else
-		// No texturing gubbins.
-		IDirectDrawSurface *pddsTexture = NULL;
-#endif
-
-
-		char	filename[MAX_PATH];
-		char *pcDirectory;
-
-		switch ( language )
-		{
-		case 1:
-			pcDirectory = "\\CD-ROM\\fallen\\dshow_french\\";
-			break;
-		default:
-			ASSERT ( FALSE );
-			/* FALLTHROUGH */
-		case 0:
-			pcDirectory = "\\CD-ROM\\fallen\\dshow\\";
-			break;
-		}
-
-
-		if ( type == -1 )
-		{
-			// These two don't have language-specific versions.
-			// Eidos & MF logo FMVs
-			ASSERT ( language == 0 );
-
-			// Play this one (Eidos).
-#if 0
-			RenderFileToMMStream("\\CD-ROM\\fallen\\dshow\\" FMV1a ".avi", &pMMStream, the_display.lp_DD);
-			RenderStreamToSurface(pSurface, pMMStream, back_surface, pddsTexture);
-			i = pMMStream->Release();
-			ASSERT ( i == 0 );
-#endif
-
-			// Then play this one (Muckyfoot).
-			sprintf(filename, "\\CD-ROM\\fallen\\dshow\\" FMV1b ".avi" );
-		}
-		else if ( type == 0 )
-		{
-			// The intro movie.
-			sprintf(filename, "%s" FMV2 ".avi", pcDirectory );
-		}
-		else
-		{
-			sprintf(filename, "%s" FMV3 ".avi", pcDirectory, type );
-		} 
-
-		
-
-#if 1
-#ifdef DEBUG
-		// Show lots of them.
-#if 1
-		RenderFileToMMStream("\\CD-ROM\\fallen\\dshow\\pccutscene1_300_25_100.avi", &pMMStream, the_display.lp_DD);
-		// This seems to be needed, sadly.
-		Sleep ( 500 );
-		RenderStreamToSurface(pSurface, pMMStream, back_surface, pddsTexture);
-		i = pMMStream->Release();
-		ASSERT ( i == 0 );
-#endif
-
-#if 1
-		RenderFileToMMStream("\\CD-ROM\\fallen\\dshow_french\\PCcutscene1_TEST_320_15C.avi", &pMMStream, the_display.lp_DD);
-		// This seems to be needed, sadly.
-		Sleep ( 500 );
-		RenderStreamToSurface(pSurface, pMMStream, back_surface, pddsTexture);
-		i = pMMStream->Release();
-		ASSERT ( i == 0 );
-#endif
-#endif
-#endif
-
-
-#if 0
-// Not just yet.
-		TRACE("Playing %s\n", filename);
-		RenderFileToMMStream(filename, &pMMStream, the_display.lp_DD);
-		RenderStreamToSurface(pSurface, pMMStream, back_surface, pddsTexture);
-		i = pMMStream->Release();
-		ASSERT ( i == 0 );
-
-#endif
-
-		if ( pddsTexture != NULL )
-		{
-			i = pddsTexture->Release();
-			ASSERT ( i == 0 );
-		}
-		i = pSurface->Release();
-		ASSERT ( i == 0 );
-		i = back_surface->Release();
-		ASSERT ( i == 0 );
-	}
-	else
-	{
-		ASSERT ( FALSE );
-	}
-
-
-	hres = the_display.lp_D3D_Device->EndScene();
-	ASSERT ( SUCCEEDED ( hres ) );
-
-
-	CoUninitialize();
-
-
-	// Incant this spell to get the DC to GIVE ME BACK MY MEMORY YOU BASTARD
-	// It is important to _believe_ this will work. If you question it, it will fail.
-	// You have been warned. Ask not for whom the memory vanishes...
-
-	Sleep(4);
-	CoFreeUnusedLibraries();
-	Sleep(4);
-	CoFreeUnusedLibraries();
-
-}
-
-#else
-
-
-static bool bMWInitialised = FALSE;
-
-
-
-static bool bThereWasAnErrorInMW = FALSE;
-
-static void	errMWErrFunc(void *errobj, Sint32 errcode)
-{
-	bThereWasAnErrorInMW = TRUE;
-
-	return;
-}
-
-
-
-void PlayQuickMovie(SLONG type, SLONG language, bool bAllowButtonsToExit )
-{
-
-#if 0
-#ifdef DEBUG
-	// Not just now thanks.
-	return;
-#endif
-#endif
-
-
-
-
-	// CRI had better rule.
-	char	filename[MAX_PATH];
-	char *pcDirectory;
-	char *pcSubDir;
-
-	switch ( language )
-	{
-	case 1:
-		pcDirectory = "\\CD-ROM\\fallen\\dshowfr\\";
-		break;
-	default:
-		ASSERT ( FALSE );
-		/* FALLTHROUGH */
-	case 0:
-		pcDirectory = "\\CD-ROM\\fallen\\dshow\\";
-		break;
-	}
-
-
-
-	bool bSixtyHertz;
-
-	// 50 or 60Hz?
-	BYTE bFormat = GetVideoOutputFormat();
-	switch ( bFormat )
-	{
-	case VIDFMT_NTSC_RGB:
-	case VIDFMT_NTSC:
-	case VIDFMT_VGA:
-		// NTSC 60Hz or VGA 60Hz.
-		bSixtyHertz = TRUE;
-		break;
-
-	case VIDFMT_PAL_RGB:
-	case VIDFMT_PAL:
-	case VIDFMT_PAL_M_RGB:
-	case VIDFMT_PAL_M:
-	case VIDFMT_PAL_N_RGB:
-	case VIDFMT_PAL_N:
-		// PAL 50Hz.
-		bSixtyHertz = FALSE;
-		break;
-
-	default:
-		ASSERT ( FALSE );
-		break;
-	}
-
-	if ( bSixtyHertz )
-	{
-		// Don't have any 60Hz ones yet.
-		//pcSubDir = "Sixty\\";
-		pcSubDir = "Fifty\\";
-	}
-	else
-	{
-		pcSubDir = "Fifty\\";
-	}
-
-
-	switch ( type )
-	{
-	case -3:
-		ASSERT ( language == 0 );
-		// CRI logo.
-		sprintf ( filename, "%s%ssfdlogoq.sfd", pcDirectory, pcSubDir );
-		break;
-	case -2:
-		ASSERT ( language == 0 );
-		// Eidos logo.
-		sprintf ( filename, "%s%seidos.sfd", pcDirectory, pcSubDir );
-		break;
-	case -1:
-		ASSERT ( language == 0 );
-		// MF logo.
-		sprintf ( filename, "%s%slogo24.sfd", pcDirectory, pcSubDir );
-		break;
-	case 0:
-		// Intro movie.
-		sprintf ( filename, "%s%spcintro_withsound.sfd", pcDirectory, pcSubDir );
-		break;
-	case 1:
-		// Cutscene 1 (Bane's office).
-		sprintf ( filename, "%s%spccutscene1_300.sfd", pcDirectory, pcSubDir );
-		break;
-	case 2:
-		// Cutscene 2 (before Day of Reckoning).
-		// No speech - use the English.
-		sprintf ( filename, "\\CD-ROM\\fallen\\dshow\\%spccutscene2_300.sfd", pcSubDir );
-		break;
-	case 3:
-		// Cutscene 3 (Day of Reckoning won).
-		// No speech - use the English.
-		sprintf ( filename, "\\CD-ROM\\fallen\\dshow\\%spccutscene3_300.sfd", pcSubDir );
-		break;
-	default:
-		ASSERT ( FALSE );
-		break;
-	}
-
-
-	// Test this one instead.
-	//strcpy ( filename, "\\CD-ROM\\fallen\\dshow\\pcintro_withsound.sfd" );
-
-
-#if 0
-	// Sample movie settings.
-#define MOVIE_FTYPE	 MWE_PLY_FTYPE_SFD
-#define MOVIE_BPS    (1024 * 1024 * 4)
-#define MOVIE_WIDTH	 (352)
-#define MOVIE_HEIGHT (240)
-#define MOVIE_NFRM	 (3)
-#else
-#define MOVIE_FTYPE	 MWE_PLY_FTYPE_SFD
-// Yes, the movies are actually only 3800 bits/sec, but any lower than
-// this and it starts to break up. Bloody thing.
-#define MOVIE_BPS    (1024 * 1024 * 5)
-//#define MOVIE_WIDTH	 (640)
-//#define MOVIE_HEIGHT (480)
-#define MOVIE_WIDTH	 (320)
-#define MOVIE_HEIGHT (240)
-//#define MOVIE_WIDTH	 (512)
-//#define MOVIE_HEIGHT (256)
-#define MOVIE_NFRM	 (3)
-#endif
-
-
-// Doesn't work - don't set it.
-#define HALVE_FRAME_RATE 0
-
-
-
-	// Init CRI stuff.
-
-	// Imported from DCLowLevel.
-extern LPDIRECTSOUND g_pds;
-
-
-	ASSERT ( the_display.lp_DD4 != NULL );
-	ASSERT ( the_display.lp_DD_FrontSurface != NULL );
-	ASSERT ( the_display.lp_DD_BackSurface != NULL );
-	ASSERT ( g_pds != NULL );
-
-
-	MWS_PLY_IPRM_SFW	iprm;
-
-	memset(&iprm, 0, sizeof(MWS_PLY_IPRM_SFW));
-	iprm.winhn    = NULL;
-	iprm.ddraw    = the_display.lp_DD4;
-	iprm.dds_prim = the_display.lp_DD_FrontSurface;
-	iprm.dds_back = the_display.lp_DD_BackSurface;
-	iprm.dsnd     = g_pds;
-
-
-	// 50 or 60Hz?
-	if ( bSixtyHertz )
-	{
-#if HALVE_FRAME_RATE
-		iprm.vfreq    = MWE_PLY_VFREQ_NTSC / 2;
-#else
-		iprm.vfreq    = MWE_PLY_VFREQ_NTSC;
-#endif
-	}
-	else
-	{
-#if HALVE_FRAME_RATE
-		iprm.vfreq    = MWE_PLY_VFREQ_PAL / 2;
-#else
-		iprm.vfreq    = MWE_PLY_VFREQ_PAL;
-#endif
-	}
-
-
-	mwPlyInitSfw(&iprm);
-
-	mwPlyEntryErrFunc(errMWErrFunc, NULL);
-
-	//bMWInitialised = TRUE;
-
-
-
-	// Do this and discard to stop held-down buttons skipping past (all too easy to do).
-	get_hardware_input(INPUT_TYPE_JOY | INPUT_TYPE_GONEDOWN);
-
-
-	// Allocate the work memory.
-	DWORD dwWorkSpaceSize = mwPlyCalcWorkSfw(MOVIE_FTYPE, MOVIE_BPS,
-								MOVIE_WIDTH, MOVIE_HEIGHT, MOVIE_NFRM);
-
-
-	Sint8 *pcMWWorkSpace = (Sint8*)VirtualAlloc(NULL, dwWorkSpaceSize, MEM_COMMIT, PAGE_READWRITE);
-	if ( pcMWWorkSpace == NULL )
-	{
-		// Out of space for FMV.
-		ASSERT ( FALSE );
-	}
-	else
-	{
-
-		// Turn off VMU screen updates - they are waaaay too slow.
-		SetVMUScreenUpdateEnable ( FALSE );
-
-
-		// Draw black screens.
-		DDBLTFX ddbf;
-		ddbf.dwSize      = sizeof(DDBLTFX);
-		ddbf.dwFillColor = 0;
-		the_display.lp_DD_BackSurface->Blt(NULL, NULL, NULL, 
-								DDBLT_WAIT | DDBLT_COLORFILL, &ddbf);
-		the_display.lp_DD_FrontSurface->Flip(NULL, DDFLIP_WAIT);
-		the_display.lp_DD4->WaitForVerticalBlank(DDWAITVB_BLOCKEND, NULL);				
-		the_display.lp_DD_BackSurface->Blt(NULL, NULL, NULL, 
-								DDBLT_WAIT | DDBLT_COLORFILL, &ddbf);
-
-
-
-// Tries to "catch" dropped video frames.
-// Actually, at the moment, it just spots them.
-#define CATCH_DROPPED_FRAMES 1
-
-
-
-		MWPLY ply;
-
-		// Start video.
-		MWS_PLY_CPRM_SFW	cprm;
-
-		memset(&cprm, 0, sizeof(cprm));
-		cprm.ftype        = MOVIE_FTYPE;
-		cprm.max_bps      = MOVIE_BPS;
-		cprm.max_width    = MOVIE_WIDTH;
-		cprm.max_height   = MOVIE_HEIGHT;
-		cprm.nfrm_pool_wk = MOVIE_NFRM;
-		cprm.wksize       = dwWorkSpaceSize;
-		cprm.work         = pcMWWorkSpace;
-
-		ply = mwPlyCreateSfw(&cprm);
-		ASSERT ( ply != NULL );
-
-		// Filename is in ASCII, not unicode.
-		mwPlyStartFname ( ply, (signed char *)filename );
-
-
-#if CATCH_DROPPED_FRAMES
-		// Wait for a VBLANK.
-		the_display.lp_DD4->WaitForVerticalBlank(DDWAITVB_BLOCKEND, NULL);
-		DWORD dwNumFramesIDrew = 0;
-		DWORD dwNumFramesIActuallyDrew = 0;
-		DWORD dwStartTime = timeGetTime();
-		DWORD dwLastFrameError = 0;
-#endif
-
-
-
-
-
-		// Play video.
-		MSG				msg;
-		bool			bStopIt = FALSE;
-
-		while ( !bStopIt )
-		{
-			mwExecMainServer();
-
-			// Flush messages (but ignore them).
-			if (PeekMessage (&msg, NULL, 0, 0, PM_NOREMOVE))
-			{
-				if (!GetMessage(&msg, NULL, 0, 0))
-				{
-					// Panic.
-					ASSERT ( FALSE );
-					break;
-				}
-				//TranslateMessage(&msg);
-				//DispatchMessage(&msg);
-			}
-
-
-			// Only scan input every now and then.
-			static iInputCountdown = 0;
-			if ( ( ( iInputCountdown++ ) & 3 ) == 0 )
-			{
-				ULONG input = get_hardware_input(INPUT_TYPE_JOY | INPUT_TYPE_GONEDOWN);
-				if ( bAllowButtonsToExit )
-				{
-					if (input & (INPUT_MASK_JUMP|INPUT_MASK_START|INPUT_MASK_SELECT|INPUT_MASK_KICK|INPUT_MASK_PUNCH|INPUT_MASK_ACTION))
-					{
-						bStopIt = TRUE;
-					}
-				}
-				else
-				{
-					// Not allowed to exit this one, but read the input anyway
-					// (there's stuff that needs doing, e.g. soft reset handling).
-				}
-			}
-
-			if (mwPlyGetStat(ply) == MWE_PLY_STAT_PLAYEND)
-			{
-				// End of movie.
-				bStopIt = TRUE;
-			}
-
-			if ( bThereWasAnErrorInMW )
-			{
-				ASSERT ( FALSE );
-				bStopIt = TRUE;
-			}
-
-			// Flip the screen.
-			the_display.lp_DD_FrontSurface->Flip(NULL, 0);
-
-			// V sync.
-			the_display.lp_DD4->WaitForVerticalBlank(DDWAITVB_BLOCKEND, NULL);
-#if HALVE_FRAME_RATE
-			// Double wait.
-			the_display.lp_DD4->WaitForVerticalBlank(DDWAITVB_BLOCKEND, NULL);
-#endif
-
-
-#if CATCH_DROPPED_FRAMES
-			dwNumFramesIDrew++;
-			dwNumFramesIActuallyDrew++;
-
-			// The >>4 is to stop the calculations ovberflowing.
-			DWORD dwTimeDifference = ( timeGetTime() - dwStartTime ) >> 4;
-			DWORD dwNumberOfFramesThatShouldHaveBeenShown = ( dwTimeDifference * iprm.vfreq ) / ( ( 1000 * 1000 ) >> 4 );
-			int iThisError = (int)dwNumberOfFramesThatShouldHaveBeenShown - (int)dwNumFramesIDrew;
-
-			if ( iThisError > 1 )
-			{
-				if ( dwNumFramesIActuallyDrew < 200 )
-				{
-					// Bedding in period - for the first chunk of frames,
-					// there is a big delay, which should not be corrected for.
-					TRACE ( "Bedding in error %i\n", iThisError );
-					dwNumFramesIDrew += iThisError - 1;
-				}
-				else
-				{
-					// Try to correct the error by doing another frame.
-					TRACE ( "Correcting error %i\n", iThisError );
-					mwExecMainServer();
-
-					// This is a massive tweak thing. For some reason, this over-corrects
-					// a fair bit. So pretend we drew more than we did.
-					dwNumFramesIDrew += iThisError >> 1;
-					dwNumFramesIActuallyDrew++;
-				}
-			}
-
-#endif
-
-
-		}
-
-		TRACE ( "Done\n" );
-
-
-
-		// Stop video.
-
-		// Draw black screens again.
-		ddbf.dwSize      = sizeof(DDBLTFX);
-		ddbf.dwFillColor = 0;
-		the_display.lp_DD_BackSurface->Blt(NULL, NULL, NULL, 
-								DDBLT_WAIT | DDBLT_COLORFILL, &ddbf);
-		the_display.lp_DD_FrontSurface->Flip(NULL, DDFLIP_WAIT);
-		the_display.lp_DD4->WaitForVerticalBlank(DDWAITVB_BLOCKEND, NULL);				
-		the_display.lp_DD_BackSurface->Blt(NULL, NULL, NULL, 
-								DDBLT_WAIT | DDBLT_COLORFILL, &ddbf);
-
-		mwPlyStop(ply);
-
-		mwPlyDestroy(ply);
-	}
-
-	// End-of-day cleanup.
-	mwPlyFinishSfw();
-
-
-	// Turn VMU screen updates back on.
-	SetVMUScreenUpdateEnable ( TRUE );
-
-
-	if ( pcMWWorkSpace != NULL )
-	{
-		VirtualFree ( pcMWWorkSpace , 0, MEM_RELEASE );
-	}
-
-
-#if 0
-	// Incant this spell to get the DC to GIVE ME BACK MY MEMORY YOU BASTARD
-	// It is important to _believe_ this will work. If you question it, it will fail.
-	// You have been warned. Ask not for whom the memory vanishes...
-
-	Sleep(4);
-	CoFreeUnusedLibraries();
-	Sleep(4);
-	CoFreeUnusedLibraries();
-#endif
-
-}
-
-#endif
-
-
-
-#else //#ifdef TARGET_DC
-void PlayQuickMovie(SLONG type, SLONG language_ignored, bool bIgnored )
+void PlayQuickMovie(SLONG type, SLONG language_ignored, bool bIgnored)
 {
 	DDSURFACEDESC2 back;
 	DDSURFACEDESC2 mine;
@@ -2319,11 +820,11 @@ void PlayQuickMovie(SLONG type, SLONG language_ignored, bool bIgnored )
 
 	InitStruct(mine);
 
-	mine.dwFlags         = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT;
-	mine.dwWidth         = 640;
-	mine.dwHeight        = 480;
+	mine.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT;
+	mine.dwWidth = 640;
+	mine.dwHeight = 480;
 	mine.ddpfPixelFormat = back.ddpfPixelFormat;
-	mine.ddsCaps.dwCaps	 = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_SYSTEMMEMORY;
+	mine.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_SYSTEMMEMORY;
 
 	HRESULT result = the_display.lp_DD4->CreateSurface(&mine, &mirror, NULL);
 
@@ -2348,10 +849,7 @@ void PlayQuickMovie(SLONG type, SLONG language_ignored, bool bIgnored )
 
 	mirror->Release();
 }
-#endif //#else //#ifdef TARGET_DC
 
-
-#ifndef TARGET_DC
 void Display::RunFMV()
 {
 	if (!hDDLibWindow)	return;
@@ -2361,19 +859,11 @@ void Display::RunFMV()
 
 	PlayQuickMovie(0,0,TRUE);
 }
-#endif
 
 
 void Display::RunCutscene(int which, int language, bool bAllowButtonsToExit)
 {
-	//extern void FRONTEND_scr_unload_theme(void);
-	//FRONTEND_scr_unload_theme();
-
-	//Fini();
-
 	PlayQuickMovie(which, language, bAllowButtonsToExit);
-
-	//Init();
 }
 
 
@@ -2396,8 +886,6 @@ HRESULT	Display::InitFullscreenMode(void)
 		return	result;
 	}
 
-	// DC is always fullscreen
-#ifndef TARGET_DC
 	// Do window mode setup.
 	if(!IsFullScreen())
 	{
@@ -2442,202 +930,6 @@ HRESULT	Display::InitFullscreenMode(void)
 	hDDLibMenu		=	GetMenu(hDDLibWindow);
 	hDDLibStyle		=	GetWindowLong(hDDLibWindow,GWL_STYLE);
 	hDDLibStyleEx	=	GetWindowLong(hDDLibWindow,GWL_EXSTYLE);
-
-#else //#ifndef TARGET_DC
-	hDDLibMenu		=	0;
-	hDDLibStyle		=	0;
-	hDDLibStyleEx	=	0;
-#endif //#else //#ifndef TARGET_DC
-
-
-#ifdef TARGET_DC
-	// We know which mode we want, and what to try.
-
-	DisplayRect.left   = 0;
-	DisplayRect.top    = 0;
-	DisplayRect.right  = 640;
-	DisplayRect.bottom = 480;
-
-
-	// Find out which modes we are allowed to support.
-	// This si from the command-line
-extern LPSTR lpszGlobalArgs;
-
-
-
-
-	// Er.. just do some non-display-related regional checking here as well.
-	BYTE bCountry = FirmwareGetCountryCode();
-
-	
-	if ( NULL != strstr ( lpszGlobalArgs, "EUROPE_ONLY" ) )
-	{
-		// This is a European build, and should only work there.
-		if ( bCountry != COUNTRY_EUROPE )
-		{
-			TRACE ( "EUROPE_ONLY - rebooting\n" );
-			ASSERT ( FALSE );
-			// Reset to Boot ROM.
-			ResetToFirmware();
-		}
-	}
-	if ( NULL != strstr ( lpszGlobalArgs, "AMERICA_ONLY" ) )
-	{
-		// This is an American build, and should only work there.
-		if ( bCountry != COUNTRY_AMERICA )
-		{
-			TRACE ( "AMERICA_ONLY - rebooting\n" );
-			ASSERT ( FALSE );
-			// Reset to Boot ROM.
-			ResetToFirmware();
-		}
-	}
-
-
-
-
-	BYTE bFormat = GetVideoOutputFormat();
-	switch ( bFormat )
-	{
-	case VIDFMT_NTSC_RGB:
-	case VIDFMT_NTSC:
-		// NTSC 60Hz.
-
-#if 0
-		if ( NULL != strstr ( lpszGlobalArgs, "NO_NTSC" ) )
-		{
-			TRACE ( "NO_NTSC set, and this is an NTSC mode - rebooting\n" );
-			ASSERT ( FALSE );
-			// Reset to Boot ROM.
-			ResetToFirmware();
-		}
-#endif
-
-
-		result	=	lp_DD4->SetDisplayMode ( 640, 480, 16, 30, 0 );
-		if(SUCCEEDED(result))
-		{
-			eDisplayType = DT_NTSC;
-			TurnValidFullscreenOn();
-			return result;
-		}
-		break;
-
-	case VIDFMT_PAL_RGB:
-	case VIDFMT_PAL:
-	case VIDFMT_PAL_M_RGB:
-	case VIDFMT_PAL_M:
-	case VIDFMT_PAL_N_RGB:
-	case VIDFMT_PAL_N:
-		// PAL 50Hz.
-		// Try a stretched one.
-
-#if 0
-		if ( NULL != strstr ( lpszGlobalArgs, "NO_PAL" ) )
-		{
-			TRACE ( "NO_PAL set, and this is a PAL mode - rebooting\n" );
-			ASSERT ( FALSE );
-			// Reset to Boot ROM.
-			ResetToFirmware();
-		}
-#endif
-
-		result	=	lp_DD4->SetDisplayMode ( 640, 480, 16, 25, DDSDM_PALHEIGHTRATIO_1_100 );
-		if(SUCCEEDED(result))
-		{
-			eDisplayType = DT_PAL;
-			TurnValidFullscreenOn();
-			return result;
-		}
-
-		// Wacky. Try normal then.
-		result	=	lp_DD4->SetDisplayMode ( 640, 480, 16, 25, 0 );
-		if(SUCCEEDED(result))
-		{
-			eDisplayType = DT_PAL;
-			TurnValidFullscreenOn();
-			return result;
-		}
-		break;
-
-	case VIDFMT_VGA:
-		// VGA 60Hz.
-
-#if 0
-		if ( NULL != strstr ( lpszGlobalArgs, "NO_VGA" ) )
-		{
-			TRACE ( "NO_VGA set, and this is a VGA mode - rebooting\n" );
-			ASSERT ( FALSE );
-			// Reset to Boot ROM.
-			ResetToFirmware();
-		}
-#endif
-
-
-		result	=	lp_DD4->SetDisplayMode ( 640, 480, 16, 60, 0 );
-		if(SUCCEEDED(result))
-		{
-#ifdef DEBUG
-			// For testing US settings.
-			eDisplayType = DT_NTSC;
-#else
-			eDisplayType = DT_VGA;
-#endif
-			TurnValidFullscreenOn();
-			return result;
-		}
-		break;
-
-	default:
-		ASSERT ( FALSE );
-		break;
-	}
-
-
-	ASSERT ( FALSE );
-
-#if 0
-#if 0
-	// Bloody thing doesn't work - corrupts my textures and puts fuzz on the screen.
-
-	// Try stretched PAL 50Hz.interlaced
-    result	=	lp_DD4->SetDisplayMode ( 640, 480, 16, 25, DDSDM_PALHEIGHTRATIO_1_066 );
-    if(SUCCEEDED(result))
-	{
-		TurnValidFullscreenOn();
-		return result;
-	}
-#endif
-
-	// NTSC 60Hz interlaced
-    result	=	lp_DD4->SetDisplayMode ( 640, 480, 16, 30, 0 );
-    if(SUCCEEDED(result))
-	{
-		TurnValidFullscreenOn();
-		return result;
-	}
-
-	// Non-stretched PAL 50Hz interlaced
-    result	=	lp_DD4->SetDisplayMode ( 640, 480, 16, 25, 0 );
-    if(SUCCEEDED(result))
-	{
-		TurnValidFullscreenOn();
-		return result;
-	}
-
-	// VGA 60Hz
-    result	=	lp_DD4->SetDisplayMode ( 640, 480, 16, 60, 0 );
-    if(SUCCEEDED(result))
-	{
-		TurnValidFullscreenOn();
-		return result;
-	}
-#endif
-
-	ASSERT ( FALSE );
-
-#else
-
 
 	// Calculate Mode info
 	CurrMode->GetMode(&w,&h,&bpp,&refresh);
@@ -2720,12 +1012,7 @@ extern LPSTR lpszGlobalArgs;
 	// Failure
 	// Output error.
 	return	result;
-
-#endif
-
 }
-
-//---------------------------------------------------------------
 
 HRESULT	Display::FiniFullscreenMode(void)
 {
@@ -2738,8 +1025,6 @@ HRESULT	Display::FiniFullscreenMode(void)
 	// Success
 	return DD_OK;
 }
-
-//---------------------------------------------------------------
 
 //
 // Given the bitmask for a colour in a pixel format, it calculates the mask and
@@ -2812,12 +1097,6 @@ void calculate_mask_and_shift(
 	}
 }
 
-
-
-
-
-//---------------------------------------------------------------
-
 HRESULT	Display::InitFront(void)
 {
 	DDSURFACEDESC2	dd_sd;
@@ -2839,9 +1118,7 @@ HRESULT	Display::InitFront(void)
 	// Setup Surfaces caps for a front buffer and back buffer
 	InitStruct(dd_sd);
 
-#ifndef TARGET_DC
 	if(IsFullScreen() && CurrDevice->IsHardware())
-#endif
 	{
 		//
 		// Fullscreen harware.
@@ -2851,7 +1128,6 @@ HRESULT	Display::InitFront(void)
 		dd_sd.ddsCaps.dwCaps	=	DDSCAPS_COMPLEX|DDSCAPS_FLIP|DDSCAPS_PRIMARYSURFACE|DDSCAPS_3DDEVICE;
 		dd_sd.dwBackBufferCount	=	1;			
 	}
-#ifndef TARGET_DC
 	else
 	{
 		//
@@ -2861,7 +1137,6 @@ HRESULT	Display::InitFront(void)
 		dd_sd.dwFlags			=	DDSD_CAPS;
 		dd_sd.ddsCaps.dwCaps	=	DDSCAPS_PRIMARYSURFACE;
 	}
-#endif
 
 	// Create Primary surface
 	result	=	lp_DD4->CreateSurface(&dd_sd,&lp_DD_FrontSurface,NULL);
@@ -2872,14 +1147,11 @@ HRESULT	Display::InitFront(void)
 		return	result;
 	}
 
-#ifndef TARGET_DC
 	// Create and attach palette, if necessary.
 	result	=	InitPalette();
 	if(FAILED(result))
 		return	result;
-#endif
 
-#ifndef TARGET_DC
 	if (!the_display.IsFullScreen())
 	{
 		// Create and attach clipper, if necessary.
@@ -2887,10 +1159,7 @@ HRESULT	Display::InitFront(void)
 		if(FAILED(result))
 			return	result;
 	}
-#endif
 
-	// No gamma control on DC.
-#ifndef TARGET_DC
 	// create gamma control
 	result = lp_DD_FrontSurface->QueryInterface(IID_IDirectDrawGammaControl, (void**)&lp_DD_GammaControl);
 	if (FAILED(result))
@@ -2907,7 +1176,6 @@ HRESULT	Display::InitFront(void)
 		GetGamma(&black, &white);
 		SetGamma(black, white);
 	}
-#endif
 
 	// Mark as Valid
 	TurnValidFrontOn();
@@ -2942,8 +1210,6 @@ HRESULT	Display::InitFront(void)
 	return DD_OK;
 }
 
-//---------------------------------------------------------------
-
 HRESULT	Display::FiniFront(void)
 {
 	// Mark as Invalid
@@ -2973,8 +1239,6 @@ HRESULT	Display::FiniFront(void)
 	return DD_OK;
 }
 
-//---------------------------------------------------------------
-
 HRESULT	Display::InitPalette(void)
 {
 	SLONG				c0,
@@ -2983,7 +1247,6 @@ HRESULT	Display::InitPalette(void)
     DDSURFACEDESC2		dd_sd;
 	HDC					hdc;
 	HRESULT				result;
-
 
     // Destroy old palette
     FiniPalette();
@@ -3167,8 +1430,6 @@ HRESULT	Display::FiniPalette(void)
 	return	DD_OK;
 }
 
-//---------------------------------------------------------------
-
 HRESULT	Display::InitBack(void)
 {
 	SLONG			mem_type,
@@ -3257,27 +1518,16 @@ HRESULT	Display::InitBack(void)
 			DebugText("InitBack: unable to load Z formats\n");
 		}
 
-#ifdef TARGET_DC
-		// No real Z buffer - don't bother
-#else
 		// Can we create a Z buffer?
 		if(IsCreateZBuffer() && device_desc && device_desc->dwDeviceZBufferBitDepth)
 		{
 			// Create the z-buffer.
 			InitStruct(dd_sd);
-#if 0
-			dd_sd.dwFlags			=	DDSD_CAPS|DDSD_WIDTH|DDSD_HEIGHT|DDSD_ZBUFFERBITDEPTH;
-			dd_sd.ddsCaps.dwCaps	=	DDSCAPS_ZBUFFER | mem_type;
-			dd_sd.dwWidth			=	w;
-			dd_sd.dwHeight			=	h;
-			dd_sd.dwZBufferBitDepth	=	FlagsToBitDepth(device_desc->dwDeviceZBufferBitDepth);
-#else
 			dd_sd.dwFlags			=	DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT | DDSD_PIXELFORMAT;
 			dd_sd.ddsCaps.dwCaps	=	DDSCAPS_ZBUFFER | mem_type;
 			dd_sd.dwWidth			=	w;
 			dd_sd.dwHeight			=	h;
 			memcpy(&dd_sd.ddpfPixelFormat, CurrDevice->GetZFormat(), sizeof(DDPIXELFORMAT));
-#endif
 			result	=	lp_DD4->CreateSurface(&dd_sd,&lp_DD_ZBuffer,NULL);
 			if(FAILED(result))
 			{
@@ -3306,7 +1556,6 @@ HRESULT	Display::InitBack(void)
 				}
 			}
 		}
-#endif
 
 		//	Create the D3D device interface
 		result	=	lp_D3D->CreateDevice(CurrDevice->guid,lp_DD_BackSurface,&lp_D3D_Device,NULL);
@@ -3336,11 +1585,8 @@ HRESULT	Display::InitBack(void)
 
 		// check the device caps
 		CurrDevice->CheckCaps(lp_D3D_Device);
-
-
 	}
 	
-#ifndef TARGET_DC
 	if(IsUseWork())
 	{
 		// Create a work screen for user access.
@@ -3379,222 +1625,19 @@ HRESULT	Display::InitBack(void)
 		}
 		
 	}
-#endif
 
 	// Mark as valid
 	TurnValidBackOn();
-
-
-#ifdef TARGET_DC
-	InitBackCache();
-#endif
 	
 	// Success
 	return DD_OK;
 }
 
-//---------------------------------------------------------------
-
-#ifdef TARGET_DC
-
-static bool bBackCacheInit = FALSE;
-
-// Creates the background texture caches, which are only used in the frontend.
-HRESULT	Display::InitBackCache(void)
-{
-	if ( bBackCacheInit )
-	{
-		// Already done.
-		return DD_OK;
-	}
-
-	// Reset the cache.
-	CompressedBackground m_lpLastBackground = NULL;
-
-
-	ASSERT ( lpBackgroundCache == NULL );
-	ASSERT ( the_display.lp_DD_Background_use_instead_texture == NULL );
-	DDSURFACEDESC2 ddsd;
-	DDSURFACEDESC2 back;
-	HRESULT result;
-	InitStruct(back);
-	InitStruct(ddsd);
-
-	lp_DD_BackSurface->GetSurfaceDesc(&back);
-
-	ddsd.dwFlags         = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT;
-	ddsd.dwWidth = 1;
-	while ( ddsd.dwWidth < back.dwWidth )
-	{
-		ddsd.dwWidth <<= 1;
-	}
-	ddsd.dwHeight = 1;
-	while ( ddsd.dwHeight < back.dwHeight )
-	{
-		ddsd.dwHeight <<= 1;
-	}
-	ddsd.ddpfPixelFormat = back.ddpfPixelFormat;
-	ddsd.ddsCaps.dwCaps	 = DDSCAPS_TEXTURE | DDSCAPS_VIDEOMEMORY;
-	ddsd.ddsCaps.dwCaps2 = 0;
-
-
-#ifdef DEBUG
-	DDSCAPS2 ddsc;
-	ddsc.dwCaps = DDSCAPS_TEXTURE;
-	ddsc.dwCaps2 = 0;
-	ddsc.dwCaps3 = 0;
-	ddsc.dwCaps4 = 0;
-	DWORD dwFree, dwTotal;
-	HRESULT hres = the_display.lp_DD4->GetAvailableVidMem ( &ddsc, &dwTotal, &dwFree );
-	TRACE ( "Memory before TEXTURE_free_unneeded: %ikb\n", dwFree / 1024 );
-#endif
-
-	result = lp_DD4->CreateSurface(&ddsd, &lpBackgroundCache, NULL);
-	if (FAILED(result))
-	{
-		ASSERT ( FALSE );
-		lpBackgroundCache = NULL;
-		return DDERR_OUTOFMEMORY;
-	}
-	//VERIFY(SUCCEEDED(lpBackgroundCache->QueryInterface(IID_IDirect3DTexture2,(LPVOID *)&lpBackgroundCacheTexture)));
-	VERIFY(SUCCEEDED(lpBackgroundCache->QueryInterface(IID_IDirect3DTexture2,(LPVOID *)&the_display.lp_DD_Background_use_instead_texture)));
-
-
-	// ...and another one.
-	ASSERT ( lpBackgroundCache2 == NULL );
-	ASSERT ( the_display.lp_DD_Background_use_instead_texture2 == NULL );
-	InitStruct(back);
-	InitStruct(ddsd);
-
-	lp_DD_BackSurface->GetSurfaceDesc(&back);
-
-	ddsd.dwFlags         = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT;
-	ddsd.dwWidth = 1;
-	while ( ddsd.dwWidth < back.dwWidth )
-	{
-		ddsd.dwWidth <<= 1;
-	}
-	ddsd.dwHeight = 1;
-	while ( ddsd.dwHeight < back.dwHeight )
-	{
-		ddsd.dwHeight <<= 1;
-	}
-	ddsd.ddpfPixelFormat = back.ddpfPixelFormat;
-	ddsd.ddsCaps.dwCaps	 = DDSCAPS_TEXTURE | DDSCAPS_VIDEOMEMORY;
-	ddsd.ddsCaps.dwCaps2 = 0;
-
-
-#ifdef DEBUG
-	ddsc.dwCaps = DDSCAPS_TEXTURE;
-	ddsc.dwCaps2 = 0;
-	ddsc.dwCaps3 = 0;
-	ddsc.dwCaps4 = 0;
-	dwFree, dwTotal;
-	hres = the_display.lp_DD4->GetAvailableVidMem ( &ddsc, &dwTotal, &dwFree );
-	ASSERT ( SUCCEEDED ( hres ) );
-	TRACE ( "After freeing: %ikb\n", dwFree / 1024 );
-#endif
-
-
-	result = lp_DD4->CreateSurface(&ddsd, &lpBackgroundCache2, NULL);
-#ifdef DEBUG
-	if ( result == DDERR_OUTOFMEMORY )
-	{
-		HRESULT hres = lp_DD4->EnumSurfaces ( DDENUMSURFACES_DOESEXIST | DDENUMSURFACES_ALL, NULL, NULL, &EnumSurfacesCallbackFunc );
-
-		ASSERT ( FALSE );
-	}
-#endif
-	if (FAILED(result))
-	{
-		ASSERT ( FALSE );
-		lpBackgroundCache2 = NULL;
-		return DDERR_OUTOFMEMORY;
-	}
-	//VERIFY(SUCCEEDED(lpBackgroundCache->QueryInterface(IID_IDirect3DTexture2,(LPVOID *)&lpBackgroundCacheTexture)));
-	VERIFY(SUCCEEDED(lpBackgroundCache2->QueryInterface(IID_IDirect3DTexture2,(LPVOID *)&the_display.lp_DD_Background_use_instead_texture2)));
-
-
-#ifdef DEBUG
-	ddsc.dwCaps = DDSCAPS_TEXTURE;
-	ddsc.dwCaps2 = 0;
-	ddsc.dwCaps3 = 0;
-	ddsc.dwCaps4 = 0;
-	dwFree, dwTotal;
-	hres = the_display.lp_DD4->GetAvailableVidMem ( &ddsc, &dwTotal, &dwFree );
-	ASSERT ( SUCCEEDED ( hres ) );
-	TRACE ( "After freeing: %ikb\n", dwFree / 1024 );
-#endif
-
-
-	bBackCacheInit = TRUE;
-
-	return ( DD_OK );
-}
-
-
-// Bins the background textures, which are only used in the frontend.
-HRESULT	Display::FiniBackCache(void)
-{
-	if ( !bBackCacheInit )
-	{
-		// Already done.
-		return DD_OK;
-	}
-
-	// Remember to release the textures.
-	if ( the_display.lp_D3D_Device != NULL )
-	{
-		the_display.lp_D3D_Device->SetTexture ( 0, NULL );
-		the_display.lp_D3D_Device->SetTexture ( 1, NULL );
-		the_display.lp_D3D_Device->SetTexture ( 2, NULL );
-		the_display.lp_D3D_Device->SetTexture ( 3, NULL );
-	}
-
-	if ( the_display.lp_DD_Background_use_instead_texture != NULL )
-	{
-		int res = the_display.lp_DD_Background_use_instead_texture->Release();
-		ASSERT ( res == 1 );
-		the_display.lp_DD_Background_use_instead_texture = NULL;
-	}
-	if ( lpBackgroundCache != NULL )
-	{
-		int res = lpBackgroundCache->Release();
-		ASSERT ( res == 0 );
-		lpBackgroundCache = NULL;
-	}
-	if ( the_display.lp_DD_Background_use_instead_texture2 != NULL )
-	{
-		int res = the_display.lp_DD_Background_use_instead_texture2->Release();
-		ASSERT ( res == 1 );
-		the_display.lp_DD_Background_use_instead_texture2 = NULL;
-	}
-	if ( lpBackgroundCache2 != NULL )
-	{
-		int res = lpBackgroundCache2->Release();
-		ASSERT ( res == 0 );
-		lpBackgroundCache2 = NULL;
-	}
-
-	bBackCacheInit = FALSE;
-
-	return ( DD_OK );
-}
-#endif
-
-
-
 HRESULT	Display::FiniBack(void)
 {
-#ifdef TARGET_DC
-	// Clean up the background texture.
-	FiniBackCache();
-#endif
-
 	// Mark as invalid
 	TurnValidBackOff();
 
-#ifndef TARGET_DC
 	// Clean up the work screen stuff.
 	if(IsUseWork())
 	{
@@ -3605,7 +1648,6 @@ HRESULT	Display::FiniBack(void)
 			lp_DD_WorkSurface	=	NULL;
 		}
 	}
-#endif
 
 	// Clean up the D3D stuff.
 	if(IsUse3D())
@@ -3644,9 +1686,6 @@ HRESULT	Display::FiniBack(void)
 	return DD_OK;
 }
 
-
-//---------------------------------------------------------------
-
 HRESULT	Display::InitClipper(void)
 {
 	HRESULT			result;
@@ -3659,8 +1698,6 @@ HRESULT	Display::InitClipper(void)
 		DebugText("InitClipper: invalid initialisation\n");
 		return	result;
 	}
-
-#ifndef TARGET_DC
 
 	result	=	lp_DD4->CreateClipper(0,&lp_DD_Clipper,NULL);
 	if(FAILED(result))
@@ -3690,9 +1727,6 @@ HRESULT	Display::InitClipper(void)
 		DebugText("\n");
 		return	result;
 	}
-#else
-	lp_DD_Clipper = 0;
-#endif
 
 	// Mark as Valid
 	TurnValidClipperOn();
@@ -3708,14 +1742,12 @@ HRESULT	Display::FiniClipper(void)
 	// Mark as Invalid
 	TurnValidClipperOff();
 
-#ifndef TARGET_DC
 	// Release Primary Surface Object
 	if(lp_DD_Clipper)
 	{
 		lp_DD_Clipper->Release();
 		lp_DD_Clipper	=	NULL;
 	}
-#endif
 
 	// Success
 	return DD_OK;
@@ -3848,11 +1880,6 @@ HRESULT	Display::InitViewport(void)
 	return DD_OK;
 }
 
-
-//---------------------------------------------------------------
-
-#ifndef TARGET_DC
-
 void Display::SetUserColour(UBYTE red, UBYTE green, UBYTE blue)
 {
 	D3DMATERIAL		material;
@@ -3891,11 +1918,6 @@ void Display::SetUserColour(UBYTE red, UBYTE green, UBYTE blue)
 
 	ASSERT(!FAILED(result));
 }
-
-#endif //#ifndef TARGET_DC
-
-
-//---------------------------------------------------------------
 
 HRESULT	Display::FiniViewport(void)
 {
@@ -3938,8 +1960,6 @@ HRESULT	Display::FiniViewport(void)
 	// Success
 	return DD_OK;
 }
-
-//---------------------------------------------------------------
 
 HRESULT	Display::UpdateViewport(void)
 {
@@ -4012,8 +2032,6 @@ HRESULT	Display::UpdateViewport(void)
 	// Success
 	return DD_OK;
 }
-
-//---------------------------------------------------------------
 
 HRESULT	Display::ChangeDriver	(
 									GUID			*DD_guid,
@@ -4326,8 +2344,6 @@ HRESULT	Display::ChangeMode	(
 			// Output error.
 			return	result;
 		}
-
-
 	}
 
 	old_driver	=	CurrDriver;
@@ -4413,7 +2429,6 @@ HRESULT	Display::ChangeMode	(
 		DebugText("ChangeMode: Error in InitBack\n");
 
 		FiniFront();
-	//  FiniFullscreenMode ();		// Unnecessary mode switch
 
 		// Try to restore old mode
 		CurrMode	=	old_mode;
@@ -4442,12 +2457,9 @@ HRESULT	Display::ChangeMode	(
     return DD_OK;
 }
 
-//---------------------------------------------------------------
-
 HRESULT	Display::Restore(void)
 {
 	HRESULT		result;
-
 
 	// Check Initialization
 	if(!IsValid())
@@ -4522,15 +2534,10 @@ HRESULT	Display::AddLoadedTexture(D3DTexture *the_texture)
 	return	DD_OK;
 }
 
-//---------------------------------------------------------------
-
 void Display::RemoveAllLoadedTextures(void)
 {
 	TextureList = NULL;
 }
-
-
-//---------------------------------------------------------------
 
 HRESULT	Display::FreeLoadedTextures(void)
 {
@@ -4557,8 +2564,6 @@ HRESULT	Display::FreeLoadedTextures(void)
 	return	DD_OK;
 }
 
-//---------------------------------------------------------------
-
 static char	clumpfile[MAX_PATH] = "";
 static size_t clumpsize = 0;
 
@@ -4572,14 +2577,10 @@ HRESULT	Display::ReloadTextures(void)
 {
 	D3DTexture		*current_texture;
 
-#ifdef TARGET_DC
-	ASSERT ( clumpfile[0] == '\0' );
-#else
 	if (clumpfile[0])
 	{
 		OpenTGAClump(clumpfile, clumpsize, true);
 	}
-#endif
 
 	current_texture	=	TextureList;
 	while(current_texture)
@@ -4589,46 +2590,18 @@ HRESULT	Display::ReloadTextures(void)
 		current_texture = next_texture;
 	}
 
-#ifdef TARGET_DC
-	ASSERT ( clumpfile[0] == '\0' );
-#else
 	if (clumpfile[0])
 	{
 		CloseTGAClump();
 	}
-#endif
 
 	return	DD_OK;
 }
 
-//---------------------------------------------------------------
-
 HRESULT	Display::toGDI(void)
 {
 	HRESULT		result;
-
-/*
-	// Restore system palette.
-	if(lpddpPalette) 
-	{
-		// Save the current palette
-		hResult = lpddpPalette->GetEntries (0, 0, cPalette, lppeCurr);
-		if (FAILED (hResult))
-		{
-			REPORTERR (hResult);
-			return hResult;
-		}
-
-		// Restore the system palette into our device
-		hResult = lpddpPalette->SetEntries (0, 0, cPalette, lppeSystem);
-		if (FAILED (hResult))
-		{
-			REPORTERR (hResult);
-			return hResult;
-		}
-	}
-*/
-
+	
 	// Flip to GDI Surface
 	if(lp_DD4) 
 	{
@@ -4640,43 +2613,25 @@ HRESULT	Display::toGDI(void)
 		}
 	}
 
-#ifndef TARGET_DC
 	// Force window to redraw itself (on GDI surface).
 	if((hDDLibWindow) && (IsWindow(hDDLibWindow)))
 	{
 		DrawMenuBar(hDDLibWindow);
 		RedrawWindow(hDDLibWindow, NULL, NULL, RDW_FRAME);
 	}
-#endif
 
 	// Success
 	return DD_OK;
 }
-
-//---------------------------------------------------------------
 
 HRESULT	Display::fromGDI(void)
 {
-//	HRESULT		result;
-
-/*
-	// Restore current palette
-	if (lpddpPalette)
-	{
-		hResult = lpddpPalette->SetEntries (0, 0, cPalette, lppeCurr);
-		if (FAILED (hResult)) 
-			return hResult;
-	}
-*/
 	// Success
 	return DD_OK;
 }
 
-//---------------------------------------------------------------
-
 void	Display::MenuOn(void)
 {
-#ifndef TARGET_DC
 	if(IsFullScreen())
 	{
 		// Set the window style
@@ -4684,33 +2639,23 @@ void	Display::MenuOn(void)
 		SetWindowLong(hDDLibWindow,GWL_STYLE,hDDLibStyle);
 		SetWindowLong(hDDLibWindow,GWL_EXSTYLE,hDDLibStyleEx);
 	}
-#endif
 }
-
-//---------------------------------------------------------------
 
 void	Display::MenuOff(void)
 {
-#ifndef TARGET_DC
 	if(IsFullScreen())
 	{
 		SetWindowLong(hDDLibWindow,GWL_STYLE,0);
 		SetWindowLong(hDDLibWindow,GWL_EXSTYLE,0);
 		SetMenu(hDDLibWindow,NULL);
 	}
-#endif
 }
 
-//---------------------------------------------------------------
-
-#ifndef TARGET_DC
 HRESULT	Display::ShowWorkScreen(void)
 {
 	return	lp_DD_FrontSurface->Blt(&DisplayRect,lp_DD_WorkSurface,NULL,DDBLT_WAIT,NULL);
 }
-#endif
 
-//---------------------------------------------------------------
 void *Display::screen_lock(void)
 {
 	if (DisplayFlags & DISPLAY_LOCKED)
@@ -4761,8 +2706,6 @@ void  Display::screen_unlock(void)
 	screen        =  NULL;
 	DisplayFlags &= ~DISPLAY_LOCKED;
 }
-
-
 
 void Display::PlotPixel(SLONG x, SLONG y, UBYTE red, UBYTE green, UBYTE blue)
 {
@@ -4875,8 +2818,6 @@ void Display::GetPixel(SLONG x, SLONG y, UBYTE *red, UBYTE *green, UBYTE *blue)
 	}
 }
 
-
-
 void Display::blit_back_buffer()
 {
 	POINT clientpos;
@@ -4914,7 +2855,6 @@ void Display::blit_back_buffer()
 		dd_error(res);
 	}
 }
-
 
 // create a background surface from a 640x480x24 image
 
@@ -4974,8 +2914,6 @@ void CopyBackground16(UBYTE* image_data, IDirectDrawSurface4* surface)
 	surface->Unlock(NULL);
 }
 
-
-
 void CopyBackground32(UBYTE* image_data, IDirectDrawSurface4* surface)
 {
 	DDSURFACEDESC2	mine;
@@ -5032,215 +2970,6 @@ void CopyBackground32(UBYTE* image_data, IDirectDrawSurface4* surface)
 	surface->Unlock(NULL);
 }
 
-
-
-
-#ifdef TARGET_DC
-// This uses my funky pixel format.
-// This only works to a 640x480,565 format image.
-// Unpacks image_data into surface
-#define UNPACKING_DEBUG_INFO 0
-void UnpackBackground ( UBYTE* image_data, IDirectDrawSurface4* surface )
-{
-	DDSURFACEDESC2	mine;
-	HRESULT			res;
-
-	InitStruct(mine);
-	mine.dwFlags = DDSD_PITCH;
-	res = surface->Lock(NULL, &mine, DDLOCK_WAIT, NULL);
-	if (FAILED(res))	return;
-
-	SLONG  pitch = mine.lPitch >> 1;
-	WORD *mem   = (WORD *)mine.lpSurface;
-	SLONG  width;
-	SLONG  height;
-
-	// The two line buffers.
-	WORD	wLine[2][640];
-	int iCurLineBuffer = 0;
-	int iPrevLineBuffer = 1;
-
-	// Fill both lines with zeroes.
-
-	for ( int iY = 0; iY < 480; iY++ )
-	{
-		// Fill one line buffer.
-		for ( int iX = 0; iX < 640; iX++ )
-		{
-			UBYTE bData = *image_data++;
-
-#if UNPACKING_DEBUG_INFO
-			if ( bData & 0x80 )
-			{
-				image_data++;
-
-				// White = raw data.
-				wLine[iCurLineBuffer][iX] = 0xffff;
-			}
-			else
-			{
-				if ( bData & 0x40 )
-				{
-					// Red = horizontal lerp.
-					wLine[iCurLineBuffer][iX] = 0xf800;
-				}
-				else
-				{
-					// Green = vertical lerp.
-					wLine[iCurLineBuffer][iX] = 0x07e0;
-				}
-			}
-
-#else //#if UNPACKING_DEBUG_INFO
-			if ( bData & 0x80 )
-			{
-				// Top bit set - this and the next byte are raw 555 pixel data.
-				WORD wPixel = ( bData << 8 ) | ( *image_data++ );
-				// And convert to 565, not 555.
-				wLine[iCurLineBuffer][iX] = ( ( wPixel & 0x7fe0 ) << 1 ) | ( wPixel &0x1f );
-			}
-			else
-			{
-				// Top bit clear.
-				// Format is now:
-				// 0 d rr gg bb
-				WORD wPixel;
-				if ( bData & 0x40 )
-				{
-					// d bit is set - use pixel above.
-					if ( iY > 0 )
-					{
-						wPixel = wLine[iPrevLineBuffer][iX];
-					}
-					else
-					{
-						// This is valid.
-						wPixel = 0;
-					}
-				}
-				else
-				{
-					// d bit is clear - use pixel to left.
-					if ( iX > 0 )
-					{
-						wPixel = wLine[iCurLineBuffer][iX-1];
-					}
-					else
-					{
-						// This is valid.
-						wPixel = 0;
-					}
-				}
-				// Now modify by the two-bit-fields for each colour.
-
-
-				WORD wMask;
-				WORD wBottomBit;
-				WORD wComponent;
-
-				// Red.
-				wMask = 0xf800;
-				wBottomBit = 0x0800;
-				switch ( ( bData & 0x30 ) >> 4 )
-				{
-				case 0:
-					// No change.
-					break;
-				case 1:
-					// Plus 1 (with wraparound)
-					wComponent = ( wPixel & wMask ) + wBottomBit;
-					wPixel = ( wPixel & ~wMask ) | ( wComponent & wMask );
-					break;
-				case 2:
-					// Plus 2 (with wraparound)
-					wComponent = ( wPixel & wMask ) + wBottomBit + wBottomBit;
-					wPixel = ( wPixel & ~wMask ) | ( wComponent & wMask );
-					break;
-				case 3:
-					// Minus 2 (with wraparound)
-					wComponent = ( wPixel & wMask ) - wBottomBit - wBottomBit;
-					wPixel = ( wPixel & ~wMask ) | ( wComponent & wMask );
-					break;
-				}
-
-				// Green.
-				wMask = 0x07e0;
-				wBottomBit = 0x0020;
-				switch ( ( bData & 0x0c ) >> 2 )
-				{
-				case 0:
-					// No change.
-					break;
-				case 1:
-					// Plus 1 (with wraparound)
-					wComponent = ( wPixel & wMask ) + wBottomBit;
-					wPixel = ( wPixel & ~wMask ) | ( wComponent & wMask );
-					break;
-				case 2:
-					// Plus 2 (with wraparound)
-					wComponent = ( wPixel & wMask ) + wBottomBit + wBottomBit;
-					wPixel = ( wPixel & ~wMask ) | ( wComponent & wMask );
-					break;
-				case 3:
-					// Minus 2 (with wraparound)
-					wComponent = ( wPixel & wMask ) - wBottomBit - wBottomBit;
-					wPixel = ( wPixel & ~wMask ) | ( wComponent & wMask );
-					break;
-				}
-
-				// Blue.
-				wMask = 0x001f;
-				wBottomBit = 0x0001;
-				switch ( ( bData & 0x03 ) >> 0 )
-				{
-				case 0:
-					// No change.
-					break;
-				case 1:
-					// Plus 1 (with wraparound)
-					wComponent = ( wPixel & wMask ) + wBottomBit;
-					wPixel = ( wPixel & ~wMask ) | ( wComponent & wMask );
-					break;
-				case 2:
-					// Plus 2 (with wraparound)
-					wComponent = ( wPixel & wMask ) + wBottomBit + wBottomBit;
-					wPixel = ( wPixel & ~wMask ) | ( wComponent & wMask );
-					break;
-				case 3:
-					// Minus 2 (with wraparound)
-					wComponent = ( wPixel & wMask ) - wBottomBit - wBottomBit;
-					wPixel = ( wPixel & ~wMask ) | ( wComponent & wMask );
-					break;
-				}
-
-				wLine[iCurLineBuffer][iX] = wPixel;
-
-			}
-#endif //#else //#if UNPACKING_DEBUG_INFO
-
-
-		}
-		// Dump that line into the surface.
-#if 0
-		memcpy ( mem, wLine[iCurLineBuffer], 640 * 2 );
-#else
-		for ( iX = 0; iX < 640; iX++ )
-		{
-			mem[iX] = wLine[iCurLineBuffer][iX];
-		}
-#endif
-		mem += pitch;
-
-		iPrevLineBuffer = iCurLineBuffer;
-		iCurLineBuffer = 1 - iCurLineBuffer;
-	}
-
-	surface->Unlock(NULL);
-}
-
-#endif //#ifdef TARGET_DC
-
-
 // This uses my funky pixel format.
 // This only works to a 640x480,565 format image.
 // Packs surface (640x480,565 pixels - raw data) into image_data.
@@ -5259,7 +2988,6 @@ int PackBackground ( UBYTE* image_data, WORD *surface )
 	{
 		for ( int iX = 0; iX < 640; iX++ )
 		{
-
 			WORD wPixel = surface[iX + 640 * iY];
 
 			WORD wNeighbourPixel[2];
@@ -5385,7 +3113,6 @@ int PackBackground ( UBYTE* image_data, WORD *surface )
 
 				// OK, that worked - stop looking.
 				break;
-
 			}
 
 			if ( iNeighbour == 2 )
@@ -5513,19 +3240,13 @@ int PackBackground ( UBYTE* image_data, WORD *surface )
 
 				wLine[iCurLineBuffer][iX] = wPixel;
 			}
-
-
 		}
 		iPrevLineBuffer = iCurLineBuffer;
 		iCurLineBuffer = 1 - iCurLineBuffer;
 	}
 
 	return ( iTotalSize );
-
 }
-
-
-
 
 void CopyBackground(UBYTE* image_data, IDirectDrawSurface4* surface)
 {
@@ -5533,12 +3254,9 @@ void CopyBackground(UBYTE* image_data, IDirectDrawSurface4* surface)
 	else										CopyBackground32(image_data, surface);
 }
 
-
-
-
 void PANEL_ResetDepthBodge ( void );
 
-HRESULT			Display::Flip(LPDIRECTDRAWSURFACE4 alt,SLONG flags)
+HRESULT Display::Flip(LPDIRECTDRAWSURFACE4 alt,SLONG flags)
 {
 	extern void PreFlipTT();
 	PreFlipTT();
@@ -5551,59 +3269,10 @@ HRESULT			Display::Flip(LPDIRECTDRAWSURFACE4 alt,SLONG flags)
 	
 	if(IsFullScreen() && CurrDevice->IsHardware())
 	{
-#ifdef TARGET_DC
-
-
-#if 1
-#ifdef TARGET_DC
-		// Reset the viewport so that text, etc gets drawn even when in letterbox mode.
-
-		{
-			D3DVIEWPORT2 viewData;
-			memset(&viewData, 0, sizeof(D3DVIEWPORT2));
-			viewData.dwSize = sizeof(D3DVIEWPORT2);
-
-			// A horrible hack for letterbox mode.
-			viewData.dwWidth  = 640;
-			viewData.dwHeight = 480;
-			viewData.dwX = 0;
-			viewData.dwY = 0;
-			viewData.dvClipX  = -1.0f;
-			viewData.dvClipY  =  1.0f;
-			viewData.dvClipWidth  = 2.0f;
-			viewData.dvClipHeight = 2.0f;
-			viewData.dvMinZ = 0.0f;
-			viewData.dvMaxZ = 1.0f;
-			HRESULT hres = (the_display.lp_D3D_Viewport)->SetViewport2 ( &viewData );
-		}
-
-#endif
-#endif
-
-
-		// Draw the frame.
-		POLY_frame_draw(TRUE, TRUE);
-
-		// Flip.
-		HRESULT hres = lp_DD_FrontSurface->Flip(alt,flags);
-
-		// And start the next one.
-		POLY_frame_init(FALSE, FALSE);
-
-		return hres;
-
-		//return DD_OK;
-#else
 		return	lp_DD_FrontSurface->Flip(alt,flags);
-#endif
 	}
 	else
 	{
-#ifdef TARGET_DC
-		// Bad dog!
-		ASSERT ( FALSE );
-#endif
-		// LogText("left - %ld, right - %ld, top - %ld. bottom - %ld\n",DisplayRect.left,DisplayRect.right,DisplayRect.top,DisplayRect.bottom);
 		return	lp_DD_FrontSurface->Blt(&DisplayRect,lp_DD_BackSurface,NULL,DDBLT_WAIT,NULL);
 	}
 }
@@ -5612,8 +3281,6 @@ void Display::use_this_background_surface(LPDIRECTDRAWSURFACE4 this_one)
 {
 	lp_DD_Background_use_instead = this_one;
 }
-
-
 
 void Display::create_background_surface(UBYTE *image_data)
 {
@@ -5676,9 +3343,6 @@ void Display::create_background_surface(UBYTE *image_data)
 	return;
 }
 
-
-
-
 void Display::blit_background_surface(bool b3DInFrame)
 {
 	LPDIRECTDRAWSURFACE4 lpBG = NULL;
@@ -5699,75 +3363,6 @@ void Display::blit_background_surface(bool b3DInFrame)
 
 	HRESULT result;
 
-#ifdef TARGET_DC
-	{
-
-		if ( !b3DInFrame )
-		{
-			// Won't have been done yet.
-			//POLY_frame_init(FALSE,FALSE);
-		}
-
-
-		// Use a poly draw.
-		ASSERT ( lpBackgroundCache != NULL );
-
-		if ( lpBG != m_lpLastBackground )
-		{
-			// Get the texture handle.
-			m_lpLastBackground = lpBG;
-
-
-			static iCount = 0;
-
-			{
-				// Copy the data to the texture cache thingie.
-				RECT rect;
-				rect.top = 0;
-				rect.left = 0;
-				rect.right = 640;
-				rect.bottom = 480;
-				HRESULT hres = lpBackgroundCache->Blt ( &rect, lpBG, &rect, DDBLT_WAIT, NULL );
-				VERIFY(SUCCEEDED(hres));
-			}
-		}
-
-		// ARGH! Got to use a poly draw instead. Useless machine.
-
-		POLY_Point  pp[4];
-		POLY_Point *quad[4] = { &pp[0], &pp[1], &pp[2], &pp[3] };
-
-		pp[0].colour=0xffffffff; pp[0].specular=0;
-		pp[1].colour=0xffffffff; pp[1].specular=0;
-		pp[2].colour=0xffffffff; pp[2].specular=0;
-		pp[3].colour=0xffffffff; pp[3].specular=0;
-
-		pp[0].X=0.0f; pp[0].Y=0.0f; pp[0].Z=0.0001f;
-		pp[0].u=0.0f; pp[0].v=0.0f;
-
-		pp[1].X=0.0f; pp[1].Y=480.0f; pp[1].Z=0.0001f;
-		pp[1].u=0.0f; pp[1].v=480.0f / 512.0f;
-
-		pp[2].X=640.0f; pp[2].Y=0.0f; pp[2].Z=0.0001f;
-		pp[2].u=640.0f / 1024.0f; pp[2].v=0.0f;
-
-		pp[3].X=640.0f; pp[3].Y=480.0f; pp[3].Z=0.0001f;
-		pp[3].u=640.0f / 1024.0f; pp[3].v=480.0f / 512.0f;
-
-		POLY_add_quad ( quad, POLY_PAGE_BACKGROUND_IMAGE, FALSE, TRUE );
-
-
-		if ( !b3DInFrame )
-		{
-			// Draw the stuff now.
-			//POLY_frame_draw(TRUE,TRUE);
-		}
-
-	}
-
-
-
-#else
 	{
 		result = lp_DD_BackSurface->Blt(NULL,lpBG,NULL,DDBLT_WAIT,0);
 
@@ -5776,7 +3371,6 @@ void Display::blit_background_surface(bool b3DInFrame)
 			dd_error(result);
 		}
 	}
-#endif
 }
 
 void Display::destroy_background_surface()
@@ -5786,7 +3380,6 @@ void Display::destroy_background_surface()
 		lp_DD_Background->Release();
 		lp_DD_Background = NULL;
 	}
-
 
 	background_image_mem = NULL;
 }
@@ -5832,7 +3425,6 @@ void Display::GetGamma(int* black, int* white)
 	*white = ENV_get_value_number("WhitePoint", 256, "Gamma");
 }
 
-
 //
 // DIALOG BOX
 //
@@ -5841,8 +3433,6 @@ static bool	         is_primary = false;
 static bool          is_secondary = false;
 static DDDriverInfo *primary_driver;
 static DDDriverInfo *secondary_driver;
-
-
 
 //
 // Returns TRUE if the current Video3DMode support 16 or 32-bit colour.
@@ -5896,11 +3486,6 @@ SLONG CurrentVideo3DModeSupports(void)
 	return ans;
 }
 
-
-
-#ifndef TARGET_DC
-
-
 static void InitDialog(HWND hWnd)
 {
 	// centre window
@@ -5921,7 +3506,6 @@ static void InitDialog(HWND hWnd)
 	if (!lang) lang="text\\lang_english.txt";
 	XLAT_load(lang);
 	XLAT_init();
-	//SetWindowText(hWnd,XLAT_str(X_GRAPHICS));
 	SetDlgItemTextA(hWnd,IDC_GRAPHICS_OPTIONS,XLAT_str(X_GRAPHICS));
 	SetDlgItemTextA(hWnd,IDC_STATIC_3DCARD,XLAT_str(X_3DCARD));
 	SetDlgItemTextA(hWnd,IDC_STATIC_BITDEPTH,XLAT_str(X_NUM_COLOURS));
@@ -6032,9 +3616,6 @@ static void InitDialog(HWND hWnd)
 
 	SendMessage(res, CB_SETCURSEL, VideoRes, 0);
 
-	// set no show
-	//SendMessage(noshow, BM_SETCHECK, BST_UNCHECKED, 0);
-
 	//
 	// Get MFX_MILES.cpp to initialise the sound part of our dialog box.
 	//
@@ -6066,15 +3647,6 @@ static void FinishDialog(HWND hWnd)
 	{
 		VideoRes += 1;
 	}
-
-	/*
-
-	if (SendMessage(noshow, BM_GETCHECK, 0, 0))
-	{
-		ENV_set_value_number("run_video_dialog", 0, "Render");
-	}
-
-	*/
 }
 
 static BOOL CALLBACK dlgproc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -6216,18 +3788,12 @@ static BOOL CALLBACK dlgproc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 	return FALSE;
 }
 
-
-#endif //#ifndef TARGET_DC
-
-
-
 //
 // Returns TRUE if the driver has a harware mode that allowed alpha textures...
 //
 
 SLONG valid_driver(DDDriverInfo *drv)
 {
-#ifndef TARGET_DC
 	D3DDeviceInfo *d3d;
 
 	if (drv == NULL)
@@ -6247,11 +3813,7 @@ SLONG valid_driver(DDDriverInfo *drv)
 	}
 
 	return FALSE;
-#else
-	return TRUE;
-#endif
 }
-
 
 // GraphicsDialog
 //
@@ -6259,16 +3821,10 @@ SLONG valid_driver(DDDriverInfo *drv)
 
 void GraphicsDialog(HINSTANCE hInst, HWND hWnd)
 {
-#ifdef TARGET_DC
-	Video3DMode = -1;
-	VideoTrueColour = false;
-	VideoRes = -1;
-#else
 	// read existing config (if any)
 	Video3DMode = ENV_get_value_number("video_card", -1, "Render");
 	VideoTrueColour = ENV_get_value_number("video_truecolour", 0, "Render") ? true : false;
 	VideoRes = ENV_get_value_number("video_res", -1, "Render");
-#endif
 
 	is_primary       = false;
 	is_secondary     = false;
@@ -6313,16 +3869,6 @@ void GraphicsDialog(HINSTANCE hInst, HWND hWnd)
 		else						Video3DMode = 2;
 	}
 
-#ifndef TARGET_DC
-#ifdef VERSION_DEMO
-	if (Video3DMode == 2)
-	{
-		MessageBox(NULL, "This demo requires a 3D accelerator (the release version works without one)", NULL, MB_ICONEXCLAMATION | MB_OK);
-		exit(1);
-	}
-#endif
-#endif
-
 	// set default res
 	if (VideoRes == -1)
 	{
@@ -6330,49 +3876,21 @@ void GraphicsDialog(HINSTANCE hInst, HWND hWnd)
 		else					VideoRes = 0;
 	}
 
-#ifndef TARGET_DC
-	// run dialog
-//	if (ENV_get_value_number("run_video_dialog", 1, "Render"))
-	{
-		DialogBox(hInst, MAKEINTRESOURCE(IDD_GRAPHICSDLG), hWnd, (DLGPROC)dlgproc);
-	}
-#else
-	// I know what I want, thanks.
-	Video3DMode = 0;	// Primary.
-	VideoTrueColour = FALSE;
-	VideoRes = 2;		// 640x480.
-#endif
+	DialogBox(hInst, MAKEINTRESOURCE(IDD_GRAPHICSDLG), hWnd, (DLGPROC)dlgproc);
 
-#ifndef TARGET_DC
 	// store config
 	ENV_set_value_number("video_card", Video3DMode, "Render");
 	ENV_set_value_number("video_truecolour", VideoTrueColour ? 1 : 0, "Render");
 	ENV_set_value_number("video_res", VideoRes, "Render");
-#endif
 
 	// look for illegal shit
 	char*	err = NULL;
 
-	/*
-
-	if (Video3DMode == 1)
-	{
-		if (VideoTrueColour)		err = "Card does not support 24-bit colour";
-	}
-	else if (Video3DMode == 2)
-	{
-//		if (VideoTrueColour)		err = "Renderer does not support 24-bit colour";
-	}
-
-	*/
-
-#ifndef TARGET_DC
 	if (err)
 	{
 		MessageBox(NULL, err, NULL, MB_ICONEXCLAMATION);
 		exit(1);
 	}
-#endif
 
 	if (Video3DMode == 0)
 	{
@@ -6384,10 +3902,3 @@ void GraphicsDialog(HINSTANCE hInst, HWND hWnd)
 		the_manager.CurrDriver = secondary_driver;
 	}
 }
-
-
-
-
-
-
-

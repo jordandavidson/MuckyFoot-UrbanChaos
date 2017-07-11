@@ -14240,7 +14240,6 @@ void	AENG_screen_shot(void)
 extern	void	tga_dump(void);
 			tga_dump();
 
-			//DumpBackToRaw();
 			the_display.screen_unlock();
 		}
 	}
@@ -14425,20 +14424,6 @@ void AENG_draw_messages()
 
 	if (the_display.screen_lock())
 	{
-/*
-		if (Keys[KB_S])
-		{
-			Keys[KB_S] = 0;
-
-			//
-			// Take a screen shot.
-			//
-
-			DumpBackToRaw();
-		}
-*/
-
-
 		//
 		// Draw the fps.
 		//
