@@ -40,7 +40,6 @@
 #endif
 #endif
 #include	<dinput.h>
-#include	<dplay.h>
 #include	<d3d.h>
 
 #ifdef TARGET_DC
