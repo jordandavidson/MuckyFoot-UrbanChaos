@@ -2275,92 +2275,43 @@ DDDriverInfo	*DDDriverManager::FindDriver(GUID *the_guid, DDDriverInfo **next_be
 	DDDriverInfo *choice1 = NULL;
 	DDDriverInfo *choice2 = NULL;
 
-extern int Video3DMode;
-
-	if (Video3DMode == 1)	// select voodoo first
+	for (i = 0; i < driver_upto; i++)
 	{
-		for (i = 0; i < driver_upto; i++)
+		if (the_guid)
 		{
-			if (the_guid)
+			if (driver[i]->Match(the_guid))
 			{
-				if (driver[i]->Match(the_guid))
-				{
-					choice1 = driver[i];
-				}
-				else
-				{
-					choice2 = driver[i];
-				}
+				choice1 = driver[i];
 			}
 			else
 			{
-				if (driver[i]->IsPrimary())
-				{
-					choice2 = driver[i];	// Primary device 2nd choice for debug mode
-				}
-				else
-				{
-					choice1 = driver[i];
-				}
+				choice2 = driver[i];
 			}
 		}
-
-		if (!choice1) {choice1 = choice2;}
-		if (!choice2) {choice2 = choice1;}
-
-		current_driver = choice1;
-
-		if (next_best)
+		else
 		{
-			*next_best = choice2;
-		}
-
-		return current_driver;
-	}
-	else
-	{
-		for (i = 0; i < driver_upto; i++)
-		{
-			if (the_guid)
+			if (driver[i]->IsPrimary())
 			{
-				if (driver[i]->Match(the_guid))
-				{
-					choice1 = driver[i];
-				}
-				else
-				{
-					choice2 = driver[i];
-				}
+				choice1 = driver[i];	// Primary device 1st choice for debug mode
 			}
 			else
 			{
-				if (driver[i]->IsPrimary())
-				{
-					choice1 = driver[i];	// Primary device 1st choice for debug mode
-				}
-				else
-				{
-					choice2 = driver[i];
-				}
+				choice2 = driver[i];
 			}
 		}
-
-		if (!choice1) {choice1 = choice2;}
-		if (!choice2) {choice2 = choice1;}
-
-		current_driver = choice1;
-
-		if (next_best)
-		{
-			*next_best = choice2;
-		}
-
-		return current_driver;
 	}
 
+	if (!choice1) {choice1 = choice2;}
+	if (!choice2) {choice2 = choice1;}
 
+	current_driver = choice1;
 
+	if (next_best)
+	{
+		*next_best = choice2;
+	}
 
+	return current_driver;
 	/*
 
 	while(current_driver)

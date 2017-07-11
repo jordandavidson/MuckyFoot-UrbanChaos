@@ -85,7 +85,6 @@ class	Display
 			DWF_VALID_FRONT			=	(1<<2),
 			DWF_VALID_BACK			=	(1<<3),
 			DWF_VALID_WORK			=	(1<<4),
-			DWF_VALID_CLIPPER		=	(1<<5),
 			DWF_VALID_VIEWPORT		=	(1<<6),
 
 			DWF_VALID				=	DWF_VALID_INTERFACE		|
@@ -115,9 +114,6 @@ class	Display
 		inline	void TurnValidWorkOn(void)					{	ValidFlags	|=	DWF_VALID_WORK;				}
 		inline	void TurnValidWorkOff(void)					{	ValidFlags	&=	~DWF_VALID_WORK;			}
 
-		inline	void TurnValidClipperOn(void)				{	ValidFlags	|=	DWF_VALID_CLIPPER;			}
-		inline	void TurnValidClipperOff(void)					{	ValidFlags	&=	~DWF_VALID_CLIPPER;			}
-
 		inline	void TurnValidViewportOn(void)				{	ValidFlags	|=	DWF_VALID_VIEWPORT;			}
 		inline	void TurnValidViewportOff(void)				{	ValidFlags	&=	~DWF_VALID_VIEWPORT;		}
 
@@ -127,7 +123,6 @@ class	Display
 		inline	BOOL			IsValidFront(void)			{	return	((ValidFlags&DWF_VALID_FRONT) ? TRUE : FALSE);				}
 		inline	BOOL			IsValidBack(void)			{	return	((ValidFlags&DWF_VALID_BACK) ? TRUE : FALSE);				}
 		inline	BOOL			IsValidWork(void)			{	return	((ValidFlags&DWF_VALID_WORK) ? TRUE : FALSE);				}
-		inline	BOOL			IsValidClipper(void)		{	return	((ValidFlags&DWF_VALID_CLIPPER) ? TRUE : FALSE);			}
 		inline	BOOL			IsValidViewport(void)		{	return	((ValidFlags&DWF_VALID_VIEWPORT) ? TRUE : FALSE);			}
 
 		UBYTE *background_image_mem;
@@ -138,8 +133,7 @@ class	Display
 #endif
 
 	public:
-		ULONG					BackColour,
-								PaletteSize;
+		ULONG					BackColour;
 		D3DDeviceInfo			*CurrDevice;				// Current Device
 		D3DMATERIALHANDLE		black_handle,
 								white_handle,
@@ -157,8 +151,6 @@ class	Display
 		LPDIRECT3DVIEWPORT3		lp_D3D_Viewport;
 		LPDIRECTDRAW			lp_DD;
 		LPDIRECTDRAW4			lp_DD4;
-		LPDIRECTDRAWCLIPPER     lp_DD_Clipper;
-		LPDIRECTDRAWPALETTE		lp_DD_Palette;
 		LPDIRECTDRAWSURFACE4	lp_DD_FrontSurface,
 								lp_DD_BackSurface,
 #ifndef TARGET_DC
@@ -173,8 +165,6 @@ class	Display
 		LPDIRECT3DTEXTURE2		lp_DD_Background_use_instead_texture2;
 #endif
 		IDirectDrawGammaControl*	lp_DD_GammaControl;
-		PALETTEENTRY			*lp_SysPalette,
-								*lp_CurrPalette;
 	    RECT					DisplayRect;				// Current surface rectangle.
 
 		//
@@ -222,9 +212,6 @@ class	Display
 		HRESULT					InitFront(void);
 		HRESULT					FiniFront(void);
 
-		HRESULT					InitPalette(void);
-		HRESULT					FiniPalette(void);
-
 		HRESULT					InitBack(void);
 		HRESULT					FiniBack(void);
 
@@ -240,14 +227,9 @@ class	Display
 		HRESULT					InitWork(void);
 		HRESULT					FiniWork(void);
 
-		HRESULT					InitClipper(void);
-		HRESULT					FiniClipper(void);
-
 		void					RunFMV();
 		void					RunCutscene(int which, int language=0, bool bAllowButtonsToExit=TRUE );
 
-		HRESULT					ChangeDriver(GUID *DD_guid,D3DDeviceInfo *device_hint,DDModeInfo *mode_hint);
-		HRESULT					ChangeDevice(GUID *D3D_guid,DDModeInfo *mode_hint);
 		HRESULT					ChangeMode(SLONG w,SLONG h,SLONG bpp,SLONG refresh);
 
 		bool					IsGammaAvailable();
@@ -267,8 +249,6 @@ class	Display
 		void                   *screen_lock  (void);
 		void                    screen_unlock(void);
 
-		void					MenuOn(void);
-		void					MenuOff(void);
 #ifndef TARGET_DC
 		HRESULT					ShowWorkScreen(void);
 #endif

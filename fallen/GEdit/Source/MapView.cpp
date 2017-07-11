@@ -1167,9 +1167,6 @@ LRESULT	CALLBACK	map_view_proc	(
 			dst	=	src;
 			OffsetRect(&dst,client_pos.x,client_pos.y);
 
-			//	Set the clipper.
-			result	=	the_display.lp_DD_Clipper->SetHWnd(0,hWnd);
-
 			//	Blit the view.
 			result	=	the_display.lp_DD_FrontSurface->Blt(&dst,the_display.lp_DD_BackSurface,&src,DDBLT_WAIT,0);
 
