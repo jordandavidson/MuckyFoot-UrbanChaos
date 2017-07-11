@@ -51,34 +51,6 @@ END
 //
 // Menu
 //
-
-IDR_MAIN_MENU MENU DISCARDABLE 
-BEGIN
-    POPUP "&Display"
-    BEGIN
-        MENUITEM "&Full Screen..\tF1",          ID_DISPLAY_FULLSCREEN
-        MENUITEM "&Drivers..\tF2",              ID_DISPLAY_DRIVERS
-        MENUITEM SEPARATOR
-        MENUITEM "E&xit",                       ID_DISPLAY_EXIT
-    END
-    POPUP "&Modes"
-    BEGIN
-        MENUITEM "320x200",                     ID_MODES_320X200
-        MENUITEM "512x384",                     ID_MODES_512X384
-        MENUITEM "640x480",                     ID_MODES_640X480
-        MENUITEM "800x600",                     ID_MODES_800X600
-        MENUITEM "1024x768",                    ID_MODES_1024X768
-    END
-    POPUP "&Editor"
-    BEGIN
-        MENUITEM "&Mission Editor...",          ID_EDITOR_MISSIONEDITOR
-    END
-    POPUP "&Help"
-    BEGIN
-        MENUITEM "&About Mucky Foot Shell",     ID_ABOUT
-    END
-END
-
 IDR_LEDIT_MENU MENU DISCARDABLE 
 BEGIN
     POPUP "&File"

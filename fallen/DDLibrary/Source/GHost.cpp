@@ -113,40 +113,6 @@ BOOL	SetupHost(ULONG flags)
 #endif
 
 	// Create the shell window.
-#ifdef TARGET_DC
-	// Create & register the window class.
-	DDLibClass.hInstance		=	hGlobalThisInst;
-	DDLibClass.lpszClassName	=	TEXT("Urban Chaos");
-	DDLibClass.lpfnWndProc		=	DDLibShellProc;
-	DDLibClass.style			=	0;
-	DDLibClass.hIcon			=	NULL;
-	DDLibClass.hCursor			=	NULL;
-	#ifndef NDEBUG
-	DDLibClass.lpszMenuName		=	NULL;
-	#else
-	DDLibClass.lpszMenuName		=	NULL;
-	#endif
-	DDLibClass.cbClsExtra		=	0;
-	DDLibClass.cbWndExtra		=	0;
-	DDLibClass.hbrBackground	=	NULL;
-
-	RegisterClass(&DDLibClass);
-
-	hDDLibWindow = CreateWindowEx (
-											0,
-											TEXT("Urban Chaos"),
-								            TEXT("Urban Chaos"),
-											WS_VISIBLE,
-											CW_USEDEFAULT,
-											CW_USEDEFAULT,
-											CW_USEDEFAULT,
-											CW_USEDEFAULT,
-											HWND_DESKTOP,
-											NULL,
-											hGlobalThisInst,
-								            NULL
-										);
-#else
 	// Create & register the window class.
 	DDLibClass.hInstance		=	hGlobalThisInst;
 	DDLibClass.lpszClassName	=	TEXT("Urban Chaos");
@@ -154,11 +120,7 @@ BOOL	SetupHost(ULONG flags)
 	DDLibClass.style			=	0;
 	DDLibClass.hIcon			=	LoadIcon(hGlobalThisInst, MAKEINTRESOURCE(IDI_ICON2));
 	DDLibClass.hCursor			=	LoadCursor(NULL, IDC_ARROW);
-	#ifndef NDEBUG
-	DDLibClass.lpszMenuName		=	MAKEINTRESOURCE(IDR_MAIN_MENU);
-	#else
 	DDLibClass.lpszMenuName		=	NULL;
-	#endif
 	DDLibClass.cbClsExtra		=	0;
 	DDLibClass.cbWndExtra		=	0;
 	DDLibClass.hbrBackground	=	(HBRUSH)GetStockObject(BLACK_BRUSH);
@@ -183,7 +145,6 @@ BOOL	SetupHost(ULONG flags)
 											hGlobalThisInst,
 								            NULL
 										);
-#endif
 
 	if(hDDLibWindow)
 	{

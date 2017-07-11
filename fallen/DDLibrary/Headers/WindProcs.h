@@ -23,8 +23,6 @@ typedef struct
 
 //---------------------------------------------------------------
 
-BOOL FAR PASCAL		AboutBoxProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
-BOOL CALLBACK		ChangeDriverProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 LRESULT	CALLBACK	DDLibShellProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 //---------------------------------------------------------------
