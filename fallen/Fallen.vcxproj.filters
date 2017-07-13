@@ -480,9 +480,6 @@
     <ClCompile Include="DDEngine\Source\oval.cpp">
       <Filter>DDEngine\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DDEngine\Source\pack.cpp">
-      <Filter>DDEngine\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DDEngine\Source\panel.cpp">
       <Filter>DDEngine\Source Files</Filter>
     </ClCompile>
@@ -1230,9 +1227,6 @@
       <Filter>DDEngine\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DDEngine\Headers\oval.h">
-      <Filter>DDEngine\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DDEngine\Headers\pack.h">
       <Filter>DDEngine\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DDEngine\Headers\panel.h">

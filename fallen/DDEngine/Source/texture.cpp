@@ -700,11 +700,6 @@ static void TEXTURE_load_page(SLONG page)
 	CBYTE name_res32[64];
 	CBYTE name_res64[64];
 	CBYTE name_res128[64];
-#ifdef TARGET_DC
-	CBYTE name_mvq32[64];
-	CBYTE name_mvq64[64];
-	CBYTE name_mvq128[64];
-#endif
 	CBYTE name_sex  [64] = "";
 	CBYTE shortname_res32[14];
 	CBYTE shortname_res64[14];
@@ -843,26 +838,6 @@ static void TEXTURE_load_page(SLONG page)
 	{
 		ASSERT(0);
 	}
-
-
-#ifdef TARGET_DC
-	strcpy ( name_mvq32, name_res32 );
-	char *pch = name_mvq32 + strlen ( name_res32 ) - 3;
-	*pch++ = 'm';
-	*pch++ = 'v';
-	*pch++ = 'q';
-	strcpy ( name_mvq64, name_res64 );
-	pch = name_mvq64 + strlen ( name_res64 ) - 3;
-	*pch++ = 'm';
-	*pch++ = 'v';
-	*pch++ = 'q';
-	strcpy ( name_mvq128, name_res128 );
-	pch = name_mvq128 + strlen ( name_res128 ) - 3;
-	*pch++ = 'm';
-	*pch++ = 'v';
-	*pch++ = 'q';
-
-#endif
 
 	if (IndividualTextures || TEXTURE_create_clump)
 	{
@@ -1510,42 +1485,6 @@ LOADED_THIS_MANY_TEXTURES(3);
 	the_display.AddLoadedTexture(&TEXTURE_texture[TEXTURE_page_background_use_instead2]);
 	TEXTURE_needed [TEXTURE_page_background_use_instead2] = 1;
 #endif
-
-
-
-
-
-#ifndef TARGET_DC
-#if 0
-	// Load and bin a load of textures used by the DC, but not the PC.
-	// This makes sure they get converted to MVQ format.
-	D3DTexture *pTex;
-
-#define DO_DC_CONVERT(name) pTex = MFnew<D3DTexture>(); pTex->LoadTextureTGA ( (name), -1, TRUE ); MFdelete ( pTex )
-
-	DO_DC_CONVERT(TEXTURE_EXTRA_DIR"DC\\button A.tga"			);
-	DO_DC_CONVERT(TEXTURE_EXTRA_DIR"DC\\button B.tga"			);
-	DO_DC_CONVERT(TEXTURE_EXTRA_DIR"DC\\button C.tga"			);
-	DO_DC_CONVERT(TEXTURE_EXTRA_DIR"DC\\button X.tga"			);
-	DO_DC_CONVERT(TEXTURE_EXTRA_DIR"DC\\button Y.tga"			);
-	DO_DC_CONVERT(TEXTURE_EXTRA_DIR"DC\\button Z.tga"			);
-	DO_DC_CONVERT(TEXTURE_EXTRA_DIR"DC\\button LEFT.tga"		);
-	DO_DC_CONVERT(TEXTURE_EXTRA_DIR"DC\\button RIGHT.tga"		);
-	DO_DC_CONVERT(TEXTURE_EXTRA_DIR"DC\\button PADLEFT.tga"		);
-	DO_DC_CONVERT(TEXTURE_EXTRA_DIR"DC\\button PADRIGHT.tga"	);
-	DO_DC_CONVERT(TEXTURE_EXTRA_DIR"DC\\button PADDOWN.tga"		);
-	DO_DC_CONVERT(TEXTURE_EXTRA_DIR"DC\\button PADUP.tga"		);
-	DO_DC_CONVERT(TEXTURE_EXTRA_DIR"DC\\page_joybutts.tga"		);
-	
-
-	DO_DC_CONVERT("server\\textures\\shared\\people\\page_darci1.tga");
-	DO_DC_CONVERT("server\\textures\\extras\\page_misc_alpha.tga");
-
-#undef DO_DC_CONVERT
-
-#endif
-#endif
-
 
 
 #if 0
