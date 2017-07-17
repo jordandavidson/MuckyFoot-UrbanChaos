@@ -158,18 +158,6 @@ SLONG fade_point_more(POLY_Point *pp)
 
 void POLY_init(void)
 {
-#ifdef TEX_EMBED
-#if !USE_FANCY_TEXTURE_PAGES_PLEASE_BOB
-	SLONG i;
-
-	for (int ii = 0; ii < 512; ii++)
-	{
-		float	u_off = (ii & 3) * 0.25f;
-		float	v_off = ((ii >> 2) & 3) * 0.25f;
-		POLY_Page[ii].SetTexEmbed(0.25f, u_off, 0.25f, v_off);
-	}
-#endif
-#endif
 }
 
 

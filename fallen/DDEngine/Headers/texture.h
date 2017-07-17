@@ -152,11 +152,8 @@ LPDIRECT3DTEXTURE2 TEXTURE_get_handle(SLONG page);
 
 
 #ifdef TEX_EMBED
-#if USE_FANCY_TEXTURE_PAGES_PLEASE_BOB
+class D3DTexture;
 D3DTexture *TEXTURE_get_D3DTexture(SLONG page);
-#else
-UBYTE				TEXTURE_get_offset(SLONG page);
-#endif
 #endif
 
 

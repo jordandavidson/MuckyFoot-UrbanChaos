@@ -40,15 +40,8 @@ static bool	RenderStates_OK = false;
 #undef	SET_RENDER_STATE
 
 #ifdef TEX_EMBED
-
-#if USE_FANCY_TEXTURE_PAGES_PLEASE_BOB
 #define	SET_TEXTURE(PAGE)		{ pa->RS.SetTexture(TEXTURE_get_handle(PAGE)); pa->SetTexOffset(TEXTURE_get_D3DTexture(PAGE)); }
 #else
-#define	SET_TEXTURE(PAGE)		{ pa->RS.SetTexture(TEXTURE_get_handle(PAGE)); pa->SetTexOffset(TEXTURE_get_offset(PAGE)); }
-#endif
-
-#else
-
 #define SET_TEXTURE(PAGE)		pa->RS.SetTexture(TEXTURE_get_handle(PAGE))
 #endif
 #define SET_NO_TEXTURE			pa->RS.SetTexture(NULL)

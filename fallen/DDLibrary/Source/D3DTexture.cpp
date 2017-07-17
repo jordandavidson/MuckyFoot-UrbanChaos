@@ -26,16 +26,6 @@ static UBYTE					EmbedOffset = 0;
 
 extern void POLY_reset_render_states ( void );
 
-#if USE_FANCY_TEXTURE_PAGES_PLEASE_BOB
-// The structure that holds the mapping from page to texture.
-#define MAX_TEXTURES_PER_PAGE 16
-
-#define MAX_NUM_D3DPAGES 200
-
-int iNumD3DPages = 0;
-D3DPage pageD3D[MAX_NUM_D3DPAGES];
-#endif
-
 static DWORD dwSizeOfFastLoadBuffer = 0;
 void *pvFastLoadBuffer = NULL;
 
@@ -94,23 +84,15 @@ inline void *FastLoadFileSomewhere ( MFFileHandle handle, DWORD dwSize )
 	return ( pvData );
 }
 
-#if USE_FANCY_TEXTURE_PAGES_PLEASE_BOB
 static bool m_bTexturePagesInitialised = FALSE;
 
 
 void FreeAllD3DPages ( void )
 {
-	for ( int i = 0; i < iNumD3DPages; i++ )
-	{
-		pageD3D[i].Unload();
-	}
-	iNumD3DPages = 0;
-
 	// And redo all the render states and sorting.
 	POLY_reset_render_states();
 
 }
-#endif
 
 void D3DTexture::BeginLoading()
 {
@@ -127,8 +109,6 @@ void D3DTexture::BeginLoading()
 	POLY_reset_render_states();
 
 }
-
-#if USE_FANCY_TEXTURE_PAGES_PLEASE_BOB
 
 void D3DPage::EnsureLoaded ( void )
 {
@@ -149,7 +129,6 @@ void D3DPage::EnsureLoaded ( void )
 	}
 }
 
-
 void D3DPage::Unload ( void )
 {
 	if ( this->pTex != NULL )
@@ -161,11 +140,7 @@ void D3DPage::Unload ( void )
 	}
 }
 
-
-#endif //#if USE_FANCY_TEXTURE_PAGES_PLEASE_BOB
-
 #ifdef TEX_EMBED
-#if USE_FANCY_TEXTURE_PAGES_PLEASE_BOB
 void D3DTexture::GetTexOffsetAndScale ( float *pfUScale, float *pfUOffset, float *pfVScale, float *pfVOffset )
 {
 	switch ( bPageType )
@@ -201,57 +176,7 @@ void D3DTexture::GetTexOffsetAndScale ( float *pfUScale, float *pfUOffset, float
 	}
 
 }
-
-#endif //#if USE_FANCY_TEXTURE_PAGES_PLEASE_BOB
 #endif //#ifdef TEX_EMBED
-
-
-#ifndef TARGET_DC
-
-//---------------------------------------------------------------
-
-HRESULT	D3DTexture::LoadTexture8(CBYTE *tex_file,CBYTE *pal_file)
-{
-	HRESULT		result;
-
-	ASSERT(Type == D3DTEXTURE_TYPE_UNUSED);
-
-	ASSERT(0);	// the TGA clumper doesn't deal with 8bpp textures
-
-	lp_Texture = NULL;
-	lp_Palette = NULL;
-	lp_Surface = NULL;
-
-
-	// Check parameters.
-	if((!tex_file) || (!pal_file))
-	{
-		// Invalid parameters.
-		return	DDERR_GENERIC;
-	}
-
-	strcpy(texture_name,tex_file);
-	strcpy(palette_name,pal_file);
-
-	Type = D3DTEXTURE_TYPE_8;
-
-	result = Reload();
-
-	if(FAILED(result))
-	{
-		DebugText("LoadTexture8: unable to load texture\n");
-	}
-
-	//
-	// Finally let the display driver know about this texture page.
-	//
-
-	the_display.AddLoadedTexture(this);
-
-	return	DD_OK;
-}
-
-#endif //#ifndef TARGET_DC
 
 HRESULT	D3DTexture::ChangeTextureTGA(CBYTE *tga_file) {
 
@@ -283,7 +208,6 @@ HRESULT	D3DTexture::LoadTextureTGA(CBYTE *tga_file, ULONG id,BOOL bCanShrink)
 	}
 
 	lp_Texture = NULL;
-	lp_Palette = NULL;
 	lp_Surface = NULL;
 
 	this->bCanShrink = bCanShrink;
@@ -324,7 +248,6 @@ HRESULT D3DTexture::CreateUserPage(SLONG texture_size, BOOL i_want_an_alpha_chan
 	ASSERT(Type == D3DTEXTURE_TYPE_UNUSED);
 
 	lp_Texture = NULL;
-	lp_Palette = NULL;
 	lp_Surface = NULL;
 	UserWantsAlpha       = i_want_an_alpha_channel;
 
@@ -589,69 +512,6 @@ HRESULT D3DTexture::Reload_TGA(void)
 	int	xoff,yoff;
 
 	{
-#ifdef TEX_EMBED
-#if !USE_FANCY_TEXTURE_PAGES_PLEASE_BOB
-	if ((ti.width == 64) && (ti.height == 64) && !ContainsAlpha)
-	{
-		if (EmbedSurface)
-		{
-			TexOffset = 128 + EmbedOffset++;
-			TexSource = EmbedSource;
-			lp_Surface = EmbedSurface;
-			lp_Texture = EmbedTexture;
-			lp_Surface->AddRef();
-			lp_Texture->AddRef();
-
-			if (EmbedOffset == 16)
-			{
-				EmbedSource = NULL;
-				EmbedSurface = NULL;
-				EmbedTexture = NULL;
-				EmbedOffset = 0;
-			}
-
-			xoff = (TexOffset & 3) * 64;
-			yoff = ((TexOffset >> 2) & 3) * 64;
-		}
-		else
-		{
-			dd_sd = mi->ddSurfDesc;
-
-			dd_sd.dwSize  = sizeof(dd_sd);
-			dd_sd.dwFlags =
-				DDSD_CAPS   |
-				DDSD_HEIGHT |
-				DDSD_WIDTH  |
-				DDSD_PIXELFORMAT;
-			dd_sd.dwWidth  = 256;
-			dd_sd.dwHeight = 256;
-			dd_sd.ddsCaps.dwCaps = DDSCAPS_TEXTURE;
-#ifdef TARGET_DC
-			dd_sd.ddsCaps.dwCaps2 = 0;
-#else
-			dd_sd.ddsCaps.dwCaps2 = DDSCAPS2_TEXTUREMANAGE;
-#endif
-			dd_sd.dwTextureStage = 0;
-
-			VERIFY(SUCCEEDED(the_display.lp_DD4->CreateSurface(&dd_sd, &lp_Surface, NULL)));
-			VERIFY(SUCCEEDED(lp_Surface->QueryInterface(IID_IDirect3DTexture2,(LPVOID *)&lp_Texture)));
-
-			TexOffset = 128;
-			TexSource = this;
-
-			EmbedSource = this;
-			EmbedSurface = lp_Surface;
-			EmbedTexture = lp_Texture;
-			EmbedOffset = 1;
-
-			xoff = yoff = 0;
-		}
-		interlace = 256;
-	}
-	else
-#endif
-#endif
-	{
 		dd_sd = mi->ddSurfDesc;
 
 		dd_sd.dwSize  = sizeof(dd_sd);
@@ -675,14 +535,6 @@ HRESULT D3DTexture::Reload_TGA(void)
 
 		interlace = ti.width;
 		xoff = yoff = 0;
-
-#ifdef TEX_EMBED
-#if !USE_FANCY_TEXTURE_PAGES_PLEASE_BOB
-		TexSource = this;
-		TexOffset = 0;
-#endif
-#endif
-	}
 	}
 
 	//
@@ -838,442 +690,6 @@ HRESULT D3DTexture::Reload_TGA(void)
 
 	return	DD_OK;
 }
-
-
-#ifndef TARGET_DC
-
-HRESULT	D3DTexture::Reload_8(void)
-{
-	UBYTE					temp_palette[768],
-							*surface_mem;
-	SLONG					bytes_read,
-							c0,
-							pitch;
-	D3DDeviceInfo			*current_device;
-	DDModeInfo				*the_format,*next_best_format;
-	DDSURFACEDESC2			dd_sd;
-	HANDLE					file_handle;
-	HANDLE					t_handle;
-	HANDLE					p_handle;
-	HRESULT					result;
-	PALETTEENTRY			the_palette[256];
-	SLONG                   score;
-	SLONG					best_score;
-
-	// Check parameters.
-	if(strlen(texture_name)<=0 || strlen(texture_name)<=0)
-	{
-		// Invalid parameters.
-		return	DDERR_GENERIC;
-	}
-
-	// Get the current device.
-	current_device	=	the_display.GetDeviceInfo();
-	if(!current_device)
-	{
-		// No current device.
-		return	DDERR_GENERIC;
-	}
-
-	//
-	// There is never any alpha in an 8-bit palettized texture.
-	//
-
-	ContainsAlpha = FALSE;
-
-	// ====================================================
-	// MARKS HACKED-IN CODE!
-	// ====================================================
-
-
-	//
-	// Find an 8-bit palettized texture format.
-	//
-
-	DDModeInfo *mi;
-	
-	the_format = NULL;
-
-	for (mi = current_device->FormatList; mi; mi = mi->Next)
-	{
-		if (mi->ddSurfDesc.ddpfPixelFormat.dwFlags & DDPF_PALETTEINDEXED8)
-		{
-			the_format = mi;
-			
-			//
-			// Use the old code to load the 8-bit textures.
-			//
-
-			goto load_8bit;
-		}
-	}
-
-	//
-	// Look for a suitable 16-bit format.
-	//
-	
-	best_score = 0;
-	the_format = NULL;
-
-	for (mi = current_device->FormatList; mi; mi = mi->Next)
-	{
-		if (mi->ddSurfDesc.ddpfPixelFormat.dwFlags & DDPF_RGB)
-		{
-			//
-			// True colour...
-			//
-
-			if (mi->ddSurfDesc.ddpfPixelFormat.dwRGBBitCount == 16)
-			{
-				//
-				// And 16-bit.
-				//
-
-				score = 5;
-								
-				if (mi->ddSurfDesc.ddpfPixelFormat.dwFlags & DDPF_ALPHAPIXELS)
-				{
-					//
-					// Knock off a bit for alpha
-					//
-				
-					score -= 1;
-				}
-				
-				if (score > best_score)
-				{
-					best_score = score;
-					the_format = mi;
-				}
-			}
-		}
-	}
-
-	if (the_format == NULL)
-	{
-		//
-		// We really are in the shit now! There aren't any texture
-		// formats for us to choose from.
-		//
-
-		return DDERR_GENERIC;
-	}
-
-	//
-	// Open the texture and palette files.
-	//
-
-	t_handle = CreateFile(
-					texture_name,
-					(GENERIC_READ|GENERIC_WRITE),
-					(FILE_SHARE_READ|FILE_SHARE_WRITE),
-					NULL,
-					OPEN_EXISTING,
-					0,
-					NULL);
-
-	if (t_handle == NULL)
-	{
-		DebugText("Could not open texture file.\n");
-		return DDERR_GENERIC;
-	}
-
-	p_handle = CreateFile(
-					palette_name,
-					(GENERIC_READ|GENERIC_WRITE),
-					(FILE_SHARE_READ|FILE_SHARE_WRITE),
-					NULL,
-					OPEN_EXISTING,
-					0,
-					NULL);
-
-	if (p_handle == NULL)
-	{
-		DebugText("Could not open palette file.\n");
-		return DDERR_GENERIC;
-	}
-
-	//
-	// We have to convert the texture into the given format.
-	//
-
-	OS_calculate_mask_and_shift(the_format->ddSurfDesc.ddpfPixelFormat.dwRBitMask ,&mask_red,   &shift_red  );
-	OS_calculate_mask_and_shift(the_format->ddSurfDesc.ddpfPixelFormat.dwGBitMask ,&mask_green, &shift_green);
-	OS_calculate_mask_and_shift(the_format->ddSurfDesc.ddpfPixelFormat.dwBBitMask ,&mask_blue,  &shift_blue );
-	//
-	// Get rid of the old texture stuff.
-	//
-	
-	Destroy();
-
-	//
-	// Create
-	//
-
-	dd_sd = the_format->ddSurfDesc;
-
-	dd_sd.dwSize  = sizeof(dd_sd);
-	dd_sd.dwFlags =
-		DDSD_CAPS   |
-		DDSD_HEIGHT |
-		DDSD_WIDTH  |
-		DDSD_PIXELFORMAT;
-	dd_sd.dwWidth  = 256;
-	dd_sd.dwHeight = 256;
-	dd_sd.ddsCaps.dwCaps = DDSCAPS_TEXTURE;
-#ifdef TARGET_DC
-	dd_sd.ddsCaps.dwCaps2 = 0;
-#else
-	dd_sd.ddsCaps.dwCaps2 = DDSCAPS2_TEXTUREMANAGE;
-#endif
-
-	VERIFY(SUCCEEDED(the_display.lp_DD4->CreateSurface(&dd_sd, &lp_Surface, NULL)));
-
-	//
-	// Lock
-	//
-
-	VERIFY(SUCCEEDED(lp_Surface->Lock(NULL, &dd_sd, 0, NULL)));
-
-	//
-	// Load in the palette.
-	//
-
-	ReadFile(p_handle, temp_palette, 768, (LPDWORD) &bytes_read, NULL);
-
-	//
-	// Copy the texture in
-	//
-
-	{
-		UWORD pixel_our;
-		UBYTE colour;
-		UBYTE red;
-		UBYTE green;
-		UBYTE blue;
-		UWORD *wscreen = (UWORD *) dd_sd.lpSurface;
-		UBYTE  line[256];
-		SLONG  i;
-		SLONG  j;
-
-		//
-		// 16 bits per pixel.
-		//
-
-		for (i = 0; i < 256; i++)
-		{
-			ReadFile(t_handle, line, 256, (LPDWORD) &bytes_read, NULL);
-
-			for (j = 0; j < 256; j++)
-			{
-				colour = line[j];
-
-				red   = temp_palette[colour * 3 + 0];
-				green = temp_palette[colour * 3 + 1];
-				blue  = temp_palette[colour * 3 + 2];
-
-				pixel_our = 0;
-				
-				pixel_our |= (red   >> mask_red  ) << shift_red;
-				pixel_our |= (green >> mask_green) << shift_green;
-				pixel_our |= (blue  >> mask_blue ) << shift_blue;
-
-				wscreen[i * 256 + j] = pixel_our;
-			}
-		}
-	}
-
-	//
-	// Close the files.
-	//
-
-	CloseHandle(t_handle);
-	CloseHandle(p_handle);
-
-	//
-	// Unlock
-	//
-
-   	VERIFY(SUCCEEDED(lp_Surface->Unlock(NULL)));
-
-	// Get d3d texture interface.
-	result	=	lp_Surface->QueryInterface(IID_IDirect3DTexture2,(LPVOID *)&lp_Texture);
-
-	if(FAILED(result))
-	{
-		DebugText("LoadTexture8: unable to create texture\n");
-		dd_error(result);
-		goto	cleanup;
-	}
-
-	//
-	// Success.
-	//
-
-	return	DD_OK;
-	
-	// ====================================================
-	// END OF MARKS HACKED-IN CODE
-	// ====================================================
-
-
-	//
-	// Found an 8-bit palettized texture format.
-	//
-
-  load_8bit:;
-
-
-	// Get rid of the old texture stuff.
-	Destroy();
-
-	//
-	// Set up the texture.
-	//
-
-	// Set up the surface description.
-	dd_sd			=	the_format->ddSurfDesc;
-	dd_sd.dwFlags	=	DDSD_CAPS 	|
-						DDSD_HEIGHT |
-						DDSD_WIDTH 	|
-						DDSD_PIXELFORMAT;
-	dd_sd.dwWidth	=	256;
-	dd_sd.dwHeight	=	256;
-	dd_sd.ddsCaps.dwCaps = DDSCAPS_TEXTURE;
-#ifdef TARGET_DC
-	dd_sd.ddsCaps.dwCaps2 = 0;
-#else
-	dd_sd.ddsCaps.dwCaps2 = DDSCAPS2_TEXTUREMANAGE;
-#endif
-
-	// Create the main texture surface.
-	result	=	the_display.lp_DD4->CreateSurface	(
-														&dd_sd,
-														&lp_Surface,
-														NULL
-													);
-	if(FAILED(result))
-	{
-		DebugText("LoadTexture8: unable to create main texture surface\n");
-		dd_error(result);
-		goto	cleanup;
-	}
-
-	// Read in the bit map.
-	file_handle	=	CreateFile	(
-									texture_name,
-									(GENERIC_READ|GENERIC_WRITE),
-									(FILE_SHARE_READ|FILE_SHARE_WRITE),
-									NULL,
-									OPEN_EXISTING,
-									0,
-									NULL
-    	                   		);
-	if(file_handle == NULL)
-	{
-		DebugText("LoadTexture8: unable to open palette file\n");
-		goto	cleanup;
-	}
-
-	// Read the bit map directly into the texture surface.
-	result	=	lp_Surface->Lock(NULL,&dd_sd,DDLOCK_WAIT|DDLOCK_NOSYSLOCK,NULL);
-	if(FAILED(result))
-	{
-		DebugText("LoadTexture8: unable to lock temp texture surface\n");
-		dd_error(result);
-		goto	cleanup;
-	}
-	pitch		=	dd_sd.lPitch;
-	surface_mem	=	(UBYTE*)dd_sd.lpSurface;
-	for(c0=0;c0<256;c0++,surface_mem+=pitch)
-	{
-		if(ReadFile(file_handle,surface_mem,256,(LPDWORD)&bytes_read,NULL)==FALSE)
-		{
-			DebugText("LoadTexture8: unable to read texture file\n");
-			goto	cleanup;
-		}
-	}
-	lp_Surface->Unlock(NULL);
-	CloseHandle(file_handle);
-
-	//
-	// Set up the palette.
-	//
-
-	// Read the palette into temp storage.
-	file_handle	=	CreateFile	(
-									palette_name,
-									(GENERIC_READ|GENERIC_WRITE),
-									(FILE_SHARE_READ|FILE_SHARE_WRITE),
-									NULL,
-									OPEN_EXISTING,
-									0,
-									NULL
-    	                   		);
-	if (file_handle == NULL)
-	{
-		DebugText("LoadTexture8: unable to open palette file\n");
-		goto	cleanup;
-	}
-	if(ReadFile(file_handle,temp_palette,768,(LPDWORD)&bytes_read,NULL)==FALSE)
-	{
-		DebugText("LoadTexture8: unable to read palette file\n");
-		goto	cleanup;
-	}
-	CloseHandle(file_handle);
-
-	// Set up palette entries.
-	ZeroMemory(the_palette,sizeof(the_palette));
-	for(c0=0;c0<256;c0++)
-	{
-		the_palette[c0].peRed	=	temp_palette[(c0*3)+0];
-		the_palette[c0].peGreen	=	temp_palette[(c0*3)+1];
-		the_palette[c0].peBlue	=	temp_palette[(c0*3)+2];
-	}
-
-    // Create the texture palette.
-	result	=	the_display.lp_DD4->CreatePalette	(
-														DDPCAPS_8BIT|DDPCAPS_ALLOW256,
-														the_palette,
-														&lp_Palette,
-														NULL
-													);
-	if(FAILED(result))
-	{
-		DebugText("LoadTexture8: unable to create texture palette\n");
-		dd_error(result);
-		goto	cleanup;
-	}
-
-	// Attach palette to texture surface.
-	result	=	lp_Surface->SetPalette(lp_Palette);
-	if(FAILED(result))
-	{
-		DebugText("LoadTexture8: unable to attach texture palette\n");
-		dd_error(result);
-//		goto	cleanup;
-	}
-
-
-	// Get d3d texture interface.
-	result	=	lp_Surface->QueryInterface(IID_IDirect3DTexture2,(LPVOID *)&lp_Texture);
-	if(FAILED(result))
-	{
-		DebugText("LoadTexture8: unable to create texture\n");
-		dd_error(result);
-		goto	cleanup;
-	}
-
-	// Success.
-	return	DD_OK;
-
-cleanup:
-
-	// Cleanup.
-	Destroy();
-	return	result;
-}
-#endif //#ifndef TARGET_DC
 
 HRESULT D3DTexture::Reload_user()
 {
@@ -1533,10 +949,6 @@ HRESULT D3DTexture::Reload(void)
 
 	switch(Type)
 	{
-		case D3DTEXTURE_TYPE_8:
-			ans = Reload_8();
-			break;
-
 		case D3DTEXTURE_TYPE_TGA:
 			ans = Reload_TGA();
 			break;
@@ -1581,17 +993,6 @@ HRESULT	D3DTexture::Destroy(void)
 		DebugText("Done\n");
 		lp_Texture			=	NULL;
 	}
-
-#ifndef TARGET_DC
-	// Release palette.
-	if(lp_Palette)
-	{
-		DebugText("Releasing palette\n");
-		b = lp_Palette->Release();
-		DebugText("Done\n");
-		lp_Palette	=	NULL;
-	}
-#endif
 
 	// Release surface.
 	if(lp_Surface)

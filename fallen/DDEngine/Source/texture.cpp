@@ -2134,38 +2134,11 @@ LPDIRECT3DTEXTURE2 TEXTURE_get_handle(SLONG page)
 	return TEXTURE_texture[page].GetD3DTexture();
 }
 
-
-
-
-
 #ifdef TEX_EMBED
-#if USE_FANCY_TEXTURE_PAGES_PLEASE_BOB
-
 D3DTexture *TEXTURE_get_D3DTexture(SLONG page)
 {
 	return &(TEXTURE_texture[page]);
 }
-
-#else //#if USE_FANCY_TEXTURE_PAGES_PLEASE_BOB
-
-UBYTE TEXTURE_get_offset(SLONG page)
-{
-#ifdef TARGET_DC
-	if ( ( page == TEXTURE_page_background_use_instead ) || ( page == TEXTURE_page_background_use_instead2 ) )
-	{
-		// Special-cased for the background replacement.
-		return ( 0 );
-	}
-#endif
-	if ( page == -1 )
-	{
-		return ( 0 );
-	}
-	ASSERT(WITHIN(page, 0, TEXTURE_num_textures - 1));
-	return TEXTURE_texture[page].GetTexOffset();
-}
-#endif //#else //#if USE_FANCY_TEXTURE_PAGES_PLEASE_BOB
-
 #endif
 
 void TEXTURE_get_minitexturebits_uvs(

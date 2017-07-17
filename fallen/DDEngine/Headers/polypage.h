@@ -29,6 +29,8 @@
 #include "vertexbuffer.h"
 #include "polypoint.h"
 
+class D3DTexture;
+
 class PolyPage;
 
 // PolyPoly
@@ -69,11 +71,7 @@ public:
 	PolyPage			*pTheRealPolyPage;			// The poly page you actually need to add tris to.
 													// This is never NULL, but may point back to this one.
 
-#if USE_FANCY_TEXTURE_PAGES_PLEASE_BOB
 	void				SetTexOffset ( D3DTexture *src );
-#else
-	void				SetTexEmbed(float u_scale, float u_offset, float v_scale, float v_offset);
-#endif
 	void				SetTexOffset(UBYTE offset);	// 0 for (0,0)-(1,1) else 128 + (0-15) for the subtexture
 #endif
 

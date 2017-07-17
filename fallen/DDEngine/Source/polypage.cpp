@@ -102,48 +102,10 @@ PolyPage::~PolyPage()
 // set texture embedding
 
 #ifdef TEX_EMBED
-
-#if USE_FANCY_TEXTURE_PAGES_PLEASE_BOB
 void PolyPage::SetTexOffset ( D3DTexture *src )
 {
 	src->GetTexOffsetAndScale ( &m_UScale, &m_UOffset, &m_VScale, &m_VOffset );
 }
-
-#else //#if USE_FANCY_TEXTURE_PAGES_PLEASE_BOB
-
-void PolyPage::SetTexEmbed(float u_scale, float u_offset, float v_scale, float v_offset)
-{
-	m_UScale = u_scale;
-	m_UOffset = u_offset;
-	m_VScale = v_scale;
-	m_VOffset = v_offset;
-}
-
-void PolyPage::SetTexOffset(UBYTE offset)
-{
-	// Kludgy test.
-	//offset = 1;
-
-	if (offset)
-	{
-		int	x = offset & 3;
-		int y = (offset >> 2) & 3;
-
-		m_UScale = 0.25f;
-		m_VScale = 0.25f;
-		m_UOffset = x * 0.25f;
-		m_VOffset = y * 0.25f;
-	}
-	else
-	{
-		m_UScale = 1.0f;
-		m_VScale = 1.0f;
-		m_UOffset = 0.0f;
-		m_VOffset = 0.0f;
-	}
-}
-#endif //#else //#if USE_FANCY_TEXTURE_PAGES_PLEASE_BOB
-
 #endif
 
 // SetGreenScreen
