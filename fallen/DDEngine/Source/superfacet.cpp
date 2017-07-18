@@ -2271,8 +2271,6 @@ SLONG SUPERFACET_draw(SLONG facet)
 
 			the_display.lp_D3D_Device->SetTexture(0, sc->texture_2pass);
 
-			the_display.lp_D3D_Device->SetRenderState(D3DRENDERSTATE_ALPHAFUNC,       D3DCMP_NOTEQUAL);
-			the_display.lp_D3D_Device->SetRenderState(D3DRENDERSTATE_ALPHAREF,        0              );
 			the_display.lp_D3D_Device->SetRenderState(D3DRENDERSTATE_ALPHATESTENABLE, TRUE           );
 
 			the_display.lp_D3D_Device->SetRenderState(D3DRENDERSTATE_TEXTUREMAPBLEND, D3DTBLEND_DECAL);

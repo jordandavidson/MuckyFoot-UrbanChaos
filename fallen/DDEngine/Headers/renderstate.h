@@ -98,8 +98,4 @@ private:
 };
 #pragma pack( pop )
 
-void	RS_read_config();
-void	RS_get_config(int* fix_directx);
-void	RS_set_config(int fix_directx);
-
 #endif

@@ -343,8 +343,6 @@ HRESULT D3DTexture::Reload_TGA(void)
 
 	DDSURFACEDESC2			dd_sd;
 
-	int iMipmapLevel;
-
 	TRACE ("Tex<%s>\n", texture_name);
 
 	TGA_Info   ti;

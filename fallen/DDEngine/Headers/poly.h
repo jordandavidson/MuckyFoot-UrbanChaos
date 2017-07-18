@@ -6,17 +6,6 @@
 #define _POLY_
 
 
-#ifdef TARGET_DC
-// Fade the diffuse and specular, rather than using D3D fog, which doesn't work on DC yet.
-// It does now!!!!!
-//#define FAKE_UP_VERTEX_FOG_PLEASE_BOB defined
-
-// If using D3D fog, use W-based table fog, rather than vertex fogging.
-// (which is faked up by the driver on DC). Doesn't work yet,
-#define USE_W_FOG_PLEASE_BOB defined
-
-#endif
-
 static inline int ftol(float f)
 {
 	return (int)f;
@@ -414,48 +403,9 @@ static void inline POLY_fadeout_point(POLY_Point *pp)
 		}
 
 		pp->specular &= 0x00ffffff;
-#ifndef FAKE_UP_VERTEX_FOG_PLEASE_BOB
 
 		// Use D3D fog.
 		pp->specular |= multi << 24;
-
-#else
-
-		SLONG red;
-		SLONG green;
-		SLONG blue;
-
-		{
-			red   = ((pp->colour >> 16) & 0xff) * multi >> 8;
-			green = ((pp->colour >>  8) & 0xff) * multi >> 8;
-			blue  = ((pp->colour >>  0) & 0xff) * multi >> 8;
-
-#ifdef TARGET_DC
-			// Force the alpha channel on.
-			//pp->colour = 0xff000000;
-			pp->colour = multi << 24;
-			//pp->colour &= 0xff000000;
-#else
-			pp->colour &= 0xff000000;
-#endif
-			pp->colour |= red   << 16;
-			pp->colour |= green << 8;
-			pp->colour |= blue  << 0;
-
-			if (pp->specular)
-			{
-				red   = ((pp->specular >> 16) & 0xff) * multi >> 8;
-				green = ((pp->specular >>  8) & 0xff) * multi >> 8;
-				blue  = ((pp->specular >>  0) & 0xff) * multi >> 8;
-
-				pp->specular = 0;
-				pp->specular |= red   << 16;
-				pp->specular |= green << 8;
-				pp->specular |= blue  << 0;
-			}
-		}
-#endif
-
 	}
 /*
 	else

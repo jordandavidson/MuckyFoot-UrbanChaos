@@ -1279,9 +1279,7 @@ void OS_init_renderstates()
 
 	d3d->SetRenderState(D3DRENDERSTATE_SHADEMODE,          D3DSHADE_GOURAUD);
 	d3d->SetRenderState(D3DRENDERSTATE_TEXTUREPERSPECTIVE, TRUE);
-	d3d->SetRenderState(D3DRENDERSTATE_DITHERENABLE,       TRUE);
 	d3d->SetRenderState(D3DRENDERSTATE_SPECULARENABLE,     TRUE);
-	d3d->SetRenderState(D3DRENDERSTATE_SUBPIXEL,           TRUE);
 	d3d->SetRenderState(D3DRENDERSTATE_ZENABLE,            TRUE);
 	d3d->SetRenderState(D3DRENDERSTATE_ZFUNC,              D3DCMP_LESSEQUAL);
 	d3d->SetRenderState(D3DRENDERSTATE_ZWRITEENABLE,       TRUE);
@@ -1485,7 +1483,6 @@ void OS_change_renderstate_for_type(ULONG draw)
 	if (draw & OS_DRAW_ALPHAREF)
 	{
 		d3d->SetRenderState(D3DRENDERSTATE_ALPHAFUNC,D3DCMP_NOTEQUAL);
-		d3d->SetRenderState(D3DRENDERSTATE_ALPHAREF,0);
 		d3d->SetRenderState(D3DRENDERSTATE_ALPHATESTENABLE,TRUE);
 
 		//
@@ -1509,11 +1506,6 @@ void OS_change_renderstate_for_type(ULONG draw)
 	if (draw & OS_DRAW_CULLREVERSE)
 	{
 		d3d->SetRenderState(D3DRENDERSTATE_CULLMODE, D3DCULL_CW);
-	}
-
-	if (draw & OS_DRAW_NODITHER)
-	{
-		d3d->SetRenderState(D3DRENDERSTATE_DITHERENABLE, FALSE);
 	}
 
 	if (draw & OS_DRAW_ALPHABLEND)
@@ -1624,7 +1616,6 @@ void OS_undo_renderstate_type_changes(void)
 	d3d->SetRenderState(D3DRENDERSTATE_ZWRITEENABLE,     TRUE);
 	d3d->SetRenderState(D3DRENDERSTATE_ZFUNC,            D3DCMP_LESSEQUAL);
 	d3d->SetRenderState(D3DRENDERSTATE_ALPHATESTENABLE,  FALSE);
-	d3d->SetRenderState(D3DRENDERSTATE_DITHERENABLE,     TRUE);
 
 	d3d->SetTextureStageState(0, D3DTSS_MINFILTER, D3DTFG_LINEAR);
 	d3d->SetTextureStageState(0, D3DTSS_MAGFILTER, D3DTFG_LINEAR);

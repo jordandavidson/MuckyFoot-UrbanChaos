@@ -253,9 +253,6 @@ extern void ENV_init ( void );
 	LocateCDROM();
 
 	AENG_read_detail_levels();	// get engine defaults
-#ifndef TARGET_DC
-	RS_read_config();			// get fixes for RenderStates for DX6/DX5 bastard mode
-#endif
 
 #if 0
 	{
