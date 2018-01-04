@@ -179,51 +179,6 @@ static HRESULT CALLBACK D3DEnumDevicesCallback(GUID FAR* lpGuid,
 	return D3DENUMRET_OK;
 }
 
-static bool VerifyDirectX()
-{
-	IDirectDraw*	lpdd;
-	IDirectDraw4*	lpdd4;
-	IDirect3D3*		lpd3d3;
-
-	// create DDraw
-	HRESULT	res = DirectDrawCreate(NULL, &lpdd, NULL);
-	if (FAILED(res))	return false;
-
-	// get DDraw4
-	res = lpdd->QueryInterface(IID_IDirectDraw4, (void**)&lpdd4);
-	if (FAILED(res))
-	{
-		lpdd->Release();
-		return false;
-	}
-
-	// get D3D3
-	res = lpdd->QueryInterface(IID_IDirect3D3, (void**)&lpd3d3);
-	if (FAILED(res))
-	{
-		lpdd4->Release();
-		lpdd->Release();
-		return false;
-	}
-
-	// count 3D devices
-	numdevices = 0;
-
-	res = lpd3d3->EnumDevices(D3DEnumDevicesCallback, NULL);
-	if (FAILED(res))
-	{
-		numdevices = 0;
-	}
-
-	// release the interfaces
-	lpd3d3->Release();
-	lpdd4->Release();
-	lpdd->Release();
-
-	// return true or false
-	return (numdevices > 0);
-}
-
 extern HINSTANCE hGlobalThisInst;
 
 SLONG main(UWORD argc, TCHAR *argv[])
@@ -262,18 +217,6 @@ extern void ENV_init ( void );
 		{
 			TRACE("Random() & 0xff = %d\n", Random() & 0xff);
 		}
-	}
-#endif
-
-#ifndef TARGET_DC
-	if (!VerifyDirectX())
-	{
-	    char buf[256];
-		LoadStringA(hGlobalThisInst, IDS_NODIRECTX, buf, 256);
-
-		MessageBox(NULL, buf, NULL, MB_OK | MB_ICONERROR);
-
-		return EXIT_FAILURE;
 	}
 #endif
 
