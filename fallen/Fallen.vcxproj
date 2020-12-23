@@ -45,14 +45,14 @@
     <OutDir>.\Release\</OutDir>
     <IntDir>.\Release\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\MFStdLib\Headers;..\SDL2\include;..\openal-soft\include;$(IncludePath)</IncludePath>
+    <IncludePath>..\MFStdLib\Headers;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)$(Configuration);..\openal-soft\libs\Win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>.\Debug\</OutDir>
     <IntDir>.\Debug\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\MFStdLib\Headers;..\SDL2\include;..\openal-soft\include;$(IncludePath)</IncludePath>
+    <IncludePath>..\MFStdLib\Headers;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)$(Configuration);..\openal-soft\libs\Win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -146,11 +146,11 @@
       <SubSystem>Windows</SubSystem>
       <OutputFile>.\Debug\Fallen.exe</OutputFile>
       <AdditionalLibraryDirectories>c:\fallen\bink;c:\miles;c:\fallen\miles;c:\mflib1\libs;C:\qsound\QM411SDK\qmdx;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;comctl32.lib;amstrmid.lib;quartz.lib;strmbase.lib;ddraw.lib;dinput8.lib;dxguid.lib;imm32.lib;Version.lib;OpenAL32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;comctl32.lib;amstrmid.lib;quartz.lib;strmbase.lib;ddraw.lib;dinput8.lib;dxguid.lib;imm32.lib;Version.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)\..\openal-soft\bin\Win32\soft_oal.dll" "$(TargetDir)\openal32.dll"</Command>
+      <Command>REM copy "$(SolutionDir)\..\openal-soft\bin\Win32\soft_oal.dll" "$(TargetDir)\openal32.dll"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

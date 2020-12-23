@@ -20,7 +20,7 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 #include <AL/alext.h>
-#include <SDL_audio.h>
+#include <SDL2/SDL_audio.h>
 
 #define		COORDINATE_UNITS	float(1.0 / 256.0)	// 1 tile ~= 1 meter
 
