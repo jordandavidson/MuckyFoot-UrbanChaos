@@ -7,7 +7,7 @@
 #ifndef _TRACKS_H_
 #define _TRACKS_H_
 
-#include "MFStdLib.h"
+#include "..\..\MFStdLibrary2\include\MFStdLib.h"
 #include "Structs.h"
 #include "game.h"
 

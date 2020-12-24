@@ -4,8 +4,8 @@
 #ifndef	DDLIB_H
 #define	DDLIB_H
 
-#include	<MFStdLib.h>
 
+#include "..\..\MFStdLibrary2\include\MFStdLib.h"
 
 #include	"D3DTexture.h"
 #include	"DDManager.h"
@@ -85,8 +85,8 @@ inline SLONG check_result(HRESULT f, SLONG line, CBYTE *file)
 	}
 	else
 	{
-		TRACE("%s(%d):\n\t", file, line);
-		LogText("Error in %s line %d\n\t", file, line);
+		TRACE((CBYTE*)"%s(%d):\n\t", file, line);
+		LogText((CBYTE*)"Error in %s line %d\n\t", file, line);
 		dd_error(f);
 
 		return TRUE;
@@ -95,7 +95,7 @@ inline SLONG check_result(HRESULT f, SLONG line, CBYTE *file)
 
 #undef  FAILED
 #undef	SUCCEEDED
-#define FAILED(f)		(check_result(f, __LINE__, __FILE__))
+#define FAILED(f)		(check_result(f, __LINE__, (CBYTE*)__FILE__))
 #define SUCCEEDED(f)	(!FAILED(f))
 
 #endif //#else //#ifdef TARGET_DC

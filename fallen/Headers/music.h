@@ -4,7 +4,7 @@
 // 14 june 99
 //
 
-#include "mfstdlib.h"
+#include "..\..\MFStdLibrary2\include\MFStdLib.h"
 
 /*
 #define	MUSIC_FLAG_FADE_IN	1

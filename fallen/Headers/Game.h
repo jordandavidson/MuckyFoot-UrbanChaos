@@ -47,7 +47,7 @@
 */
 //---------------------------------------------------------------
 
-#include	<MFStdLib.h>
+#include "..\..\MFStdLibrary2\include\MFStdLib.h"
 #ifndef		PSX
 #undef      LogText
 #define		LogText
