@@ -156,8 +156,6 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\MFStdLib\Source\StdLib\StdFile.cpp" />
-    <ClCompile Include="..\MFStdLib\Source\StdLib\StdMem.cpp" />
     <ClCompile Include="DDEngine\Source\aa.cpp" />
     <ClCompile Include="DDEngine\Source\aeng.cpp" />
     <ClCompile Include="DDEngine\Source\BreakTimer.cpp" />
@@ -707,7 +705,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\MFStdLib\Headers\MFStdLib.h" />
-    <ClInclude Include="..\MFStdLib\Headers\StdMem.h" />
     <ClInclude Include="DDEngine\Headers\aa.h" />
     <ClInclude Include="DDEngine\Headers\aeng.h" />
     <ClInclude Include="DDEngine\Headers\BreakTimer.h" />

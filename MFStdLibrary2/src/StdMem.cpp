@@ -7,7 +7,7 @@
 #define		INITIAL_HEAP_SIZE		(8*1024*1024)
 #define		MAXIMUM_HEAP_SIZE		0
 
-#ifdef DEBUG
+#ifdef _DEBUG
 // Allows heap debugging - logs interesting info, e.g. for memory leak tracking.
 //#define HEAP_DEBUGGING_PLEASE_BOB defined
 #endif
@@ -201,7 +201,7 @@ void	MemClear(void *mem_ptr,ULONG size)
 //---------------------------------------------------------------
 
 
-#ifdef DEBUG
+#ifdef _DEBUG
 // Support for MFnew and MFdelete
 #ifndef HEAP_DEBUGGING_PLEASE_BOB
 

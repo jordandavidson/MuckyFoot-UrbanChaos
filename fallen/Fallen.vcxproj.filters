@@ -798,12 +798,6 @@
     <ClCompile Include="outro\wire.cpp">
       <Filter>outro\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\MFStdLib\Source\StdLib\StdFile.cpp">
-      <Filter>MFStdLib\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\MFStdLib\Source\StdLib\StdMem.cpp">
-      <Filter>MFStdLib\Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Headers\america.h">
@@ -1645,9 +1639,6 @@
     </ClInclude>
     <ClInclude Include="outro\wire.h">
       <Filter>outro\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\MFStdLib\Headers\StdMem.h">
-      <Filter>MFStdLib\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

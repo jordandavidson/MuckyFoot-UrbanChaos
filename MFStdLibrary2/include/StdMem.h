@@ -14,7 +14,7 @@ void	MemFree(void *mem_ptr);
 
 
 
-#ifdef DEBUG
+#ifdef _DEBUG
 void MFnewTrace ( void *pvAddr, size_t size );
 void MFdeleteTrace ( void *pvAddr );
 #endif
@@ -24,7 +24,7 @@ void MFdeleteTrace ( void *pvAddr );
 template <class T> T *MFnew ( void )
 {
 	T *ptr = new T;
-#ifdef DEBUG
+#ifdef _DEBUG
 	MFnewTrace ( ptr, sizeof ( ptr ) );
 #endif
 	return ptr;
@@ -32,7 +32,7 @@ template <class T> T *MFnew ( void )
 
 template<class T> void MFdelete(T *thing)
 {
-#ifdef DEBUG
+#ifdef _DEBUG
 	MFdeleteTrace ( thing );
 #endif
 	delete thing;
