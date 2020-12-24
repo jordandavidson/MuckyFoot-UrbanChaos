@@ -587,7 +587,7 @@ static void SetupVoice(MFX_Voice* vptr, UWORD channel_id, ULONG wave, ULONG flag
 		FinishLoading(vptr);
 	}
 }
-
+//TODO: Review memory leak due to OpenAL Usage
 // set up voice after sample has loaded
 static void FinishLoading(MFX_Voice* vptr)
 {
@@ -799,7 +799,7 @@ static void TriggerPairedVoice(UWORD channel_id)
 	vptr->flags &= ~MFX_PAIRED_TRK2;
 	PlayVoice(vptr);
 }
-
+//TODO: Review memory leak due to OpenAL Usage
 static UBYTE PlayWave(UWORD channel_id, ULONG wave, ULONG flags, bool is3D, SLONG x, SLONG y, SLONG z, Thing* thing)
 {
 	MFX_Voice*	vptr = GetVoiceForWave(channel_id, wave, flags);

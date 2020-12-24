@@ -6,6 +6,14 @@
 #include "tga.h"
 
 
+TGA_Info TGA_FileLoad_Error(TGA_Info& ans, FILE*& handle, const CBYTE*& file) {
+
+	TRACE("File error loading TGA file %s\n", *file);
+	fclose(handle);
+	ans.valid = FALSE;
+	return ans;
+}
+
 
 TGA_Info TGA_load(
 			const CBYTE *file,
@@ -31,7 +39,7 @@ TGA_Info TGA_load(
 
 	FILE *handle;
 
-	TGA_Info ans;
+	TGA_Info ans{};
 
 	//
 	// Open the file.
@@ -50,7 +58,8 @@ TGA_Info TGA_load(
 	// Read the header.
 	//
 
-	if (fread(header, sizeof(UBYTE), 18, handle) != 18) goto file_error;
+	if (fread(header, sizeof(UBYTE), 18, handle) != 18) 
+		return TGA_FileLoad_Error(ans, handle, file);
 
 	//
 	// Extract info from the header.
@@ -105,7 +114,7 @@ TGA_Info TGA_load(
 	
 	for (i = 0; i < tga_id_length; i++)
 	{
-		if (fread(&rubbish, sizeof(UBYTE), 1, handle) != 1) goto file_error;
+		if (fread(&rubbish, sizeof(UBYTE), 1, handle) != 1) return TGA_FileLoad_Error(ans, handle, file);
 	}
 
 	//
@@ -114,7 +123,7 @@ TGA_Info TGA_load(
 
 	if (tga_pixel_depth == 32)
 	{
-		if (fread(data, sizeof(TGA_Pixel), tga_width * tga_height, handle) != tga_width * tga_height) goto file_error;
+		if (fread(data, sizeof(TGA_Pixel), tga_width * tga_height, handle) != tga_width * tga_height) return TGA_FileLoad_Error(ans, handle, file);
 
 		no_alpha = FALSE;
 	}
@@ -126,9 +135,9 @@ TGA_Info TGA_load(
 
 		for (i = 0; i < tga_width * tga_height; i++)
 		{
-			if (fread(&blue,  sizeof(UBYTE), 1, handle) != 1) goto file_error;
-			if (fread(&green, sizeof(UBYTE), 1, handle) != 1) goto file_error;
-			if (fread(&red,   sizeof(UBYTE), 1, handle) != 1) goto file_error;
+			if (fread(&blue,  sizeof(UBYTE), 1, handle) != 1) return TGA_FileLoad_Error(ans, handle, file);
+			if (fread(&green, sizeof(UBYTE), 1, handle) != 1) return TGA_FileLoad_Error(ans, handle, file);
+			if (fread(&red,   sizeof(UBYTE), 1, handle) != 1) return TGA_FileLoad_Error(ans, handle, file);
 			
 			data[i].red   = red;
 			data[i].green = green;
@@ -191,18 +200,6 @@ TGA_Info TGA_load(
 			break;
 		}
 	}
-
-	return ans;
-
-  file_error:;
-
-	//
-	// Error!
-	//
-
-	TRACE("File error loading TGA file %s\n", file);
-	fclose(handle);
-	ans.valid = FALSE;
 
 	return ans;
 }

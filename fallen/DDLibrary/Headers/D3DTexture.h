@@ -99,15 +99,15 @@ class	D3DTexture
 		// The format used.
 		// 
 
-		SLONG mask_red;
-		SLONG mask_green;
-		SLONG mask_blue;
-		SLONG mask_alpha;
+		SLONG mask_red=0;
+		SLONG mask_green=0;
+		SLONG mask_blue = 0;
+		SLONG mask_alpha = 0;
 
-		SLONG shift_red;
-		SLONG shift_green;
-		SLONG shift_blue;
-		SLONG shift_alpha;
+		SLONG shift_red = 0;
+		SLONG shift_green = 0;
+		SLONG shift_blue = 0;
+		SLONG shift_alpha = 0;
 
 		SLONG		Type;
 		SLONG       size;			// The size in pixels of the texture page.
