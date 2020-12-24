@@ -110,8 +110,8 @@ class	D3DTexture
 		SLONG shift_alpha = 0;
 
 		SLONG		Type;
-		SLONG       size;			// The size in pixels of the texture page.
-		SLONG       ContainsAlpha;
+		SLONG       size = 0;			// The size in pixels of the texture page.
+		SLONG       ContainsAlpha = 0;
 
 		HRESULT		LoadTextureTGA(CBYTE *tga_file,ULONG texid,BOOL bCanShrink=TRUE);
 

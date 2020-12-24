@@ -134,6 +134,16 @@ struct MFTime
 	SLONG		Ticks;			// Number of ticks(milliseconds) since windows started.
 };
 
+SLONG			main(UWORD argc, TCHAR** argv);
+BOOL			SetupHost(ULONG flags);
+void			ResetHost(void);
+//void            TraceText(CBYTE *error, ...);
+void            TraceText(char *error, ...);
+BOOL			LibShellActive(void);
+BOOL			LibShellChanged(void);
+
+
+//BOOL			LibShellMessage(const char *pMessage, const char *pFile, ULONG dwLine);
 
 
 #define	NoError					0
@@ -221,17 +231,7 @@ BOOL	ReadInputDevice(void);
 
 
 
-
-
-SLONG			main(UWORD argc, TCHAR** argv);
-BOOL			SetupHost(ULONG flags);
-void			ResetHost(void);
-//void            TraceText(CBYTE *error, ...);
-void            TraceText(char* error, ...);
-BOOL			LibShellActive(void);
-BOOL			LibShellChanged(void);
-BOOL			LibShellMessage(const char* pMessage, const char* pFile, ULONG dwLine);
-
+BOOL	LibShellMessage(const char* pMessage, const char* pFile, ULONG dwLine);
 
 
 

@@ -57,7 +57,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <StringPooling>true</StringPooling>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -147,7 +147,7 @@
       <SubSystem>Windows</SubSystem>
       <OutputFile>.\Debug\Fallen.exe</OutputFile>
       <AdditionalLibraryDirectories>c:\fallen\bink;c:\miles;c:\fallen\miles;c:\mflib1\libs;C:\qsound\QM411SDK\qmdx;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;comctl32.lib;amstrmid.lib;quartz.lib;strmbase.lib;ddraw.lib;dinput8.lib;dxguid.lib;imm32.lib;Version.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libcmtd.lib;odbc32.lib;odbccp32.lib;comctl32.lib;amstrmid.lib;quartz.lib;strmbase.lib;ddraw.lib;dinput8.lib;dxguid.lib;imm32.lib;Version.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PostBuildEvent>
@@ -157,7 +157,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\MFStdLib\Source\StdLib\StdFile.cpp" />
-    <ClCompile Include="..\MFStdLib\Source\StdLib\StdMaths.cpp" />
     <ClCompile Include="..\MFStdLib\Source\StdLib\StdMem.cpp" />
     <ClCompile Include="DDEngine\Source\aa.cpp" />
     <ClCompile Include="DDEngine\Source\aeng.cpp" />
@@ -708,11 +707,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\MFStdLib\Headers\MFStdLib.h" />
-    <ClInclude Include="..\MFStdLib\Headers\StdFile.h" />
-    <ClInclude Include="..\MFStdLib\Headers\StdKeybd.h" />
-    <ClInclude Include="..\MFStdLib\Headers\StdMaths.h" />
     <ClInclude Include="..\MFStdLib\Headers\StdMem.h" />
-    <ClInclude Include="..\MFStdLib\Headers\StdMouse.h" />
     <ClInclude Include="DDEngine\Headers\aa.h" />
     <ClInclude Include="DDEngine\Headers\aeng.h" />
     <ClInclude Include="DDEngine\Headers\BreakTimer.h" />
@@ -1011,6 +1006,11 @@
   <ItemGroup>
     <Text Include="notes.txt" />
     <Text Include="text\lang_english.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MFStdLibrary2\MFStdLibrary2.vcxproj">
+      <Project>{5d2cafb5-edfa-4e63-8f63-af57c5cf5e3b}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

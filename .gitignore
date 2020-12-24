@@ -5,3 +5,5 @@
 *.VC.opendb
 *.vcxproj.user
 /SDL2/VisualC/SDL/Win32
+
+MFStdLibrary2/Debug/
