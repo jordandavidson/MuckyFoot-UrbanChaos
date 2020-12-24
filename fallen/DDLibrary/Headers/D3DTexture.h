@@ -187,9 +187,9 @@ public:
 	}
 
 	// Call this when linking a standard D3DTexture to the page - it will demand-load the page's texture.
-	void D3DPage::EnsureLoaded ( void );
+	void EnsureLoaded();
 	// Call this when unloading everything.
-	void D3DPage::Unload ( void );
+	void Unload();
 
 };
 

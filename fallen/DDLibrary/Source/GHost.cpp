@@ -372,7 +372,7 @@ BOOL	LibShellChanged(void)
 }
 
 //---------------------------------------------------------------
-
+/*
 BOOL	LibShellMessage(const char *pMessage, const char *pFile, ULONG dwLine)
 {
 	BOOL		result;
@@ -415,7 +415,7 @@ BOOL	LibShellMessage(const char *pMessage, const char *pFile, ULONG dwLine)
 
 	return	result;
 }
-
+*/
 //---------------------------------------------------------------
 
 void	Time(MFTime *the_time)

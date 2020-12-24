@@ -21,9 +21,9 @@ CBYTE cTempFilename[MAX_LENGTH_OF_FULL_NAME+1];
 
 CBYTE *MakeFullPathName ( const CBYTE *cFilename )
 {
-	strncpy_s ( cTempFilename, cBasePath, sizeof(MAX_LENGTH_OF_FULL_NAME + 1));
+	strcpy ( cTempFilename, cBasePath);
 	ASSERT ( strlen ( cFilename ) < ( MAX_LENGTH_OF_FULL_NAME - MAX_LENGTH_OF_BASE_PATH ) );
-	strncat_s ( cTempFilename, cFilename, sizeof(MAX_LENGTH_OF_FULL_NAME + 1));
+	strcat ( cTempFilename, cFilename);
 	return ( cTempFilename );
 }
 
@@ -33,7 +33,7 @@ BOOL	FileExists( CBYTE *file_name)
 {
 	file_name = MakeFullPathName ( file_name );
 
-	if(GetFileAttributes((LPCWSTR)file_name)==0xffffffff)
+	if(GetFileAttributesA(file_name)==0xffffffff)
 		return	FALSE;
 	else
 		return	TRUE;
@@ -49,8 +49,8 @@ MFFileHandle	FileOpen(CBYTE *file_name)
 	{
 		file_name = MakeFullPathName ( file_name );
 
-    	result	=	CreateFile	(
-									(LPCWSTR)file_name,
+    	result	=	CreateFileA	(
+									file_name,
 									(GENERIC_READ),
 									(FILE_SHARE_READ),
 									NULL,

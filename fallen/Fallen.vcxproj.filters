@@ -10,15 +10,6 @@
     <Filter Include="fallen\Source Files">
       <UniqueIdentifier>{08bc38ae-bcd2-4b14-a711-cd1bc18111e5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="outro">
-      <UniqueIdentifier>{cd361eb0-d735-4330-be9e-4546f3290666}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="outro\Header Files">
-      <UniqueIdentifier>{9913c700-b5f2-4687-9e60-7a485e3d6eb7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="outro\Source Files">
-      <UniqueIdentifier>{2a0ac334-f4c1-4da3-8a30-67387b2911bf}</UniqueIdentifier>
-    </Filter>
     <Filter Include="DDEngine">
       <UniqueIdentifier>{4c74626e-f558-4de8-b7a1-3a32105e53a3}</UniqueIdentifier>
     </Filter>
@@ -63,15 +54,6 @@
     </Filter>
     <Filter Include="Ledit\Source Files">
       <UniqueIdentifier>{dea8be02-feca-4da8-a78c-69b0c328d14d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MFStdLib">
-      <UniqueIdentifier>{e05742ab-db31-44ce-bb0e-8c35195a504e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MFStdLib\Header Files">
-      <UniqueIdentifier>{8e4b92cd-fb79-475d-acfe-e69346a2e981}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MFStdLib\Source Files">
-      <UniqueIdentifier>{7a3c1483-28fd-48e5-8e95-19daa6c36856}</UniqueIdentifier>
     </Filter>
     <Filter Include="Res">
       <UniqueIdentifier>{78187831-b4fc-4a5f-b5e1-f24ffde16f98}</UniqueIdentifier>
@@ -764,39 +746,6 @@
     </ClCompile>
     <ClCompile Include="Ledit\Source\ledit.cpp">
       <Filter>Ledit\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="outro\back.cpp">
-      <Filter>outro\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="outro\cam.cpp">
-      <Filter>outro\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="outro\credits.cpp">
-      <Filter>outro\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="outro\imp.cpp">
-      <Filter>outro\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="outro\mf.cpp">
-      <Filter>outro\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="outro\os.cpp">
-      <Filter>outro\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="outro\outroFont.cpp">
-      <Filter>outro\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="outro\outroMain.cpp">
-      <Filter>outro\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="outro\outroMatrix.cpp">
-      <Filter>outro\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="outro\OutroTga.cpp">
-      <Filter>outro\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="outro\wire.cpp">
-      <Filter>outro\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1588,57 +1537,6 @@
     </ClInclude>
     <ClInclude Include="Ledit\Headers\ledit.h">
       <Filter>Ledit\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\MFStdLib\Headers\MFStdLib.h">
-      <Filter>MFStdLib\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="outro\Always.h">
-      <Filter>outro\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="outro\back.h">
-      <Filter>outro\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="outro\cam.h">
-      <Filter>outro\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="outro\checker.h">
-      <Filter>outro\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="outro\credits.h">
-      <Filter>outro\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="outro\font.h">
-      <Filter>outro\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="outro\imp.h">
-      <Filter>outro\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="outro\Key.h">
-      <Filter>outro\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="outro\lmap.h">
-      <Filter>outro\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="outro\Matrix.h">
-      <Filter>outro\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="outro\mf.h">
-      <Filter>outro\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="outro\midasdll.h">
-      <Filter>outro\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="outro\os.h">
-      <Filter>outro\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="outro\slap.h">
-      <Filter>outro\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="outro\Tga.h">
-      <Filter>outro\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="outro\wire.h">
-      <Filter>outro\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

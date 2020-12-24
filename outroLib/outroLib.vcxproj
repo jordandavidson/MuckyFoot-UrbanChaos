@@ -19,24 +19,44 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\MFStdLib.h" />
-    <ClInclude Include="include\StdFile.h" />
-    <ClInclude Include="include\StdKeybd.h" />
-    <ClInclude Include="include\StdMaths.h" />
-    <ClInclude Include="include\StdMem.h" />
-    <ClInclude Include="include\StdMouse.h" />
+    <ClInclude Include="include\Always.h" />
+    <ClInclude Include="include\back.h" />
+    <ClInclude Include="include\cam.h" />
+    <ClInclude Include="include\checker.h" />
+    <ClInclude Include="include\credits.h" />
+    <ClInclude Include="include\font.h" />
+    <ClInclude Include="include\imp.h" />
+    <ClInclude Include="include\Key.h" />
+    <ClInclude Include="include\lmap.h" />
+    <ClInclude Include="include\Matrix.h" />
+    <ClInclude Include="include\mf.h" />
+    <ClInclude Include="include\midasdll.h" />
+    <ClInclude Include="include\os.h" />
+    <ClInclude Include="include\slap.h" />
+    <ClInclude Include="include\Tga.h" />
+    <ClInclude Include="include\wire.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\StdFile.cpp" />
-    <ClCompile Include="src\StdMaths.cpp" />
-    <ClCompile Include="src\StdMem.cpp" />
-    <ClCompile Include="src\StdShell.cpp" />
+    <ClCompile Include="src\back.cpp" />
+    <ClCompile Include="src\cam.cpp" />
+    <ClCompile Include="src\checker.cpp" />
+    <ClCompile Include="src\credits.cpp" />
+    <ClCompile Include="src\imp.cpp" />
+    <ClCompile Include="src\lmap.cpp" />
+    <ClCompile Include="src\mf.cpp" />
+    <ClCompile Include="src\os.cpp" />
+    <ClCompile Include="src\outroFont.cpp" />
+    <ClCompile Include="src\outroMain.cpp" />
+    <ClCompile Include="src\outroMatrix.cpp" />
+    <ClCompile Include="src\outroTga.cpp" />
+    <ClCompile Include="src\slap.cpp" />
+    <ClCompile Include="src\wire.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{5d2cafb5-edfa-4e63-8f63-af57c5cf5e3b}</ProjectGuid>
-    <RootNamespace>MFStdLibrary2</RootNamespace>
+    <ProjectGuid>{ff117fc4-d2c8-457f-a275-ff87533e7f3e}</ProjectGuid>
+    <RootNamespace>outroLib</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -44,14 +64,14 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -105,6 +125,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -124,7 +145,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -143,6 +164,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -161,6 +183,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
