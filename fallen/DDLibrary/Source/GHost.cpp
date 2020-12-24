@@ -449,6 +449,8 @@ static LPTSTR	argv[MAX_PATH];
 #include "dtags.h"
 #endif
 
+void init_best_found(void);
+
 int WINAPI WinMain(HINSTANCE hThisInst, HINSTANCE hPrevInst, LPTSTR lpszArgs, int iWinMode)
 {
 	// Store WinMain parameters.
@@ -464,7 +466,7 @@ int WINAPI WinMain(HINSTANCE hThisInst, HINSTANCE hPrevInst, LPTSTR lpszArgs, in
 	hGlobalThisInst	=	hThisInst;
 	hGlobalPrevInst	=	hPrevInst;
 
-void	init_best_found(void);
+
 	init_best_found();
 
 
