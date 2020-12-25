@@ -45,14 +45,14 @@
     <OutDir>.\Release\</OutDir>
     <IntDir>.\Release\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\MFStdLib\Headers;$(IncludePath)</IncludePath>
+    <IncludePath>$(IncludePath);</IncludePath>
     <LibraryPath>$(SolutionDir)$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>.\Debug\</OutDir>
     <IntDir>.\Debug\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\MFStdLibrary2\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(IncludePath);</IncludePath>
     <LibraryPath>$(SolutionDir)$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -65,14 +65,15 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <WarningLevel>Level3</WarningLevel>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <AdditionalIncludeDirectories>Headers;..\fallen\ledit\headers;..\fallen\sedit\headers;..\fallen\DDLibrary\Headers;..\fallen\gedit\headers;..\fallen\ddengine\headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Headers;..\fallen\ledit\headers;..\fallen\sedit\headers;..\fallen\DDLibrary\Headers;..\fallen\gedit\headers;..\fallen\ddengine\headers;..\MFStdLibrary2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;_RELEASE;WIN32;_WINDOWS;VERSION_D3D;TEX_EMBED;FINAL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>.\Release\</AssemblerListingLocation>
       <BrowseInformation>true</BrowseInformation>
       <PrecompiledHeaderOutputFile>.\Release\Fallen.pch</PrecompiledHeaderOutputFile>
       <ObjectFileName>.\Release\</ObjectFileName>
       <ProgramDataBaseFileName>.\Release\</ProgramDataBaseFileName>
-      <AdditionalOptions> /D /NODEFAULTLIB:libcmtd.lib" "</AdditionalOptions>
+      <AdditionalOptions>
+      </AdditionalOptions>
       <StructMemberAlignment>1Byte</StructMemberAlignment>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -120,9 +121,10 @@
       <PrecompiledHeaderOutputFile>.\Debug\Fallen.pch</PrecompiledHeaderOutputFile>
       <ObjectFileName>.\Debug\</ObjectFileName>
       <ProgramDataBaseFileName>.\Debug\</ProgramDataBaseFileName>
-      <AdditionalOptions> /D /NODEFAULTLIB:libcmtd.lib" "</AdditionalOptions>
+      <AdditionalOptions>
+      </AdditionalOptions>
       <StructMemberAlignment>1Byte</StructMemberAlignment>
-      <AdditionalIncludeDirectories>Headers;..\fallen\ledit\headers;..\fallen\sedit\headers;..\fallen\DDLibrary\Headers;..\fallen\gedit\headers;..\fallen\ddengine\headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Headers;..\fallen\ledit\headers;..\fallen\sedit\headers;..\fallen\DDLibrary\Headers;..\fallen\gedit\headers;..\fallen\ddengine\headers;..\MFStdLibrary2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Midl>
@@ -151,8 +153,7 @@
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>copy "$(TargetPath)" "C:\Users\Jordan\Documents\urban-chaos-source"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -746,7 +747,6 @@
     <ClInclude Include="DDEngine\Headers\truetype.h" />
     <ClInclude Include="DDEngine\Headers\vertexbuffer.h" />
     <ClInclude Include="DDEngine\Headers\wibble.h" />
-    <ClInclude Include="DDLibrary\Headers\AsyncFile.h" />
     <ClInclude Include="DDLibrary\Headers\AsyncFile2.h" />
     <ClInclude Include="DDLibrary\Headers\BinkClient.h" />
     <ClInclude Include="DDLibrary\Headers\D3DTexture.h" />
@@ -977,6 +977,9 @@
     <Text Include="text\lang_english.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DDLib\DDLib.vcxproj">
+      <Project>{30b69159-dbbc-40fa-aca6-74b02817c9ac}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\MFStdLibrary2\MFStdLibrary2.vcxproj">
       <Project>{5d2cafb5-edfa-4e63-8f63-af57c5cf5e3b}</Project>
       <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>

@@ -222,6 +222,22 @@ SLONG	FileLoadAt(CBYTE *file_name,void *buffer)
 
 //---------------------------------------------------------------
 
+/*
+void TraceText(const char* fmt)
+{
+	//
+	// Work out the real message.
+	//
+
+	CBYTE   message[512];
+	va_list	ap;
+
+	va_start(ap, fmt);
+	vsprintf_s(message, fmt, ap);
+	va_end(ap);
+
+	OutputDebugString((LPCWSTR)message);
+}*/
 
 void TraceText(CBYTE *fmt, ...)
 {

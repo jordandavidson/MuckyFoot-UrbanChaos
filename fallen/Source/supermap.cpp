@@ -3717,9 +3717,9 @@ void	save_all_nads(void)
 		DONT_load=levels[c0].dontload;
 
 		strcpy(ELEV_fname_level,name);
-		TRACE("bLevel: %s \n",levels[c0].name);
+		TRACE((CBYTE*)"bLevel: %s \n",levels[c0].name);
 		game_create_psx(name);
-		TRACE("cLevel: %s \n",levels[c0].name);
+		TRACE((CBYTE*)"cLevel: %s \n",levels[c0].name);
 void	count_people_types(void);
 		count_people_types();
 
@@ -3763,14 +3763,14 @@ void	make_all_clumps(void)
 
 	TEXTURE_create_clump = 1;
 
-	TRACE("Doing front-end\n");
+	TRACE((CBYTE*)"Doing front-end\n");
 	TEXTURE_load_needed("levels\\frontend.ucm", 0, 256, 40);
 
 	Levels*	lptr = levels;//_demo;
 
 	while(lptr[c0].level)
 	{
-		TRACE("Doing level %s\n", lptr[c0].name);
+		TRACE((CBYTE*)"Doing level %s\n", lptr[c0].name);
 
 		CBYTE	name[100];
 		sprintf(name,"levels\\%s.ucm",lptr[c0].name);

@@ -137,8 +137,8 @@ struct MFTime
 SLONG			main(UWORD argc, TCHAR** argv);
 BOOL			SetupHost(ULONG flags);
 void			ResetHost(void);
-//void            TraceText(CBYTE *error, ...);
-void            TraceText(char *error, ...);
+void            TraceText(CBYTE *error, ...);
+//void            TraceTextChar(const char *error);
 BOOL			LibShellActive(void);
 BOOL			LibShellChanged(void);
 
@@ -156,7 +156,7 @@ void			DebugText(CBYTE *error, ...);
 #define	LogText				DebugText
 #define	MFMessage			LibShellMessage
 #define	ERROR_MSG(e,m)		{if(!(e)) {LibShellMessage(m,__FILE__,__LINE__);}}
-//#define ASSERT(e)			{if (!(e)) { DebugBreak(); }else{/*TRACE("file %s line %d \n",__FILE__,__LINE__);*/}}
+//#define ASSERT(e)			{if (!(e)) { DebugBreak(); }else{/*TRACE((CBYTE*)"file %s line %d \n",__FILE__,__LINE__);*/}}
 #ifndef ASSERT
 #define ASSERT(e)			ERROR_MSG(e,"ASSERT TRIGGERED");
 #endif

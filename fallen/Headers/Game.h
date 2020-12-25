@@ -114,7 +114,8 @@ extern	struct MemTable save_table[];
 #include	"interact.h"
 
 #ifdef VERSION_D3D
-#include	"aeng.h"
+//#include	"aeng.h"
+#include "../../DDEngineLib/include/aeng.h"
 #endif
 
 #ifdef	PSX

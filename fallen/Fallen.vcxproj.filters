@@ -1226,9 +1226,6 @@
     <ClInclude Include="DDEngine\Headers\wibble.h">
       <Filter>DDEngine\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DDLibrary\Headers\AsyncFile.h">
-      <Filter>DDLibrary\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DDLibrary\Headers\AsyncFile2.h">
       <Filter>DDLibrary\Header Files</Filter>
     </ClInclude>

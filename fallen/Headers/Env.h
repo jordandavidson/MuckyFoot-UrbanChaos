@@ -36,14 +36,14 @@ extern int ENV_save ( char *pcData );
 // retrieve values
 //
 
-CBYTE *ENV_get_value_string(CBYTE *name, CBYTE* section = "Game");				// returns NULL if not found - NOTE: string is in a static buffer
-SLONG  ENV_get_value_number(CBYTE *name, SLONG def, CBYTE* section = "Game");	// returns def if not found
+CBYTE *ENV_get_value_string(CBYTE *name, CBYTE* section = (CBYTE*)"Game");				// returns NULL if not found - NOTE: string is in a static buffer
+SLONG  ENV_get_value_number(CBYTE *name, SLONG def, CBYTE* section = (CBYTE*)"Game");	// returns def if not found
 
 //
 // store values
 //
 
-void ENV_set_value_string(CBYTE* name, CBYTE* value, CBYTE* section = "Game");
-void ENV_set_value_number(CBYTE* name, SLONG value, CBYTE* section = "Game");
+void ENV_set_value_string(CBYTE* name, CBYTE* value, CBYTE* section = (CBYTE*)"Game");
+void ENV_set_value_number(CBYTE* name, SLONG value, CBYTE* section = (CBYTE*)"Game");
 
 #endif

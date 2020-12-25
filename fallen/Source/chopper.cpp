@@ -89,7 +89,7 @@ Thing *alloc_chopper(UBYTE type)
 	// There are no spare chopper structures.
 	//
 
-	TRACE("Run out of chopper structures.");
+	TRACE((CBYTE*)"Run out of chopper structures.");
 
 	return NULL;
 
@@ -108,7 +108,7 @@ Thing *alloc_chopper(UBYTE type)
 		// Could not allocate a drawmesh structure.
 		//
 
-		TRACE("Run out of drawmesh structures.");
+		TRACE((CBYTE*)"Run out of drawmesh structures.");
 
 		//
 		// Free up the chopper structure we allocated.
@@ -425,7 +425,7 @@ void CHOPPER_predict_altitude(Thing *thing, Chopper *chopper)
   altitude/=dist;
 /*
   if ((altitude>20)&&(MAV_inside(tx,gnd,tz))) {
-	  TRACE("panic!\n");
+	  TRACE((CBYTE*)"panic!\n");
 	  CHOPPER_damp(chopper,1);
 	  CHOPPER_damp(chopper,1);
   }
@@ -754,22 +754,22 @@ void CHOPPER_fn_normal(Thing *thing)
 void CHOPPER_init_state(Thing *chopper_thing, UBYTE new_state) {
 	Chopper *chopper = CHOPPER_get_chopper(chopper_thing);
 	
-	TRACE("Chopper: ");
+	TRACE((CBYTE*)"Chopper: ");
 	switch (new_state) {
 	case CHOPPER_substate_idle:
-		TRACE("Idle\n");
+		TRACE((CBYTE*)"Idle\n");
 		break;
 	case CHOPPER_substate_takeoff:
-		TRACE("Takeoff\n");
+		TRACE((CBYTE*)"Takeoff\n");
 		chopper->counter       = 0;
 		chopper->since_takeoff = 0;
 		break;
 	case CHOPPER_substate_landing:
-		TRACE("Landing\n");
+		TRACE((CBYTE*)"Landing\n");
 		chopper->counter=0;
 		break;
 	case CHOPPER_substate_landed:
-		TRACE("Landed\n");
+		TRACE((CBYTE*)"Landed\n");
 		chopper->counter=0;
 		break;
 	case CHOPPER_substate_tracking:
@@ -779,22 +779,22 @@ void CHOPPER_init_state(Thing *chopper_thing, UBYTE new_state) {
 			chopper->victim=0;
 		}
 		if (!(chopper->target)) {
-			TRACE("Tracking failed, no target\n");
+			TRACE((CBYTE*)"Tracking failed, no target\n");
 			CHOPPER_init_state(chopper_thing, CHOPPER_substate_idle);
 		} else {
-			TRACE("Tracking\n");
+			TRACE((CBYTE*)"Tracking\n");
 		}
 		chopper->counter=0;
 		break;
 	case CHOPPER_substate_homing:
 		chopper->target=0;
 		chopper->counter=0;
-		TRACE("Homing\n");
+		TRACE((CBYTE*)"Homing\n");
 		break;
 	case CHOPPER_substate_patrolling:
 		chopper->target=0;
 		chopper->patrol=0;
-		TRACE("Patrolling\n");
+		TRACE((CBYTE*)"Patrolling\n");
 		break;
 	}
 	chopper->substate = new_state;

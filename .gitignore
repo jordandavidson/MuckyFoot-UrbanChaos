@@ -7,5 +7,19 @@
 /SDL2/VisualC/SDL/Win32
 
 MFStdLibrary2/Debug/
+MFStdLibrary2/Release/
+MFStdLibrary2/x64/Debug/
+MFStdLibrary2/x64/Release/
 
 outroLib/Debug/
+outroLib/Release/
+
+DDEngineLib/Debug/
+DDEngineLib/x64/Debug
+DDEngineLib/Release/
+DDEngineLib/x64/Release
+
+DDLib/Debug/
+DDLib/x64/Debug/
+DDLib/Release/
+DDLib/x64/Release/

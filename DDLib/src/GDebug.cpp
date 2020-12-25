@@ -1,0 +1,297 @@
+// Debug.cpp
+// Guy Simmons, 15th November 1997.
+
+#include	"DDLib.h"
+
+#ifndef NDEBUG
+
+HANDLE		LogFile;
+
+//---------------------------------------------------------------
+
+HANDLE	InitDebugLog(void)
+{
+	LogFile	=	CreateFileA	(
+								"DebugLog.txt",
+								(GENERIC_READ|GENERIC_WRITE),
+								(FILE_SHARE_READ|FILE_SHARE_WRITE),
+								NULL,
+								CREATE_ALWAYS,
+								0,
+								NULL
+	                   		);
+	if(LogFile==INVALID_HANDLE_VALUE)
+	{
+		LogFile	=	NULL;
+	}
+	return	LogFile;
+}
+
+//---------------------------------------------------------------
+
+void	FiniDebugLog(void)
+{
+	if(LogFile)
+	CloseHandle(LogFile);
+}
+
+//---------------------------------------------------------------
+
+void	DebugText(const char* error)
+{
+	CBYTE 			buf[512];
+	SLONG			bytes_written;
+	va_list 		argptr;
+
+	if (LogFile)
+	{
+		va_start(argptr, error);
+		vsprintf(buf, error, argptr);
+		va_end(argptr);
+
+		WriteFile(LogFile, buf, strlen(buf), (LPDWORD)&bytes_written, NULL);
+	}
+}
+
+void	DebugText(CBYTE *error, ...)
+{
+	CBYTE 			buf[512];
+	SLONG			bytes_written;
+	va_list 		argptr;
+
+	if(LogFile)
+	{
+		va_start(argptr,error); 
+		vsprintf(buf, error,argptr); 
+		va_end(argptr);
+
+		WriteFile(LogFile,buf,strlen(buf),(LPDWORD)&bytes_written,NULL);
+	}
+}
+
+//---------------------------------------------------------------
+
+#define OutputDXError TRACE
+
+void	dd_error(HRESULT dd_err)
+{
+	if(dd_err)
+	{
+		OutputDXError((CBYTE*)"DirectDraw Error: ");
+		switch(dd_err)
+		{
+			case	DDERR_ALREADYINITIALIZED:			OutputDXError((CBYTE*)"DDERR_ALREADYINITIALIZED");break;
+			case	DDERR_CANNOTATTACHSURFACE:			OutputDXError((CBYTE*)"DDERR_CANNOTATTACHSURFACE");break;
+			case	DDERR_CANNOTDETACHSURFACE:			OutputDXError((CBYTE*)"DDERR_CANNOTDETACHSURFACE");break;
+			case	DDERR_CURRENTLYNOTAVAIL:			OutputDXError((CBYTE*)"DDERR_CURRENTLYNOTAVAIL");break;
+			case	DDERR_EXCEPTION:					OutputDXError((CBYTE*)"DDERR_EXCEPTION");break;
+			case	DDERR_GENERIC:						OutputDXError((CBYTE*)"DDERR_GENERIC");break;
+			case	DDERR_HEIGHTALIGN:					OutputDXError((CBYTE*)"DDERR_HEIGHTALIGN");break;
+			case	DDERR_INCOMPATIBLEPRIMARY:			OutputDXError((CBYTE*)"DDERR_INCOMPATIBLEPRIMARY");break;
+			case	DDERR_INVALIDCAPS:					OutputDXError((CBYTE*)"DDERR_INVALIDCAPS");break;
+			case	DDERR_INVALIDCLIPLIST:				OutputDXError((CBYTE*)"DDERR_INVALIDCLIPLIST");break;
+			case	DDERR_INVALIDMODE:					OutputDXError((CBYTE*)"DDERR_INVALIDMODE");break;
+			case	DDERR_INVALIDOBJECT:				OutputDXError((CBYTE*)"DDERR_INVALIDOBJECT");break;
+			case	DDERR_INVALIDPARAMS:				OutputDXError((CBYTE*)"DDERR_INVALIDPARAMS");break;
+			case	DDERR_INVALIDPIXELFORMAT:			OutputDXError((CBYTE*)"DDERR_INVALIDPIXELFORMAT");break;
+			case	DDERR_INVALIDRECT:					OutputDXError((CBYTE*)"DDERR_INVALIDRECT");break;
+			case	DDERR_LOCKEDSURFACES:				OutputDXError((CBYTE*)"DDERR_LOCKEDSURFACES");break;
+			case	DDERR_NO3D:							OutputDXError((CBYTE*)"DDERR_NO3D");break;
+			case	DDERR_NOALPHAHW:					OutputDXError((CBYTE*)"DDERR_NOALPHAHW");break;
+			case	DDERR_NOCLIPLIST:					OutputDXError((CBYTE*)"DDERR_NOCLIPLIST");break;
+			case	DDERR_NOCOLORCONVHW:				OutputDXError((CBYTE*)"DDERR_NOCOLORCONVHW");break;
+			case	DDERR_NOCOOPERATIVELEVELSET:		OutputDXError((CBYTE*)"DDERR_NOCOOPERATIVELEVELSET");break;
+			case	DDERR_NOCOLORKEY:					OutputDXError((CBYTE*)"DDERR_NOCOLORKEY");break;
+			case	DDERR_NOCOLORKEYHW:					OutputDXError((CBYTE*)"DDERR_NOCOLORKEYHW");break;
+			case	DDERR_NODIRECTDRAWSUPPORT:			OutputDXError((CBYTE*)"DDERR_NODIRECTDRAWSUPPORT");break;
+			case	DDERR_NOEXCLUSIVEMODE:				OutputDXError((CBYTE*)"DDERR_NOEXCLUSIVEMODE");break;
+			case	DDERR_NOFLIPHW:						OutputDXError((CBYTE*)"DDERR_NOFLIPHW");break;
+			case	DDERR_NOGDI:						OutputDXError((CBYTE*)"DDERR_NOGDI");break;
+			case	DDERR_NOMIRRORHW:					OutputDXError((CBYTE*)"DDERR_NOMIRRORHW");break;
+			case	DDERR_NOTFOUND:						OutputDXError((CBYTE*)"DDERR_NOTFOUND");break;
+			case	DDERR_NOOVERLAYHW:					OutputDXError((CBYTE*)"DDERR_NOOVERLAYHW");break;
+			case	DDERR_NORASTEROPHW:					OutputDXError((CBYTE*)"DDERR_NORASTEROPHW");break;
+			case	DDERR_NOROTATIONHW:					OutputDXError((CBYTE*)"DDERR_NOROTATIONHW");break;
+			case	DDERR_NOSTRETCHHW:					OutputDXError((CBYTE*)"DDERR_NOSTRETCHHW");break;
+			case	DDERR_NOT4BITCOLOR:					OutputDXError((CBYTE*)"DDERR_NOT4BITCOLOR");break;
+			case	DDERR_NOT4BITCOLORINDEX:			OutputDXError((CBYTE*)"DDERR_NOT4BITCOLORINDEX");break;
+			case	DDERR_NOT8BITCOLOR:					OutputDXError((CBYTE*)"DDERR_NOT8BITCOLOR");break;
+			case	DDERR_NOTEXTUREHW:					OutputDXError((CBYTE*)"DDERR_NOTEXTUREHW");break;
+			case	DDERR_NOVSYNCHW:					OutputDXError((CBYTE*)"DDERR_NOVSYNCHW");break;
+			case	DDERR_NOZBUFFERHW:					OutputDXError((CBYTE*)"DDERR_NOZBUFFERHW");break;
+			case	DDERR_NOZOVERLAYHW:					OutputDXError((CBYTE*)"DDERR_NOZOVERLAYHW");break;
+			case	DDERR_OUTOFCAPS:					OutputDXError((CBYTE*)"DDERR_OUTOFCAPS");break;
+			case	DDERR_OUTOFMEMORY:					OutputDXError((CBYTE*)"DDERR_OUTOFMEMORY");break;
+			case	DDERR_OUTOFVIDEOMEMORY:				OutputDXError((CBYTE*)"DDERR_OUTOFVIDEOMEMORY");break;
+			case	DDERR_OVERLAYCANTCLIP:				OutputDXError((CBYTE*)"DDERR_OVERLAYCANTCLIP");break;
+			case	DDERR_OVERLAYCOLORKEYONLYONEACTIVE:	OutputDXError((CBYTE*)"DDERR_OVERLAYCOLORKEYONLYONEACTIVE");break;
+			case	DDERR_PALETTEBUSY:					OutputDXError((CBYTE*)"DDERR_PALETTEBUSY");break;
+			case	DDERR_COLORKEYNOTSET:				OutputDXError((CBYTE*)"DDERR_COLORKEYNOTSET");break;
+			case	DDERR_SURFACEALREADYATTACHED:		OutputDXError((CBYTE*)"DDERR_SURFACEALREADYATTACHED");break;
+			case	DDERR_SURFACEALREADYDEPENDENT:		OutputDXError((CBYTE*)"DDERR_SURFACEALREADYDEPENDENT");break;
+			case	DDERR_SURFACEBUSY:					OutputDXError((CBYTE*)"DDERR_SURFACEBUSY");break;
+			case	DDERR_CANTLOCKSURFACE:				OutputDXError((CBYTE*)"DDERR_CANTLOCKSURFACE");break;
+			case	DDERR_SURFACEISOBSCURED:			OutputDXError((CBYTE*)"DDERR_SURFACEISOBSCURED");break;
+			case	DDERR_SURFACELOST:					OutputDXError((CBYTE*)"DDERR_SURFACELOST");break;
+			case	DDERR_SURFACENOTATTACHED:			OutputDXError((CBYTE*)"DDERR_SURFACENOTATTACHED");break;
+			case	DDERR_TOOBIGHEIGHT:					OutputDXError((CBYTE*)"DDERR_TOOBIGHEIGHT");break;
+			case	DDERR_TOOBIGSIZE:					OutputDXError((CBYTE*)"DDERR_TOOBIGSIZE");break;
+			case	DDERR_TOOBIGWIDTH:					OutputDXError((CBYTE*)"DDERR_TOOBIGWIDTH");break;
+			case	DDERR_UNSUPPORTED:					OutputDXError((CBYTE*)"DDERR_UNSUPPORTED");break;
+			case	DDERR_UNSUPPORTEDFORMAT:			OutputDXError((CBYTE*)"DDERR_UNSUPPORTEDFORMAT");break;
+			case	DDERR_UNSUPPORTEDMASK:				OutputDXError((CBYTE*)"DDERR_UNSUPPORTEDMASK");break;
+			case	DDERR_VERTICALBLANKINPROGRESS:		OutputDXError((CBYTE*)"DDERR_VERTICALBLANKINPROGRESS");break;
+			case	DDERR_WASSTILLDRAWING:				OutputDXError((CBYTE*)"DDERR_WASSTILLDRAWING");break;
+			case	DDERR_XALIGN:						OutputDXError((CBYTE*)"DDERR_XALIGN");break;
+			case	DDERR_INVALIDDIRECTDRAWGUID:		OutputDXError((CBYTE*)"DDERR_INVALIDDIRECTDRAWGUID");break;
+			case	DDERR_DIRECTDRAWALREADYCREATED:		OutputDXError((CBYTE*)"DDERR_DIRECTDRAWALREADYCREATED");break;
+			case	DDERR_NODIRECTDRAWHW:				OutputDXError((CBYTE*)"DDERR_NODIRECTDRAWHW");break;
+			case	DDERR_PRIMARYSURFACEALREADYEXISTS:	OutputDXError((CBYTE*)"DDERR_PRIMARYSURFACEALREADYEXISTS");break;
+			case	DDERR_NOEMULATION:					OutputDXError((CBYTE*)"DDERR_NOEMULATION");break;
+			case	DDERR_REGIONTOOSMALL:				OutputDXError((CBYTE*)"DDERR_REGIONTOOSMALL");break;
+			case	DDERR_CLIPPERISUSINGHWND:			OutputDXError((CBYTE*)"DDERR_CLIPPERISUSINGHWND");break;
+			case	DDERR_NOCLIPPERATTACHED:			OutputDXError((CBYTE*)"DDERR_NOCLIPPERATTACHED");break;
+			case	DDERR_NOHWND:						OutputDXError((CBYTE*)"DDERR_NOHWND");break;
+			case	DDERR_HWNDSUBCLASSED:				OutputDXError((CBYTE*)"DDERR_HWNDSUBCLASSED");break;
+			case	DDERR_HWNDALREADYSET:				OutputDXError((CBYTE*)"DDERR_HWNDALREADYSET");break;
+			case	DDERR_NOPALETTEATTACHED:			OutputDXError((CBYTE*)"DDERR_NOPALETTEATTACHED");break;
+			case	DDERR_NOPALETTEHW:					OutputDXError((CBYTE*)"DDERR_NOPALETTEHW");break;
+			case	DDERR_BLTFASTCANTCLIP:				OutputDXError((CBYTE*)"DDERR_BLTFASTCANTCLIP");break;
+			case	DDERR_NOBLTHW:						OutputDXError((CBYTE*)"DDERR_NOBLTHW");break;
+			case	DDERR_NODDROPSHW:					OutputDXError((CBYTE*)"DDERR_NODDROPSHW");break;
+			case	DDERR_OVERLAYNOTVISIBLE:			OutputDXError((CBYTE*)"DDERR_OVERLAYNOTVISIBLE");break;
+			case	DDERR_NOOVERLAYDEST:				OutputDXError((CBYTE*)"DDERR_NOOVERLAYDEST");break;
+			case	DDERR_INVALIDPOSITION:				OutputDXError((CBYTE*)"DDERR_INVALIDPOSITION");break;
+			case	DDERR_NOTAOVERLAYSURFACE:			OutputDXError((CBYTE*)"DDERR_NOTAOVERLAYSURFACE");break;
+			case	DDERR_EXCLUSIVEMODEALREADYSET:		OutputDXError((CBYTE*)"DDERR_EXCLUSIVEMODEALREADYSET");break;
+			case	DDERR_NOTFLIPPABLE:					OutputDXError((CBYTE*)"DDERR_NOTFLIPPABLE");break;
+			case	DDERR_CANTDUPLICATE:				OutputDXError((CBYTE*)"DDERR_CANTDUPLICATE");break;
+			case	DDERR_NOTLOCKED:					OutputDXError((CBYTE*)"DDERR_NOTLOCKED");break;
+			case	DDERR_CANTCREATEDC:					OutputDXError((CBYTE*)"DDERR_CANTCREATEDC");break;
+			case	DDERR_NODC:							OutputDXError((CBYTE*)"DDERR_NODC");break;
+			case	DDERR_WRONGMODE:					OutputDXError((CBYTE*)"DDERR_WRONGMODE");break;
+			case	DDERR_IMPLICITLYCREATED:			OutputDXError((CBYTE*)"DDERR_IMPLICITLYCREATED");break;
+			case	DDERR_NOTPALETTIZED:				OutputDXError((CBYTE*)"DDERR_NOTPALETTIZED");break;
+			case	DDERR_UNSUPPORTEDMODE:				OutputDXError((CBYTE*)"DDERR_UNSUPPORTEDMODE");break;
+			case	DDERR_NOMIPMAPHW:					OutputDXError((CBYTE*)"DDERR_NOMIPMAPHW");break;
+			case	DDERR_INVALIDSURFACETYPE:			OutputDXError((CBYTE*)"DDERR_INVALIDSURFACETYPE");break;
+			case	DDERR_NOOPTIMIZEHW:					OutputDXError((CBYTE*)"DDERR_NOOPTIMIZEHW");break;
+			case	DDERR_NOTLOADED:					OutputDXError((CBYTE*)"DDERR_NOTLOADED");break;
+			case	DDERR_DCALREADYCREATED:				OutputDXError((CBYTE*)"DDERR_DCALREADYCREATED");break;
+			case	DDERR_NONONLOCALVIDMEM:				OutputDXError((CBYTE*)"DDERR_NONONLOCALVIDMEM");break;
+			case	DDERR_CANTPAGELOCK:					OutputDXError((CBYTE*)"DDERR_CANTPAGELOCK");break;
+			case	DDERR_CANTPAGEUNLOCK:				OutputDXError((CBYTE*)"DDERR_CANTPAGEUNLOCK");break;
+			case	DDERR_NOTPAGELOCKED:				OutputDXError((CBYTE*)"DDERR_NOTPAGELOCKED");break;
+			case	DDERR_MOREDATA:						OutputDXError((CBYTE*)"DDERR_MOREDATA");break;
+			case	DDERR_VIDEONOTACTIVE:				OutputDXError((CBYTE*)"DDERR_VIDEONOTACTIVE");break;
+			case	DDERR_DEVICEDOESNTOWNSURFACE:		OutputDXError((CBYTE*)"DDERR_DEVICEDOESNTOWNSURFACE");break;
+			case	DDERR_NOTINITIALIZED:				OutputDXError((CBYTE*)"DDERR_NOTINITIALIZED");break;
+			default:									OutputDXError((CBYTE*)"Unknown - %ld",dd_err&0xffff);
+		}
+		OutputDXError((CBYTE*)"\n");
+	}
+}
+
+//---------------------------------------------------------------
+
+void	d3d_error(HRESULT dd_err)
+{
+	if(dd_err)
+	{
+		OutputDXError((CBYTE*)"Direct3D Error: ");
+		switch(dd_err)
+		{
+			case	D3DERR_BADMAJORVERSION:			OutputDXError((CBYTE*)"D3DERR_BADMAJORVERSION");break;
+			case	D3DERR_BADMINORVERSION:			OutputDXError((CBYTE*)"D3DERR_BADMINORVERSION");break;
+			case	D3DERR_INVALID_DEVICE:			OutputDXError((CBYTE*)"D3DERR_INVALID_DEVICE");break;
+			case	D3DERR_EXECUTE_CREATE_FAILED:	OutputDXError((CBYTE*)"D3DERR_EXECUTE_CREATE_FAILED");break;
+			case	D3DERR_EXECUTE_DESTROY_FAILED:	OutputDXError((CBYTE*)"D3DERR_EXECUTE_DESTROY_FAILED");break;
+			case	D3DERR_EXECUTE_LOCK_FAILED:		OutputDXError((CBYTE*)"D3DERR_EXECUTE_LOCK_FAILED");break;
+			case	D3DERR_EXECUTE_UNLOCK_FAILED:	OutputDXError((CBYTE*)"D3DERR_EXECUTE_UNLOCK_FAILED");break;
+			case	D3DERR_EXECUTE_LOCKED:			OutputDXError((CBYTE*)"D3DERR_EXECUTE_LOCKED");break;
+			case	D3DERR_EXECUTE_NOT_LOCKED:		OutputDXError((CBYTE*)"D3DERR_EXECUTE_NOT_LOCKED");break;
+			case	D3DERR_EXECUTE_FAILED:			OutputDXError((CBYTE*)"D3DERR_EXECUTE_FAILED");break;
+			case	D3DERR_EXECUTE_CLIPPED_FAILED:	OutputDXError((CBYTE*)"D3DERR_EXECUTE_CLIPPED_FAILED");break;
+			case	D3DERR_TEXTURE_NO_SUPPORT:		OutputDXError((CBYTE*)"D3DERR_TEXTURE_NO_SUPPORT");break;
+			case	D3DERR_TEXTURE_CREATE_FAILED:	OutputDXError((CBYTE*)"D3DERR_TEXTURE_CREATE_FAILED");break;
+			case	D3DERR_TEXTURE_DESTROY_FAILED:	OutputDXError((CBYTE*)"D3DERR_TEXTURE_DESTROY_FAILED");break;
+			case	D3DERR_TEXTURE_LOCK_FAILED:		OutputDXError((CBYTE*)"D3DERR_TEXTURE_LOCK_FAILED");break;
+			case	D3DERR_TEXTURE_UNLOCK_FAILED:	OutputDXError((CBYTE*)"D3DERR_TEXTURE_UNLOCK_FAILED");break;
+			case	D3DERR_TEXTURE_LOAD_FAILED:		OutputDXError((CBYTE*)"D3DERR_TEXTURE_LOAD_FAILED");break;
+			case	D3DERR_TEXTURE_SWAP_FAILED:		OutputDXError((CBYTE*)"D3DERR_TEXTURE_SWAP_FAILED");break;
+			case	D3DERR_TEXTURE_LOCKED:			OutputDXError((CBYTE*)"D3DERR_TEXTURE_LOCKED");break;
+			case	D3DERR_TEXTURE_NOT_LOCKED:		OutputDXError((CBYTE*)"D3DERR_TEXTURE_NOT_LOCKED");break;
+			case	D3DERR_TEXTURE_GETSURF_FAILED:	OutputDXError((CBYTE*)"D3DERR_TEXTURE_GETSURF_FAILED");break;
+			case	D3DERR_MATRIX_CREATE_FAILED:	OutputDXError((CBYTE*)"D3DERR_MATRIX_CREATE_FAILED");break;
+			case	D3DERR_MATRIX_DESTROY_FAILED:	OutputDXError((CBYTE*)"D3DERR_MATRIX_DESTROY_FAILED");break;
+			case	D3DERR_MATRIX_SETDATA_FAILED:	OutputDXError((CBYTE*)"D3DERR_MATRIX_SETDATA_FAILED");break;
+			case	D3DERR_MATRIX_GETDATA_FAILED:	OutputDXError((CBYTE*)"D3DERR_MATRIX_GETDATA_FAILED");break;
+			case	D3DERR_SETVIEWPORTDATA_FAILED:	OutputDXError((CBYTE*)"D3DERR_SETVIEWPORTDATA_FAILED");break;
+			case	D3DERR_MATERIAL_CREATE_FAILED:	OutputDXError((CBYTE*)"D3DERR_MATERIAL_CREATE_FAILED");break;
+			case	D3DERR_MATERIAL_DESTROY_FAILED:	OutputDXError((CBYTE*)"D3DERR_MATERIAL_DESTROY_FAILED");break;
+			case	D3DERR_MATERIAL_SETDATA_FAILED:	OutputDXError((CBYTE*)"D3DERR_MATERIAL_SETDATA_FAILED");break;
+			case	D3DERR_MATERIAL_GETDATA_FAILED:	OutputDXError((CBYTE*)"D3DERR_MATERIAL_GETDATA_FAILED");break;
+			case	D3DERR_LIGHT_SET_FAILED:		OutputDXError((CBYTE*)"D3DERR_LIGHT_SET_FAILED");break;
+			case	D3DERR_SCENE_IN_SCENE:			OutputDXError((CBYTE*)"D3DERR_SCENE_IN_SCENE");break;
+			case	D3DERR_SCENE_NOT_IN_SCENE:		OutputDXError((CBYTE*)"D3DERR_SCENE_NOT_IN_SCENE");break;
+			case	D3DERR_SCENE_BEGIN_FAILED:		OutputDXError((CBYTE*)"D3DERR_SCENE_BEGIN_FAILED");break;
+			case	D3DERR_SCENE_END_FAILED:		OutputDXError((CBYTE*)"D3DERR_SCENE_END_FAILED");break;
+			case	D3DERR_INBEGIN:					OutputDXError((CBYTE*)"D3DERR_INBEGIN");break;
+			case	D3DERR_NOTINBEGIN:				OutputDXError((CBYTE*)"D3DERR_NOTINBEGIN");break;
+			case	D3DERR_NOVIEWPORTS:				OutputDXError((CBYTE*)"D3DERR_NOVIEWPORTS");break;
+			case	D3DERR_VIEWPORTDATANOTSET:		OutputDXError((CBYTE*)"D3DERR_VIEWPORTDATANOTSET");break;
+			case	D3DERR_INVALIDCURRENTVIEWPORT:	OutputDXError((CBYTE*)"D3DERR_INVALIDCURRENTVIEWPORT");break;
+			case	D3DERR_INVALIDPRIMITIVETYPE:	OutputDXError((CBYTE*)"D3DERR_INVALIDPRIMITIVETYPE");break;
+			case	D3DERR_INVALIDVERTEXTYPE:		OutputDXError((CBYTE*)"D3DERR_INVALIDVERTEXTYPE");break;
+			case	D3DERR_TEXTURE_BADSIZE:			OutputDXError((CBYTE*)"D3DERR_TEXTURE_BADSIZE");break;
+			default:								dd_error(dd_err);
+		}
+		OutputDXError((CBYTE*)"\n");
+	}
+}
+
+//---------------------------------------------------------------
+
+void	di_error(HRESULT di_err)
+{
+	if(di_err)
+	{
+		OutputDXError((CBYTE*)"DirectInput Error: ");
+		switch(di_err)
+		{
+			case	DIERR_OLDDIRECTINPUTVERSION:	OutputDXError((CBYTE*)"DIERR_OLDDIRECTINPUTVERSION");break;
+			case	DIERR_BETADIRECTINPUTVERSION:	OutputDXError((CBYTE*)"DIERR_BETADIRECTINPUTVERSION");break;
+			case	DIERR_BADDRIVERVER:				OutputDXError((CBYTE*)"DIERR_BADDRIVERVER");break;
+			case	DIERR_DEVICENOTREG:				OutputDXError((CBYTE*)"DIERR_DEVICENOTREG");break;	
+			case	DIERR_NOTFOUND:					OutputDXError((CBYTE*)"DIERR_NOTFOUND\nDIERR_OBJECTNOTFOUND\nDIERR_READONLY\nDIERR_HANDLEEXISTS");break;	
+			case	DIERR_INVALIDPARAM:				OutputDXError((CBYTE*)"DIERR_INVALIDPARAM");break;
+			case	DIERR_NOINTERFACE:				OutputDXError((CBYTE*)"DIERR_NOINTERFACE");break;	
+			case	DIERR_GENERIC:					OutputDXError((CBYTE*)"DIERR_GENERIC");break;	
+			case	DIERR_OUTOFMEMORY:				OutputDXError((CBYTE*)"DIERR_OUTOFMEMORY");break;		
+			case	DIERR_UNSUPPORTED:				OutputDXError((CBYTE*)"DIERR_UNSUPPORTED");break;	
+			case	DIERR_NOTINITIALIZED:			OutputDXError((CBYTE*)"DIERR_NOTINITIALIZED");break;	
+			case	DIERR_ALREADYINITIALIZED:		OutputDXError((CBYTE*)"DIERR_ALREADYINITIALIZED");break;
+			case	DIERR_NOAGGREGATION:			OutputDXError((CBYTE*)"DIERR_NOAGGREGATION");break;
+			case	DIERR_OTHERAPPHASPRIO:			OutputDXError((CBYTE*)"DIERR_OTHERAPPHASPRIO");break;	
+			case	DIERR_INPUTLOST:				OutputDXError((CBYTE*)"DIERR_INPUTLOST");break;
+			case	DIERR_ACQUIRED:					OutputDXError((CBYTE*)"DIERR_ACQUIRED");break;		
+			case	DIERR_NOTACQUIRED:				OutputDXError((CBYTE*)"DIERR_NOTACQUIRED");break;		
+			case	E_PENDING:						OutputDXError((CBYTE*)"E_PENDING");break;	
+			case	DIERR_INSUFFICIENTPRIVS:		OutputDXError((CBYTE*)"DIERR_INSUFFICIENTPRIVS");break;
+			case	DIERR_DEVICEFULL:				OutputDXError((CBYTE*)"DIERR_DEVICEFULL");break;
+			case	DIERR_MOREDATA:					OutputDXError((CBYTE*)"DIERR_MOREDATA");break;	
+			case	DIERR_NOTDOWNLOADED:			OutputDXError((CBYTE*)"DIERR_NOTDOWNLOADED");break;	
+			case	DIERR_HASEFFECTS:				OutputDXError((CBYTE*)"DIERR_HASEFFECTS");break;	
+			case	DIERR_NOTEXCLUSIVEACQUIRED:		OutputDXError((CBYTE*)"DIERR_NOTEXCLUSIVEACQUIRED");break;
+			case	DIERR_INCOMPLETEEFFECT:			OutputDXError((CBYTE*)"DIERR_INCOMPLETEEFFECT");break;
+			case	DIERR_NOTBUFFERED:				OutputDXError((CBYTE*)"DIERR_NOTBUFFERED");break;
+			case	DIERR_EFFECTPLAYING:			OutputDXError((CBYTE*)"DIERR_EFFECTPLAYING");break;
+			default:								OutputDXError((CBYTE*)"Unknown - %ld",di_err&0xffff);
+		}
+		OutputDXError((CBYTE*)"\n");
+	}
+}
+
+//---------------------------------------------------------------
+
+#endif
