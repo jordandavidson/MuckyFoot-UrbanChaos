@@ -45,7 +45,7 @@ float not_private_smiley_yscale;
 
 // constructor & destructor
 
-PolyPage::PolyPage(ULONG logsize)
+PolyPage::PolyPage(ULONG logsize) : m_VB(nullptr)
 {
 	m_VertexBuffer = NULL;
 	m_VertexPtr = NULL;
